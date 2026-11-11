@@ -107,6 +107,37 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
+  packages/agente:
+    dependencies:
+      '@frank/contratos':
+        specifier: workspace:*
+        version: link:../contratos
+      '@frank/dominio':
+        specifier: workspace:*
+        version: link:../dominio
+      '@frank/ia':
+        specifier: workspace:*
+        version: link:../ia
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@frank/banco':
+        specifier: workspace:*
+        version: link:../banco
+      '@frank/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^5.1.0
+        version: 5.1.0(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
   packages/banco:
     dependencies:
       '@frank/contratos':

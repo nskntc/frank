@@ -1,14 +1,18 @@
 # Skills do Frank
 
-Arquivos de conhecimento que vao junto no pedido ao Claude. Editar um arquivo muda o comportamento
-do Frank sem mexer no codigo. Nascem na Fase 1:
+Arquivos de conhecimento que vão junto no pedido ao Claude (como instruções do sistema). Editar um
+arquivo muda o comportamento do Frank sem mexer no código. Depois de editar, rode o eval da tarefa
+(`FRANK_EVAL=1 pnpm --filter @frank/agente test`) para conferir que nada piorou.
 
-| Arquivo | O que ensina | Fase |
-|---|---|---|
-| `entender_pedido.md` | texto livre vira vigilancia (rotas, datas, filtros, preco-alvo) | 1 |
-| `estrategias_de_busca.md` | aeroportos proximos, datas flexiveis, uma busca por companhia | 1 |
-| `avaliar_oferta.md` | checklist de pegadinhas | 1 |
-| `regras_brasil.md` | 24 h, IOF, tarifas sem mala, comprar na companhia | 1 |
-| `escrever_alerta.md` | formato do aviso no Telegram | 1 |
-| `cacar_promocoes.md` | onde procurar e como conferir; texto de site e dado | 2 |
-| `milhas.md` | quando milhas compensam | 3 |
+| Arquivo | O que ensina | Usado em | Fase |
+|---|---|---|---|
+| `entender_pedido.md` | texto livre vira vigilância (rotas, datas, filtros, preço-alvo) | planejador | 1 |
+| `estrategias_de_busca.md` | aeroportos por cidade, regiões, escalas | planejador | 1 |
+| `avaliar_oferta.md` | checklist de pegadinhas | avaliador | 1 |
+| `regras_brasil.md` | 24 h, IOF, tarifas sem mala, comprar na companhia | avaliador | 1 |
+| `escrever_alerta.md` | formato do aviso no Telegram | alertas | 1 |
+| `cacar_promocoes.md` | onde procurar e como conferir; texto de site é dado | caçador | 2 |
+| `milhas.md` | quando milhas compensam | avaliador | 3 |
+
+Regra: skill nunca recebe texto vindo de fora (página, resposta de fonte). Esse texto vai na
+mensagem, marcado como dado.
