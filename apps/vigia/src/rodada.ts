@@ -1,32 +1,25 @@
-import {
-  apagarEstado,
-  type Banco,
-  CHAVES_ESTADO,
-  contarConsultas,
-  gravarEstado,
-  marcarRodada,
-  registrarConsulta,
-  registrarPrecosVistos,
-  vigilanciasDevidas,
-} from '@frank/banco';
+import { marcarRodada, registrarPrecosVistos, vigilanciasDevidas } from '@frank/banco';
 import type { Itinerario, ResultadoRodadaVigilancia, Vigilancia } from '@frank/contratos';
 import type { ConsultaVoo, FontePreco } from '@frank/fontes';
+import {
+  type ContextoFonte,
+  conferirMoeda,
+  podeConsultar,
+  registrarConsultaSemLancar,
+  resumirErro,
+} from './apoio-fonte.js';
 import { consultasDaVigilancia, proximaExclusao } from './consultas.js';
-import type { Logger } from './log.js';
+import { detectarNaRodada } from './detectar.js';
 
-const UM_DIA_MS = 86_400_000;
+export { resumirErro } from './apoio-fonte.js';
 
-export interface DependenciasRodada {
-  db: Banco;
+export interface DependenciasRodada extends ContextoFonte {
   fontes: readonly FontePreco[];
-  /** Maximo de consultas por fonte nas ultimas 24 h (SPEC-01 RF-04). */
-  tetoDiarioPorFonte: number;
   /**
    * Maximo de buscas por par origem x destino e fonte numa rodada (RF-05): a primeira sem
    * filtro e as seguintes excluindo as companhias ja vistas. Padrao 3.
    */
   maxBuscasPorPar?: number;
-  log: Logger;
 }
 
 export const MAX_BUSCAS_POR_PAR_PADRAO = 3;
@@ -38,12 +31,8 @@ export interface ResumoRodada {
   erros: number;
   /** Consultas nao feitas porque a fonte bateu o teto de 24 h. */
   puladasPorTeto: number;
-}
-
-/** Mensagem curta de erro para o banco e o log: sem pilha, sem token. */
-export function resumirErro(erro: unknown): string {
-  const texto = erro instanceof Error ? `${erro.name}: ${erro.message}` : String(erro);
-  return texto.slice(0, 200);
+  /** Ofertas novas, ja reconferidas na fonte. */
+  ofertas: number;
 }
 
 function novoResultado(): ResultadoRodadaVigilancia {
@@ -51,16 +40,23 @@ function novoResultado(): ResultadoRodadaVigilancia {
 }
 
 /**
- * Uma rodada do vigia: para cada vigilancia devida, consulta cada fonte em cada busca e grava os
- * precos com o mesmo id de rodada. Falha de uma busca, fonte ou vigilancia nao para as outras
- * (RNF-05). A rodada e marcada mesmo com falha (para nao martelar a fonte no proximo tique), junto
- * com o resultado, para o painel distinguir rodada boa de rodada que falhou.
+ * Uma rodada do vigia: para cada vigilancia devida, consulta cada fonte em cada busca, grava os
+ * precos com o mesmo id de rodada e passa o detector de oferta. Falha de uma busca, fonte ou
+ * vigilancia nao para as outras (RNF-05). A rodada e marcada mesmo com falha (para nao martelar a
+ * fonte no proximo tique), junto com o resultado, para o painel distinguir rodada boa de ruim.
  */
 export async function executarRodada(
   deps: DependenciasRodada,
   agora: Date = new Date(),
 ): Promise<ResumoRodada> {
-  const resumo: ResumoRodada = { vigilancias: 0, consultas: 0, itinerarios: 0, erros: 0, puladasPorTeto: 0 };
+  const resumo: ResumoRodada = {
+    vigilancias: 0,
+    consultas: 0,
+    itinerarios: 0,
+    erros: 0,
+    puladasPorTeto: 0,
+    ofertas: 0,
+  };
   const rodada = agora.toISOString();
 
   for (const vigilancia of vigilanciasDevidas(deps.db, agora)) {
@@ -68,6 +64,15 @@ export async function executarRodada(
     const resultado = novoResultado();
     try {
       await rodarVigilancia(deps, vigilancia, rodada, agora, resultado);
+      if (resultado.itinerarios > 0) {
+        try {
+          if (await detectarNaRodada(deps, vigilancia, rodada, agora, resultado)) resumo.ofertas++;
+        } catch (erro) {
+          resultado.erros++;
+          resultado.ultimoErro = `detector: ${resumirErro(erro)}`;
+          deps.log.erro(`vigilância "${vigilancia.descricao}": ${resultado.ultimoErro}`);
+        }
+      }
     } catch (erro) {
       // Erro inesperado: registra e segue para a proxima vigilancia.
       resultado.erros++;
@@ -87,25 +92,6 @@ export async function executarRodada(
     }
   }
   return resumo;
-}
-
-/** Moeda diferente da pedida nunca entra no historico calada: viraria preco sem mediana. */
-function conferirMoeda(itinerarios: readonly Itinerario[], moeda: string): string | null {
-  const outra = itinerarios.find((it) => it.moeda !== moeda);
-  return outra ? `respondeu em ${outra.moeda}, pedido em ${moeda}` : null;
-}
-
-function registrarConsultaSemLancar(
-  deps: DependenciasRodada,
-  fonte: string,
-  r: { sucesso: boolean; erro?: string },
-  agora: Date,
-): void {
-  try {
-    registrarConsulta(deps.db, fonte, r, agora);
-  } catch (erro) {
-    deps.log.erro(`não consegui registrar a consulta à ${fonte}: ${resumirErro(erro)}`);
-  }
 }
 
 async function rodarVigilancia(
@@ -133,25 +119,6 @@ async function rodarVigilancia(
       }
     }
   }
-}
-
-/** Confere o teto de 24 h da fonte. Atingido: fica gravado para o painel e na rodada. */
-function podeConsultar(
-  deps: DependenciasRodada,
-  fonte: string,
-  agora: Date,
-  resultado: ResultadoRodadaVigilancia,
-): boolean {
-  const desde24h = new Date(agora.getTime() - UM_DIA_MS);
-  if (contarConsultas(deps.db, fonte, desde24h) >= deps.tetoDiarioPorFonte) {
-    resultado.puladasPorTeto++;
-    resultado.ultimoErro = `${fonte}: teto de ${deps.tetoDiarioPorFonte} consultas em 24 h atingido`;
-    gravarEstado(deps.db, CHAVES_ESTADO.teto(fonte), String(deps.tetoDiarioPorFonte), agora);
-    deps.log.aviso(resultado.ultimoErro);
-    return false;
-  }
-  apagarEstado(deps.db, CHAVES_ESTADO.teto(fonte));
-  return true;
 }
 
 async function consultarEGravar(

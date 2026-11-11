@@ -32,6 +32,8 @@ export interface FontePreco {
    * voos escondidos, e o vigia busca de novo excluindo as companhias ja vistas. Omitido = sem limite.
    */
   readonly limiteResultados?: number;
+  /** Quem vende pela fonte e estrangeiro: compra com cartao brasileiro paga IOF de 3,5%. */
+  readonly vendedorEstrangeiro?: boolean;
   /** Lanca FonteIndisponivelError ou RespostaInvalidaError; nunca devolve [] para esconder erro. */
   buscar(consulta: ConsultaVoo): Promise<Itinerario[]>;
 }

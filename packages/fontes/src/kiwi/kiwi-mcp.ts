@@ -144,6 +144,8 @@ export class KiwiMcp implements FontePreco {
   readonly nome = NOME;
   /** Medido em 2026-11-10: toda busca devolveu no maximo 15 itinerarios. */
   readonly limiteResultados = 15;
+  /** Kiwi.com s.r.o., empresa tcheca: o link de compra leva a um vendedor estrangeiro. */
+  readonly vendedorEstrangeiro = true;
   private proximoId = 1;
 
   constructor(private readonly opcoes: OpcoesKiwi = {}) {}

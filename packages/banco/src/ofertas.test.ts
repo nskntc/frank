@@ -6,6 +6,7 @@ import {
   listarOfertas,
   listarOpcoesCompra,
   marcarReconferida,
+  menorOfertaAberta,
   obterOferta,
   registrarOferta,
   salvarAvaliacao,
@@ -85,6 +86,20 @@ describe('ofertas', () => {
     expect(listarOfertas(db).map((o) => o.id)).toEqual([barata.id, cara.id]);
     descartarOferta(db, barata.id);
     expect(listarOfertas(db, { vigilanciaId }).map((o) => o.id)).toEqual([cara.id]);
+  });
+});
+
+describe('menorOfertaAberta', () => {
+  it('lembra a menor oferta aberta do itinerario e ignora as descartadas', () => {
+    expect(menorOfertaAberta(db, vigilanciaId, 'kiwi', 'a', 'BRL')).toBeNull();
+    const cara = novaOferta(75_000);
+    const barata = novaOferta(70_000);
+    expect(menorOfertaAberta(db, vigilanciaId, 'kiwi', 'a', 'BRL')).toBe(70_000);
+    descartarOferta(db, barata.id);
+    expect(menorOfertaAberta(db, vigilanciaId, 'kiwi', 'a', 'BRL')).toBe(75_000);
+    descartarOferta(db, cara.id);
+    expect(menorOfertaAberta(db, vigilanciaId, 'kiwi', 'a', 'BRL')).toBeNull();
+    expect(menorOfertaAberta(db, vigilanciaId, 'kiwi', 'outro', 'BRL')).toBeNull();
   });
 });
 

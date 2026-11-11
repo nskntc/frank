@@ -4,6 +4,7 @@ import {
   listarReferencias,
   menoresPorRodada,
   obterPrecoVisto,
+  precosDaRodada,
   registrarPrecosVistos,
   salvarReferencias,
   ultimaRodada,
@@ -71,6 +72,13 @@ describe('menoresPorRodada (base do preco normal)', () => {
       instante('2026-11-10T00:00:00Z'),
     );
     expect(menoresPorRodada(db, vigilanciaId, instante('2026-11-05T00:00:00Z'), 'BRL')).toEqual([110_000]);
+  });
+
+  it('deixa de fora a rodada que esta sendo avaliada', () => {
+    registrarPrecosVistos(db, vigilanciaId, 'r1', [itinerarioExemplo('a', 100_000)], instante('2026-11-02T00:00:00Z'));
+    registrarPrecosVistos(db, vigilanciaId, 'r2', [itinerarioExemplo('a', 60_000)], instante('2026-11-03T00:00:00Z'));
+    expect(menoresPorRodada(db, vigilanciaId, desdeSempre, 'BRL', 'r2')).toEqual([100_000]);
+    expect(precosDaRodada(db, vigilanciaId, 'r2').map((p) => p.precoCentavos)).toEqual([60_000]);
   });
 
   it('ignora o historico de antes de mudar a viagem', () => {

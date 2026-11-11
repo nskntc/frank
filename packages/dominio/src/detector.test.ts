@@ -29,6 +29,12 @@ describe('detectarOferta', () => {
     expect(r.percentualAbaixo).toBe(25);
   });
 
+  it('24,6% abaixo do normal nao vira 25% por arredondamento', () => {
+    const r = detectarOferta({ precoFinal: 75_400, precoNormal: 100_000 });
+    expect(r.ehOferta).toBe(false);
+    expect(r.percentualAbaixo).toBe(25); // so o numero exibido e arredondado
+  });
+
   it('nao e oferta a 24% abaixo do normal e acima do alvo', () => {
     const r = detectarOferta({ precoFinal: 82_840, precoNormal: 109_000, precoAlvo: 80_000 });
     expect(r.ehOferta).toBe(false);
@@ -47,6 +53,17 @@ describe('detectarOferta', () => {
   it('junta os dois motivos', () => {
     const r = detectarOferta({ precoFinal: 60_000, precoAlvo: 80_000, precoNormal: 109_000 });
     expect(r.motivos).toEqual(['abaixo_do_alvo', 'abaixo_do_normal']);
+  });
+
+  it('compara o normal com o preco da fonte e o alvo com o preco final', () => {
+    // Fonte: R$ 800 (26% abaixo do normal de R$ 1.090). Final com IOF: R$ 828, acima do alvo de R$ 820.
+    const r = detectarOferta({
+      precoFinal: 82_800,
+      precoParaNormal: 80_000,
+      precoNormal: 109_000,
+      precoAlvo: 82_000,
+    });
+    expect(r).toEqual({ ehOferta: true, motivos: ['abaixo_do_normal'], percentualAbaixo: 27 });
   });
 
   it('preco acima do normal da percentual negativo e nao e oferta', () => {

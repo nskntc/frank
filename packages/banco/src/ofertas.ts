@@ -97,6 +97,28 @@ export function obterOferta(db: Banco, id: number): Oferta | null {
   return linha ? paraOferta(linha) : null;
 }
 
+/**
+ * Menor preco final entre as ofertas ainda abertas (nao descartadas) do mesmo itinerario e moeda.
+ * O vigia so cria oferta nova para o itinerario se o preco cair abaixo disto. Null = nenhuma.
+ */
+export function menorOfertaAberta(
+  db: Banco,
+  vigilanciaId: string,
+  fonte: string,
+  idNaFonte: string,
+  moeda: string,
+): Centavos | null {
+  const linha = db
+    .prepare(
+      `SELECT MIN(o.preco_final_centavos) AS menor
+       FROM ofertas o JOIN precos_vistos p ON p.id = o.preco_visto_id
+       WHERE o.vigilancia_id = ? AND o.status != 'descartada' AND o.moeda = ?
+         AND p.fonte = ? AND p.id_na_fonte = ?`,
+    )
+    .get(vigilanciaId, moeda, fonte, idNaFonte) as { menor: number | null } | undefined;
+  return linha?.menor ?? null;
+}
+
 export function marcarReconferida(db: Banco, id: number, agora: Date = new Date()): void {
   db.prepare('UPDATE ofertas SET reconferida_em = ? WHERE id = ?').run(agora.toISOString(), id);
 }

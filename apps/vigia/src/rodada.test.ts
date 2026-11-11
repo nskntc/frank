@@ -37,7 +37,7 @@ describe('executarRodada', () => {
     const resumo = await executarRodada(deps([fonte]), agora);
 
     expect(fonte.consultas.map((c) => `${c.origem}-${c.destino}`)).toEqual(['GRU-REC', 'CGH-REC']);
-    expect(resumo).toEqual({ vigilancias: 1, consultas: 2, itinerarios: 2, erros: 0, puladasPorTeto: 0 });
+    expect(resumo).toEqual({ vigilancias: 1, consultas: 2, itinerarios: 2, erros: 0, puladasPorTeto: 0, ofertas: 0 });
     const rodada = ultimaRodada(db, v.id);
     expect(rodada).toHaveLength(2);
     expect(new Set(rodada.map((p) => p.rodada))).toEqual(new Set([agora.toISOString()]));

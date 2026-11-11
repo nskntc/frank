@@ -52,6 +52,7 @@ export class FonteFalsa implements FontePreco {
     readonly nome: string,
     private readonly responder: (c: ConsultaVoo) => Promise<Itinerario[]>,
     readonly limiteResultados?: number,
+    readonly vendedorEstrangeiro?: boolean,
   ) {}
   buscar(consulta: ConsultaVoo): Promise<Itinerario[]> {
     this.consultas.push(consulta);

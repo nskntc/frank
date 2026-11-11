@@ -40,7 +40,7 @@ export class Vigia {
       if (resumo.vigilancias > 0) {
         this.deps.log.info(
           `rodada: ${resumo.vigilancias} vigilância(s), ${resumo.consultas} consulta(s), ` +
-            `${resumo.itinerarios} voo(s), ${resumo.erros} erro(s), ` +
+            `${resumo.itinerarios} voo(s), ${resumo.ofertas} oferta(s), ${resumo.erros} erro(s), ` +
             `${resumo.puladasPorTeto} pulada(s) por teto`,
         );
       }

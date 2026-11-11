@@ -108,6 +108,8 @@ export function menoresPorRodada(
   vigilanciaId: string,
   desde: Date,
   moeda: string,
+  /** Rodada que fica de fora (a que esta sendo avaliada: a oferta nao puxa o proprio normal). */
+  excetoRodada: string | null = null,
 ): Centavos[] {
   const linhas = db
     .prepare(
@@ -116,11 +118,25 @@ export function menoresPorRodada(
        JOIN vigilancias v ON v.id = p.vigilancia_id
        WHERE p.vigilancia_id = ? AND p.moeda = ?
          AND p.visto_em >= MAX(?, v.historico_desde)
+         AND (? IS NULL OR p.rodada != ?)
        GROUP BY p.rodada
        ORDER BY MIN(p.visto_em)`,
     )
-    .all(vigilanciaId, moeda, desde.toISOString()) as unknown as { menor: number }[];
+    .all(vigilanciaId, moeda, desde.toISOString(), excetoRodada, excetoRodada) as unknown as {
+    menor: number;
+  }[];
   return linhas.map((l) => l.menor);
+}
+
+/** Os precos de uma rodada especifica, do mais barato ao mais caro. */
+export function precosDaRodada(db: Banco, vigilanciaId: string, rodada: string): PrecoVisto[] {
+  const linhas = db
+    .prepare(
+      `SELECT * FROM precos_vistos WHERE vigilancia_id = ? AND rodada = ?
+       ORDER BY preco_centavos, id`,
+    )
+    .all(vigilanciaId, rodada) as unknown as LinhaPrecoVisto[];
+  return linhas.map(paraPrecoVisto);
 }
 
 /** Todos os itinerarios da rodada mais recente da vigilancia, do mais barato ao mais caro. */

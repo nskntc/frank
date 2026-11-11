@@ -24,7 +24,13 @@ export function precoNormal(
 export type MotivoOferta = 'abaixo_do_alvo' | 'abaixo_do_normal';
 
 export interface EntradaDetector {
+  /** O que a pessoa paga (com IOF e mala): comparado com o preco-alvo. */
   precoFinal: Centavos;
+  /**
+   * Preco comparado com o preco normal. Padrao: `precoFinal`. Use o preco da fonte quando o
+   * historico tambem e da fonte (sem IOF): assim a comparacao e entre iguais.
+   */
+  precoParaNormal?: Centavos;
   precoAlvo?: Centavos | null;
   precoNormal?: Centavos | null;
   percentualAbaixoDoNormal?: number;
@@ -47,8 +53,11 @@ export function detectarOferta(entrada: EntradaDetector): ResultadoDetector {
 
   let percentualAbaixo: number | null = null;
   if (entrada.precoNormal != null && entrada.precoNormal > 0) {
-    percentualAbaixo = Math.round((1 - entrada.precoFinal / entrada.precoNormal) * 100);
-    if (percentualAbaixo >= limite) motivos.push('abaixo_do_normal');
+    const comparado = entrada.precoParaNormal ?? entrada.precoFinal;
+    // Compara em inteiros, sem arredondar: 24,6% abaixo nao pode virar "25%" e passar.
+    if (comparado * 100 <= entrada.precoNormal * (100 - limite)) motivos.push('abaixo_do_normal');
+    // Arredondado so para mostrar.
+    percentualAbaixo = Math.round((1 - comparado / entrada.precoNormal) * 100);
   }
 
   return { ehOferta: motivos.length > 0, motivos, percentualAbaixo };
