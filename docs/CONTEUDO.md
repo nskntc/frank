@@ -8,6 +8,7 @@ Status: **pauta** (ideia anotada) · **rascunho** · **publicado** (com link).
 
 | Data | Momento | Prova | O que ensina | Status |
 |---|---|---|---|---|
+| 2026-11-11 | A oferta mais barata nem sempre é o botão destacado: se a companhia custa até 5% a mais, o Frank destaca ela pelas 24 h para desistir | prints da tela Ofertas (#13) | Recomendação com critério explícito, não só "o menor preço" | pauta |
 | 2026-11-11 | Você escreve a viagem em português e o Claude mostra o que entendeu e o que supôs antes de salvar | `docs/DIARIO-DE-TESTES.md` (tela Rotas) | IA que confessa as suposições: confirmação humana em vez de confiança cega | pauta |
 | 2026-11-11 | Primeiro aviso de verdade no e-mail. E o Frank recusou avisar uma "oferta" que estava 9% acima do normal: o Claude leu os números e disse "é tarifa comum, não promoção" | issue #11, diário de testes | Um agente bom também sabe quando ficar quieto | pauta |
 | 2026-11-11 | O revisor achou que um Wi-Fi caindo por 3 minutos faria o Frank desistir de um aviso para sempre, sem ninguém saber. Agora: tentativas em 5 e 30 min, fila por canal, e "desisti" aparece no painel | issue #11 | Agente que roda sozinho precisa de paciência e de transparência | pauta |

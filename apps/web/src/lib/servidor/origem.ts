@@ -6,6 +6,11 @@
  */
 const HOSTS_LOCAIS = /^(127\.0\.0\.1|localhost)(:\d+)?$/;
 
+/** A pagina foi pedida pelo endereco local (barra DNS rebinding em leituras de pagina). */
+export function hostLocal(cabecalhos: Headers): boolean {
+  return HOSTS_LOCAIS.test(cabecalhos.get('host') ?? '');
+}
+
 export function pedidoDoPainel(cabecalhos: Headers): boolean {
   const host = cabecalhos.get('host') ?? '';
   if (!HOSTS_LOCAIS.test(host)) return false;

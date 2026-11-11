@@ -163,3 +163,8 @@ de todo commit.
 - **Código que roda dentro do Next não usa caminho relativo ao arquivo** (`import.meta.url`): o
   Turbopack empacota e o caminho muda. Ache a raiz com `raizDoRepositorio()`
 - **`typecheck` do painel roda `next typegen` antes do `tsc`**: sem isso, tipos velhos em `.next/` quebram
+- **Tela Ofertas monta tudo por `ofertasParaTela`** (`apps/web/src/lib/ofertas.ts`): link só via
+  `linkSeguro` (https), texto do Claude como texto puro, sem avaliação = pegadinhas do código.
+  Página que lê o banco checa `hostLocal` e responde 404 a outro host
+- **Dados de exemplo do painel em `apps/web/src/lib/teste/exemplo.ts`** (`semearExemplos`): fictícios,
+  usados nos testes e nos prints

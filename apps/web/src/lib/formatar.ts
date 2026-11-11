@@ -34,3 +34,21 @@ export function haQuanto(instante: string, agora: Date = new Date()): string {
 export function plural(n: number, um: string, varios: string): string {
   return `${n} ${n === 1 ? um : varios}`;
 }
+
+/** "2027-03-12T10:45:00" -> "sex 12/03 10:45". Horario local do aeroporto, como a fonte manda. */
+export function horario(local: string): string {
+  const p = partes(local.slice(0, 10));
+  if (!p) return local;
+  const [a, m, d] = p;
+  const semana = DIAS.at(new Date(Date.UTC(a, m - 1, d)).getUTCDay());
+  return `${semana} ${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')} ${local.slice(11, 16)}`;
+}
+
+/** 11100 -> "3 h 05 min"; 3600 -> "1 h". */
+export function duracao(segundos: number): string {
+  const min = Math.round(segundos / 60);
+  const h = Math.floor(min / 60);
+  const resto = min % 60;
+  if (h === 0) return `${resto} min`;
+  return resto ? `${h} h ${String(resto).padStart(2, '0')} min` : `${h} h`;
+}
