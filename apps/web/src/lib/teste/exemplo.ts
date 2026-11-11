@@ -5,12 +5,18 @@ import {
   type OpcaoCompra,
   registrarOferta,
   registrarPrecosVistos,
+  salvarReferencias,
   salvarAvaliacao,
   salvarOpcoesCompra,
 } from '@frank/banco';
 import type { AvaliacaoOferta, Itinerario, NovaVigilancia, Perna } from '@frank/contratos';
 
-const vigilancia = (descricao: string, origens: string[], destinos: string[], volta: boolean): NovaVigilancia => ({
+const vigilancia = (
+  descricao: string,
+  origens: string[],
+  destinos: string[],
+  volta: boolean,
+): NovaVigilancia => ({
   descricao,
   origens,
   destinos,
@@ -28,11 +34,34 @@ const vigilancia = (descricao: string, origens: string[], destinos: string[], vo
   intervaloMinutos: 60,
 });
 
-function perna(de: string, para: string, partida: string, chegada: string, companhia: string, escala?: string): Perna {
+function perna(
+  de: string,
+  para: string,
+  partida: string,
+  chegada: string,
+  companhia: string,
+  escala?: string,
+): Perna {
   const trechos = escala
     ? [
-        { de, para: escala, partida, chegada: `${partida.slice(0, 11)}09:10:00`, companhia, codigoCompanhia: 'XX', numeroVoo: 'XX 1001' },
-        { de: escala, para, partida: `${partida.slice(0, 11)}16:20:00`, chegada, companhia, codigoCompanhia: 'XX', numeroVoo: 'XX 1002' },
+        {
+          de,
+          para: escala,
+          partida,
+          chegada: `${partida.slice(0, 11)}09:10:00`,
+          companhia,
+          codigoCompanhia: 'XX',
+          numeroVoo: 'XX 1001',
+        },
+        {
+          de: escala,
+          para,
+          partida: `${partida.slice(0, 11)}16:20:00`,
+          chegada,
+          companhia,
+          codigoCompanhia: 'XX',
+          numeroVoo: 'XX 1002',
+        },
       ]
     : [{ de, para, partida, chegada, companhia, codigoCompanhia: 'XX', numeroVoo: 'XX 1000' }];
   return {
@@ -46,7 +75,12 @@ function perna(de: string, para: string, partida: string, chegada: string, compa
   };
 }
 
-function itinerario(id: string, precoCentavos: number, ida: Perna, volta: Perna | null): Itinerario {
+function itinerario(
+  id: string,
+  precoCentavos: number,
+  ida: Perna,
+  volta: Perna | null,
+): Itinerario {
   return {
     fonte: 'kiwi',
     idNaFonte: id,
@@ -83,13 +117,35 @@ export const EXEMPLOS: readonly Exemplo[] = [
     abaixo: 38,
     avaliacao: {
       valeAPena: true,
-      pegadinhas: [{ tipo: 'sem_mala_despachada', descricao: 'A tarifa não inclui mala despachada.' }],
-      resumo: 'Voos diretos nos dois sentidos e em bons horários; bem abaixo do que essa rota costuma custar.',
+      pegadinhas: [
+        { tipo: 'sem_mala_despachada', descricao: 'A tarifa não inclui mala despachada.' },
+      ],
+      resumo:
+        'Voos diretos nos dois sentidos e em bons horários; bem abaixo do que essa rota costuma custar.',
     },
     opcoes: [
-      { vendedor: 'Kiwi.com', precoCentavos: 69_000, moeda: 'BRL', estrangeiro: true, link: 'https://www.kiwi.com/u/exemplo-1' },
-      { vendedor: 'Companhia Exemplo', precoCentavos: 73_500, moeda: 'BRL', estrangeiro: false, ehCompanhia: true, link: 'https://www.google.com/travel/flights?exemplo=1' },
-      { vendedor: 'Agência Exemplo', precoCentavos: 75_200, moeda: 'BRL', estrangeiro: false, link: 'https://www.google.com/travel/flights?exemplo=2' },
+      {
+        vendedor: 'Kiwi.com',
+        precoCentavos: 69_000,
+        moeda: 'BRL',
+        estrangeiro: true,
+        link: 'https://www.kiwi.com/u/exemplo-1',
+      },
+      {
+        vendedor: 'Companhia Exemplo',
+        precoCentavos: 73_500,
+        moeda: 'BRL',
+        estrangeiro: false,
+        ehCompanhia: true,
+        link: 'https://www.google.com/travel/flights?exemplo=1',
+      },
+      {
+        vendedor: 'Agência Exemplo',
+        precoCentavos: 75_200,
+        moeda: 'BRL',
+        estrangeiro: false,
+        link: 'https://www.google.com/travel/flights?exemplo=2',
+      },
     ],
   },
   {
@@ -119,7 +175,9 @@ export const EXEMPLOS: readonly Exemplo[] = [
     abaixo: 8,
     avaliacao: {
       valeAPena: false,
-      pegadinhas: [{ tipo: 'outro_aeroporto', descricao: 'A ida sai de GIG, mas a volta chega em SDU.' }],
+      pegadinhas: [
+        { tipo: 'outro_aeroporto', descricao: 'A ida sai de GIG, mas a volta chega em SDU.' },
+      ],
       resumo: 'Só um pouco abaixo do normal e a volta chega em outro aeroporto.',
     },
     opcoes: [],
@@ -129,7 +187,12 @@ export const EXEMPLOS: readonly Exemplo[] = [
 /** Grava os exemplos e devolve os ids das ofertas, na ordem de EXEMPLOS. */
 export function semearExemplos(db: Banco, vistoEm: Date = new Date()): number[] {
   return EXEMPLOS.map((e) => {
-    const vigilanciaId = criarVigilancia(db, e.vig).id;
+    // Criada 30 dias antes: o historico de exemplo (semearHistorico) cabe depois da criacao.
+    const vigilanciaId = criarVigilancia(
+      db,
+      e.vig,
+      new Date(vistoEm.getTime() - 30 * 86_400_000),
+    ).id;
     const [precoVistoId] = registrarPrecosVistos(db, vigilanciaId, 'r1', [e.it], vistoEm);
     const oferta = registrarOferta(db, {
       vigilanciaId,
@@ -144,4 +207,39 @@ export function semearExemplos(db: Banco, vistoEm: Date = new Date()): number[] 
     if (e.opcoes.length) salvarOpcoesCompra(db, oferta.id, e.opcoes);
     return oferta.id;
   });
+}
+
+/**
+ * Historico ficticio para o grafico: `dias` dias de checagens a cada `horas` h (precos que oscilam
+ * de forma deterministica) e 60 dias de referencia do Google. Devolve quantas rodadas gravou.
+ */
+export function semearHistorico(
+  db: Banco,
+  vigilanciaId: string,
+  agora: Date,
+  dias = 12,
+  horas = 3,
+): number {
+  const base = EXEMPLOS[0]?.it as Itinerario;
+  const HORA = 3_600_000;
+  let rodadas = 0;
+  for (let t = agora.getTime() - dias * 24 * HORA; t <= agora.getTime(); t += horas * HORA) {
+    const i = rodadas++;
+    // Oscila em torno de R$ 1.100 e cai no fim (a oferta).
+    const onda = Math.round(Math.sin(i / 3) * 6_000 + Math.cos(i / 7) * 4_000);
+    const queda = t > agora.getTime() - 18 * HORA ? -35_000 : 0;
+    registrarPrecosVistos(
+      db,
+      vigilanciaId,
+      `h${i}`,
+      [{ ...base, idNaFonte: `h${i}`, precoCentavos: 110_000 + onda + queda }],
+      new Date(t),
+    );
+  }
+  const pontos = Array.from({ length: 60 }, (_, k) => {
+    const dia = new Date(agora.getTime() - (60 - k) * 24 * HORA).toISOString().slice(0, 10);
+    return { dia, precoCentavos: 118_000 + Math.round(Math.sin(k / 5) * 9_000) };
+  });
+  salvarReferencias(db, vigilanciaId, 'google', 'BRL', pontos, agora);
+  return rodadas;
 }

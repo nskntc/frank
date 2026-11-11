@@ -38,7 +38,8 @@ export default async function Ofertas() {
     <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8 md:py-12">
       <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Ofertas</h1>
       <p className="mt-2 text-sm text-[var(--color-texto-suave)]">
-        Antes de pagar, confira o preço final na tela de pagamento e use o nome exatamente como no documento.
+        Antes de pagar, confira o preço final na tela de pagamento e use o nome exatamente como no
+        documento.
       </p>
 
       <div className="mt-6 space-y-4">
@@ -46,14 +47,20 @@ export default async function Ofertas() {
           <CartaoOferta key={o.id} o={o} />
         ))}
         {valem.length === 0 && (
-          <p className="text-sm text-[var(--color-texto-suave)]">Nenhuma oferta que o Claude ache que vale a pena agora.</p>
+          <p className="text-sm text-[var(--color-texto-suave)]">
+            Nenhuma oferta que o Claude ache que vale a pena agora.
+          </p>
         )}
       </div>
 
       {naoValem.length > 0 && (
         <details className="mt-8">
           <summary className="min-h-11 cursor-pointer py-2 text-sm text-[var(--color-texto-suave)]">
-            {naoValem.length} {naoValem.length === 1 ? 'oferta que o Claude acha que não vale' : 'ofertas que o Claude acha que não valem'} a pena
+            {naoValem.length}{' '}
+            {naoValem.length === 1
+              ? 'oferta que o Claude acha que não vale'
+              : 'ofertas que o Claude acha que não valem'}{' '}
+            a pena
           </summary>
           <div className="mt-3 space-y-4 opacity-80">
             {naoValem.map((o) => (

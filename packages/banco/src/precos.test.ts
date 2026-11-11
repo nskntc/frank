@@ -7,6 +7,7 @@ import {
   precosDaRodada,
   registrarPrecosVistos,
   salvarReferencias,
+  serieDaVigilancia,
   ultimaRodada,
 } from './precos.js';
 import { instante, itinerarioExemplo, vigilanciaExemplo } from './teste/dados.js';
@@ -108,6 +109,26 @@ describe('referencias de preco', () => {
     expect(listarReferencias(db, vigilanciaId, 'BRL')).toEqual([
       { fonte: 'google', dia: '2026-09-12', precoCentavos: 90_100 },
       { fonte: 'google', dia: '2026-09-13', precoCentavos: 71_800 },
+    ]);
+  });
+});
+
+describe('serieDaVigilancia (grafico da rota)', () => {
+  it('um ponto por rodada, com o menor preco e o inicio da rodada, so da viagem atual e da moeda', () => {
+    registrarPrecosVistos(db, vigilanciaId, 'r0', [itinerarioExemplo('a', 90_000)], instante('2026-11-02T00:00:00Z'));
+    atualizarVigilancia(db, vigilanciaId, { ...vigilanciaExemplo, destinos: ['SSA'] }, instante('2026-11-05T00:00:00Z'));
+    registrarPrecosVistos(db, vigilanciaId, 'r1', [itinerarioExemplo('a', 120_000)], instante('2026-11-06T10:00:00Z'));
+    registrarPrecosVistos(db, vigilanciaId, 'r1', [itinerarioExemplo('b', 99_000)], instante('2026-11-06T10:01:00Z'));
+    registrarPrecosVistos(
+      db,
+      vigilanciaId,
+      'r2',
+      [{ ...itinerarioExemplo('c', 10_000), moeda: 'EUR' }, itinerarioExemplo('d', 105_000)],
+      instante('2026-11-06T11:00:00Z'),
+    );
+    expect(serieDaVigilancia(db, vigilanciaId, 'BRL')).toEqual([
+      { rodada: 'r1', em: '2026-11-06T10:00:00.000Z', precoCentavos: 99_000 },
+      { rodada: 'r2', em: '2026-11-06T11:00:00.000Z', precoCentavos: 105_000 },
     ]);
   });
 });

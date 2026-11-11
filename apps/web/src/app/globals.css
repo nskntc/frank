@@ -14,6 +14,9 @@
   /* Um destaque so, para a acao principal: comprar. */
   --color-destaque: oklch(0.55 0.16 255);
   --color-aviso: oklch(0.75 0.15 75);
+  /* Series dos graficos (paleta validada: azul e laranja, slots 1 e 2). */
+  --serie-1: #2a78d6;
+  --serie-2: #eb6834;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +27,8 @@
     --color-texto-suave: oklch(0.72 0.01 250);
     --color-borda: oklch(0.3 0.01 250);
     --color-destaque: oklch(0.68 0.14 255);
+    --serie-1: #3987e5;
+    --serie-2: #d95926;
   }
 }
 
@@ -34,6 +39,8 @@
   --color-texto-suave: oklch(0.72 0.01 250);
   --color-borda: oklch(0.3 0.01 250);
   --color-destaque: oklch(0.68 0.14 255);
+  --serie-1: #3987e5;
+  --serie-2: #d95926;
 }
 
 html {

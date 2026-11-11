@@ -11,7 +11,10 @@ const ETIQUETAS: Record<EtiquetaCompra, string> = {
 function Trecho({ nome, p }: { nome: string; p: Perna }) {
   const companhias = [...new Set(p.trechos.map((t) => t.companhia))].join(', ');
   const paradas = p.trechos.slice(0, -1).map((t) => t.para);
-  const escalas = p.escalas === 0 ? 'direto' : `${p.escalas} ${p.escalas === 1 ? 'escala' : 'escalas'} (${paradas.join(', ')})`;
+  const escalas =
+    p.escalas === 0
+      ? 'direto'
+      : `${p.escalas} ${p.escalas === 1 ? 'escala' : 'escalas'} (${paradas.join(', ')})`;
   return (
     <div className="grid grid-cols-[3.5rem_1fr] gap-x-3 text-sm">
       <span className="text-[var(--color-texto-suave)]">{nome}</span>
@@ -54,10 +57,13 @@ export function CartaoOferta({ o }: { o: OfertaNaTela }) {
           <h2 className="text-lg font-semibold">
             {it.ida.de} → {it.ida.para}
             <span className="ml-2 text-sm font-normal text-[var(--color-texto-suave)]">
-              {it.volta ? 'ida e volta' : 'só ida'} · {o.adultos} {o.adultos === 1 ? 'adulto' : 'adultos'}
+              {it.volta ? 'ida e volta' : 'só ida'} · {o.adultos}{' '}
+              {o.adultos === 1 ? 'adulto' : 'adultos'}
             </span>
           </h2>
-          <p className="mt-0.5 text-sm break-words text-[var(--color-texto-suave)]">{o.descricao}</p>
+          <p className="mt-0.5 text-sm break-words text-[var(--color-texto-suave)]">
+            {o.descricao}
+          </p>
         </div>
         <div className="text-left sm:text-right">
           <p className="text-2xl font-semibold tracking-tight">{formatarReais(o.precoCentavos)}</p>
@@ -65,7 +71,10 @@ export function CartaoOferta({ o }: { o: OfertaNaTela }) {
             <p className="text-sm font-medium text-[var(--color-destaque)]">
               {o.percentualAbaixo}% abaixo do normal
               {o.precoNormalCentavos !== null && (
-                <span className="font-normal text-[var(--color-texto-suave)]"> ({formatarReais(o.precoNormalCentavos)})</span>
+                <span className="font-normal text-[var(--color-texto-suave)]">
+                  {' '}
+                  ({formatarReais(o.precoNormalCentavos)})
+                </span>
               )}
             </p>
           )}
@@ -76,7 +85,8 @@ export function CartaoOferta({ o }: { o: OfertaNaTela }) {
         <Trecho nome="Ida" p={it.ida} />
         {it.volta && <Trecho nome="Volta" p={it.volta} />}
         <p className="text-sm text-[var(--color-texto-suave)]">
-          Mala despachada: {it.malas.despachada > 0 ? 'incluída' : 'não incluída'} · conferido {haQuanto(o.vistoEm)}
+          Mala despachada: {it.malas.despachada > 0 ? 'incluída' : 'não incluída'} · conferido{' '}
+          {haQuanto(o.vistoEm)}
         </p>
       </div>
 
@@ -102,24 +112,38 @@ export function CartaoOferta({ o }: { o: OfertaNaTela }) {
           {o.compras.map((c, i) => {
             const destaque = i === o.destacado;
             return (
-              <li key={`${c.vendedor}-${i}`} className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3">
+              <li
+                key={`${c.vendedor}-${i}`}
+                className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3"
+              >
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium break-words">
                     {c.vendedor}
-                    {c.ehCompanhia && <span className="font-normal text-[var(--color-texto-suave)]"> · companhia</span>}
+                    {c.ehCompanhia && (
+                      <span className="font-normal text-[var(--color-texto-suave)]">
+                        {' '}
+                        · companhia
+                      </span>
+                    )}
                   </p>
                   {c.etiquetas.length > 0 && (
-                    <p className="text-xs text-[var(--color-texto-suave)]">{c.etiquetas.map((e) => ETIQUETAS[e]).join(' · ')}</p>
+                    <p className="text-xs text-[var(--color-texto-suave)]">
+                      {c.etiquetas.map((e) => ETIQUETAS[e]).join(' · ')}
+                    </p>
                   )}
                 </div>
-                <span className="text-sm font-semibold tabular-nums">{formatarReais(c.precoFinalCentavos)}</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {formatarReais(c.precoFinalCentavos)}
+                </span>
                 {c.link ? (
                   <a
                     href={c.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-medium ${
-                      destaque ? 'bg-[var(--color-destaque)] text-white' : 'border border-[var(--color-borda)]'
+                      destaque
+                        ? 'bg-[var(--color-destaque)] text-white'
+                        : 'border border-[var(--color-borda)]'
                     }`}
                   >
                     Comprar

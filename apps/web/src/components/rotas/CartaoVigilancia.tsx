@@ -1,4 +1,5 @@
 import { formatarReais } from '@frank/dominio';
+import Link from 'next/link';
 import { haQuanto, janela } from '@/lib/formatar';
 import type { VigilanciaNaTela } from './tipos';
 
@@ -52,6 +53,12 @@ export function CartaoVigilancia({ v, ocupado, aoPausar, aoEditar, aoApagar }: P
         </p>
       )}
       <div className="mt-3 flex flex-wrap gap-2">
+        <Link
+          href={`/rotas/${encodeURIComponent(v.id)}`}
+          className="inline-flex min-h-11 items-center rounded-lg border border-[var(--color-borda)] px-4 text-sm font-medium"
+        >
+          Ver preços
+        </Link>
         <button type="button" disabled={ocupado} onClick={aoPausar} className="min-h-11 rounded-lg border border-[var(--color-borda)] px-4 text-sm disabled:opacity-60">
           {v.ativa ? 'Pausar' : 'Retomar'}
         </button>

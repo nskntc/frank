@@ -32,7 +32,7 @@ import { companhiasDoResultado, consultasDaVigilancia } from './consultas.js';
 import { type ContextoGoogle, gravarOndeComprar, normalPelaReferencia } from './google.js';
 
 /** Janela do preco normal (SPEC-01 RF-07, calibrar). */
-export const JANELA_NORMAL_DIAS = 14;
+export const JANELA_NORMAL_DIAS = DETECTOR_PADRAO.janelaNormalDias;
 
 export interface ContextoDeteccao extends ContextoGoogle {
   fontes: readonly FontePreco[];

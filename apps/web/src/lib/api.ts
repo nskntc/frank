@@ -1,5 +1,6 @@
 /** Resposta da API local do Frank. */
-export type Resposta<T> = { ok: true; dados: T } | { ok: false; erro: string; problemas?: string[] };
+export type Resposta<T> =
+  { ok: true; dados: T } | { ok: false; erro: string; problemas?: string[] };
 
 /** Chama a API local e nunca lanca: erro de rede vira resposta com mensagem para a tela. */
 export async function chamar<T>(url: string, init?: RequestInit): Promise<Resposta<T>> {

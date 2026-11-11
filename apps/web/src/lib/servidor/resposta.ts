@@ -9,4 +9,5 @@ export function falha(erro: string, status: number, problemas?: string[]): NextR
   return NextResponse.json({ ok: false, erro, ...(problemas ? { problemas } : {}) }, { status });
 }
 
-export const recusado = () => falha('Pedido recusado: só o próprio painel do Frank pode fazer isso.', 403);
+export const recusado = () =>
+  falha('Pedido recusado: só o próprio painel do Frank pode fazer isso.', 403);

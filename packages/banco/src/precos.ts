@@ -201,3 +201,28 @@ export function listarReferencias(
     .all(vigilanciaId, moeda) as unknown as { fonte: string; dia: string; preco_centavos: number }[];
   return linhas.map((l) => ({ fonte: l.fonte, dia: l.dia, precoCentavos: l.preco_centavos }));
 }
+
+export interface PontoDaSerie {
+  rodada: string;
+  /** Quando a rodada comecou (o primeiro preco visto nela), instante ISO. */
+  em: string;
+  precoCentavos: Centavos;
+}
+
+/**
+ * Serie do grafico da rota: o menor preco de cada rodada, da mais antiga para a mais nova, desde o
+ * `historico_desde` da vigilancia (precos de antes de mudar a viagem sao de outra viagem).
+ */
+export function serieDaVigilancia(db: Banco, vigilanciaId: string, moeda: string): PontoDaSerie[] {
+  const linhas = db
+    .prepare(
+      `SELECT p.rodada AS rodada, MIN(p.visto_em) AS em, MIN(p.preco_centavos) AS menor
+       FROM precos_vistos p
+       JOIN vigilancias v ON v.id = p.vigilancia_id
+       WHERE p.vigilancia_id = ? AND p.moeda = ? AND p.visto_em >= v.historico_desde
+       GROUP BY p.rodada
+       ORDER BY MIN(p.visto_em)`,
+    )
+    .all(vigilanciaId, moeda) as unknown as { rodada: string; em: string; menor: number }[];
+  return linhas.map((l) => ({ rodada: l.rodada, em: l.em, precoCentavos: l.menor }));
+}

@@ -10,7 +10,7 @@ import {
   salvarReferencias,
 } from '@frank/banco';
 import type { Itinerario, Vigilancia } from '@frank/contratos';
-import { type Centavos, mediana } from '@frank/dominio';
+import { type Centavos, DETECTOR_PADRAO, mediana } from '@frank/dominio';
 import type { ConsultaVoo, FontePreco, SerpApiGoogleFlights } from '@frank/fontes';
 import { type ContextoFonte, resumirErro } from './apoio-fonte.js';
 
@@ -34,8 +34,8 @@ const DIA_MS = 86_400_000;
 const VALIDADE_REFERENCIA_MS = 7 * DIA_MS;
 const ESPERA_APOS_ERRO_MS = DIA_MS;
 /** Minimo de dias de historico do Google para valer como preco normal (calibrar). */
-export const MINIMO_PONTOS_REFERENCIA = 10;
-const JANELA_REFERENCIA_DIAS = 60;
+export const MINIMO_PONTOS_REFERENCIA = DETECTOR_PADRAO.minimoPontosReferencia;
+const JANELA_REFERENCIA_DIAS = DETECTOR_PADRAO.janelaReferenciaDias;
 
 const chaveReferencia = (vigilanciaId: string) => `referencia:${vigilanciaId}`;
 

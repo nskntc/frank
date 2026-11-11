@@ -168,3 +168,8 @@ de todo commit.
   Página que lê o banco checa `hostLocal` e responde 404 a outro host
 - **Dados de exemplo do painel em `apps/web/src/lib/teste/exemplo.ts`** (`semearExemplos`): fictícios,
   usados nos testes e nos prints
+- **Janelas do preço normal ficam em `DETECTOR_PADRAO`** (dominio: 14 dias próprios, 60 dias e
+  10 pontos do Google). Vigia e gráfico da rota (`apps/web/src/lib/rota.ts`) leem dali: nunca repetir
+  os números
+- **Gráficos do painel:** cores em `--serie-1`/`--serie-2` (validadas para daltonismo, claro e
+  escuro), um eixo só, legenda, tabela ao lado e geometria testada em `lib/grafico.ts`

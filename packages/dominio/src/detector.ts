@@ -5,6 +5,11 @@ import { mediana } from './estatistica.js';
 export const DETECTOR_PADRAO = {
   minimoObservacoes: 20,
   percentualAbaixoDoNormal: 25,
+  /** Janela do preco normal proprio (RF-07). */
+  janelaNormalDias: 14,
+  /** Referencia do Google: historico de ate 60 dias, valendo com pelo menos 10 dias. */
+  janelaReferenciaDias: 60,
+  minimoPontosReferencia: 10,
 } as const;
 
 /**

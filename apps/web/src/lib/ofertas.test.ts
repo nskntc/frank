@@ -30,7 +30,13 @@ describe('ofertasParaTela', () => {
   it('sem Onde comprar gravado, usa o link da fonte ao preco da oferta', () => {
     const o = ofertasParaTela(db, HOJE).find((x) => x.id === ids[1]);
     expect(o?.compras).toEqual([
-      { vendedor: 'Kiwi.com', precoFinalCentavos: 40_355, ehCompanhia: false, etiquetas: ['empresa_estrangeira'], link: 'https://www.kiwi.com/u/exemplo-2' },
+      {
+        vendedor: 'Kiwi.com',
+        precoFinalCentavos: 40_355,
+        ehCompanhia: false,
+        etiquetas: ['empresa_estrangeira'],
+        link: 'https://www.kiwi.com/u/exemplo-2',
+      },
     ]);
     expect(o?.destacado).toBe(0);
   });
