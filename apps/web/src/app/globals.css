@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+
+/* Tema por classe: <html class="dark"> liga o escuro; sem classe, segue o sistema. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --color-fundo: oklch(0.99 0 0);
+  --color-superficie: oklch(0.97 0.003 250);
+  --color-texto: oklch(0.22 0.01 250);
+  --color-texto-suave: oklch(0.48 0.01 250);
+  --color-borda: oklch(0.9 0.005 250);
+  /* Um destaque so, para a acao principal: comprar. */
+  --color-destaque: oklch(0.55 0.16 255);
+  --color-aviso: oklch(0.75 0.15 75);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --color-fundo: oklch(0.17 0.01 250);
+    --color-superficie: oklch(0.21 0.01 250);
+    --color-texto: oklch(0.95 0.005 250);
+    --color-texto-suave: oklch(0.72 0.01 250);
+    --color-borda: oklch(0.3 0.01 250);
+    --color-destaque: oklch(0.68 0.14 255);
+  }
+}
+
+:root.dark {
+  --color-fundo: oklch(0.17 0.01 250);
+  --color-superficie: oklch(0.21 0.01 250);
+  --color-texto: oklch(0.95 0.005 250);
+  --color-texto-suave: oklch(0.72 0.01 250);
+  --color-borda: oklch(0.3 0.01 250);
+  --color-destaque: oklch(0.68 0.14 255);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-fundo);
+  color: var(--color-texto);
+  font-family: var(--font-sans);
+}

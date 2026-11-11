@@ -1,0 +1,26 @@
+{
+  "name": "@frank/vigia",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@frank/contratos": "workspace:*",
+    "@frank/dominio": "workspace:*",
+    "@frank/fontes": "workspace:*"
+  },
+  "devDependencies": {
+    "@frank/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

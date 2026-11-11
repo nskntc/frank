@@ -1,6 +1,6 @@
 # ADR-001 — Stack
 
-Data: 2026-11-11 · Status: **proposta** (aceita quando o dono do projeto confirmar)
+Data: 2026-11-11 · Status: **aceita** (confirmada pelo dono do projeto em 2026-11-11)
 
 ## Decisão
 

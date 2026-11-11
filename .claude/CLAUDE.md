@@ -10,7 +10,13 @@ Visão e regras: `docs/specs/SPEC-PRODUTO.md`. MVP: `docs/specs/SPEC-01-MVP.md`.
 
 Metodologia herdada do JN (que herdou do aupus-service) e adaptada a um repo público e local.
 
-## Estrutura (planejada, nasce na Fase 0)
+## Trabalho
+
+Tarefas no **GitHub Issues** do repo; commits **direto na `main`** enquanto só o dono mexe no
+código (ADR-002). Commit cita a issue quando houver (`#12: ...`). `pnpm verificar` verde antes
+de todo commit.
+
+## Estrutura
 
 | Pasta | O que é |
 |---|---|
@@ -22,13 +28,15 @@ Metodologia herdada do JN (que herdou do aupus-service) e adaptada a um repo pú
 | `skills` | arquivos de conhecimento que vão junto no pedido ao Claude |
 | `docs` | specs, roadmap, decisões, riscos, técnicas de IA, diário de testes |
 
-## Comandos (quando a Fase 0 terminar)
+## Comandos (na raiz)
 
 | Comando | O que faz |
 |---|---|
 | `pnpm install` | instala tudo (gerenciador é **pnpm**, nunca npm) |
-| `pnpm dev` | painel e vigia juntos |
+| `pnpm dev` | painel em `http://127.0.0.1:4321` e vigia juntos |
 | `pnpm verificar` | lint + typecheck + test + build (o mínimo antes de "pronto") |
+| `pnpm --filter @frank/dominio test` | só um pacote |
+| `FRANK_TESTE_AO_VIVO=1 pnpm --filter @frank/fontes exec vitest run` | inclui o teste que chama a Kiwi de verdade (Git Bash) |
 
 ## Fluxo de desenvolvimento
 

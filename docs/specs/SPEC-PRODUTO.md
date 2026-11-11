@@ -126,4 +126,3 @@ Fontes: [termos do Claude Code](https://code.claude.com/docs/en/legal-and-compli
 - [ ] Termos de uso da Kiwi permitem consultas automáticas frequentes?
 - [ ] Quais sites de companhia e agência aceitam link de busca preenchido
 - [ ] Parâmetros do detector (janela da mediana, % abaixo do normal) a calibrar com dados reais
-- [ ] GitHub Issues/Projects ou Jira para organizar o trabalho

@@ -19,16 +19,19 @@ Feito em 2026-11-11:
       revisores, skill `verificacao`
 - [x] Specs de produto e MVP, roadmap, ADR-001 (stack), riscos, técnicas de IA, diário de testes
 
+- [x] Stack confirmada (ADR-001); tarefas no GitHub Issues e trabalho direto na `main` (ADR-002)
+- [x] Esqueleto do monorepo: `apps/web`, `apps/vigia`, `packages/dominio`, `packages/fontes`,
+      `packages/contratos`, `packages/config`; `pnpm verificar` verde (62 testes)
+- [x] CI no GitHub Actions (lint, typecheck, testes, build), roda no primeiro push
+- [x] `packages/fontes`: adaptador `KiwiMcp` com teste contra resposta gravada; teste ao vivo
+      passou em 2026-11-11
+- [x] `packages/dominio`: datas, centavos, mediana, detector de oferta, preço final com IOF,
+      regra das 24 h
+- [x] Painel com as 4 telas navegáveis em estado vazio, conferido em 360/768/1280 px, claro e escuro
+
 A fazer:
 
-1. Confirmar a stack (ADR-001) e o lugar dos cards (GitHub Issues ou Jira)
-2. Criar o repositório no GitHub e o primeiro push
-3. Esqueleto do monorepo: `apps/web`, `apps/vigia`, `packages/dominio`, `packages/fontes`,
-   `packages/contratos`, `packages/config`; `pnpm verificar` verde
-4. CI no GitHub Actions (lint, typecheck, testes, build)
-5. Ler os termos de uso da Kiwi e registrar a conclusão no diário
-6. `packages/fontes`: adaptador `KiwiMcp` (chamada, leitura do `text/event-stream`, validação por
-   schema) com teste contra resposta gravada e um teste ao vivo opcional
-7. `packages/dominio`: `lerDia`, preço em centavos, mediana, regra de oferta, preço final com IOF,
-   regra das 24 h, com testes
-8. Testar quais sites de companhia e agência aceitam link de busca preenchido
+1. Criar o repositório no GitHub e o primeiro push (CI verde lá)
+2. Ler os termos de uso da Kiwi e registrar a conclusão no diário
+3. Testar quais sites de companhia e agência aceitam link de busca preenchido
+4. Abrir as issues da Fase 1 a partir da [SPEC-01](specs/SPEC-01-MVP.md)
