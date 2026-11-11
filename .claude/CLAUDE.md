@@ -48,7 +48,9 @@ de todo commit.
    arquivo próprio
 4. **Verificar com a skill `verificacao`** antes de dizer pronto (inclui os agentes revisores em
    `.claude/agents/` e a tela em 360, 768 e 1280 px)
-5. **Registrar no diário** (`docs/DIARIO-DE-TESTES.md`) todo experimento com fonte ou com o Claude
+5. **Registrar no diário** (`docs/DIARIO-DE-TESTES.md`) todo experimento com fonte ou com o Claude,
+   e no diário de conteúdo (`docs/CONTEUDO.md`) todo momento que vira post (descoberta, erro
+   achado, número surpreendente), com a prova (issue, commit, teste)
 6. **Commit** com a doc ou skill afetada atualizada junto
 
 ## Regras invioláveis do Frank

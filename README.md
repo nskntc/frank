@@ -46,6 +46,7 @@ achar a passagem mais barata.
 | [Riscos](docs/RISCOS.md) | casos especiais que o Frank precisa tratar |
 | [Técnicas de IA](docs/TECNICAS-DE-IA.md) | o que o Frank usa de IA e onde |
 | [Diário de testes](docs/DIARIO-DE-TESTES.md) | cada experimento e o que ele ensinou |
+| [Diário de conteúdo](docs/CONTEUDO.md) | os momentos da construção que viram post |
 | [Como contribuir](CONTRIBUTING.md) | regras para quem mexe no código |
 
 ## Aviso
