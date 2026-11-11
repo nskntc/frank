@@ -101,7 +101,13 @@ describe('consultasDaVigilancia', () => {
 
 describe('lerConfig', () => {
   it('usa os padroes e aceita sobrescrever', () => {
-    expect(lerConfig({})).toEqual({ tetoDiarioPorFonte: 300, maxBuscasPorPar: 3, tiqueMs: 60_000 });
+    expect(lerConfig({})).toEqual({
+      tetoDiarioPorFonte: 300,
+      maxBuscasPorPar: 3,
+      tiqueMs: 60_000,
+      limiteDiarioIa: 30,
+      modeloIa: '',
+    });
     expect(lerConfig({ FRANK_TETO_DIARIO_FONTE: '50' }).tetoDiarioPorFonte).toBe(50);
   });
 

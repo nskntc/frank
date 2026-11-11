@@ -1,5 +1,6 @@
 import { abrirBanco, caminhoDoBanco } from '@frank/banco';
 import { KiwiMcp } from '@frank/fontes';
+import { ClaudeCli, ComOrcamento } from '@frank/ia';
 import { lerConfig } from './config.js';
 import { log } from './log.js';
 import { resumirErro } from './rodada.js';
@@ -18,6 +19,9 @@ const vigia = new Vigia(
     fontes: [new KiwiMcp()],
     tetoDiarioPorFonte: config.tetoDiarioPorFonte,
     maxBuscasPorPar: config.maxBuscasPorPar,
+    ia: new ComOrcamento(new ClaudeCli(config.modeloIa ? { modelo: config.modeloIa } : {}), db, {
+      limiteDiario: config.limiteDiarioIa,
+    }),
     log,
   },
   config.tiqueMs,

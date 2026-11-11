@@ -12,7 +12,9 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@frank/agente": "workspace:*",
     "@frank/banco": "workspace:*",
+    "@frank/ia": "workspace:*",
     "@frank/contratos": "workspace:*",
     "@frank/dominio": "workspace:*",
     "@frank/fontes": "workspace:*"

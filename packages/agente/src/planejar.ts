@@ -2,6 +2,7 @@ import { type NovaVigilancia, novaVigilanciaSchema } from '@frank/contratos';
 import type { ProvedorLLM } from '@frank/ia';
 import { z } from 'zod';
 import { montarSistema } from './skills.js';
+import { neutralizarTexto } from './texto.js';
 
 /** O que o Claude devolve ao ler o pedido. Sem refinamentos: eles nao cabem no JSON Schema. */
 export const planoSchema = z
@@ -50,14 +51,8 @@ function diaDeHoje(agora: Date): string {
   return agora.toISOString().slice(0, 10);
 }
 
-/**
- * O pedido vai entre <pedido> e </pedido>. Trocar `<` e `>` por aspas angulares impede qualquer
- * forma de fechar a tag (`<</pedido>/pedido>`, `</PEDIDO>`, `</pedido >`): o texto colado de uma
- * pagina nunca sai da area de dado.
- */
-export function neutralizarPedido(texto: string): string {
-  return texto.replaceAll('<', '‹').replaceAll('>', '›');
-}
+/** O pedido vai entre <pedido> e </pedido>, neutralizado (texto.ts). */
+export const neutralizarPedido = neutralizarTexto;
 
 /**
  * Transforma o pedido em texto livre numa vigilancia (SPEC-01 RF-01). O Claude so interpreta;

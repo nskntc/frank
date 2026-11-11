@@ -9,12 +9,14 @@ import {
   resumirErro,
 } from './apoio-fonte.js';
 import { consultasDaVigilancia, proximaExclusao } from './consultas.js';
-import { detectarNaRodada } from './detectar.js';
+import { type ContextoDeteccao, detectarNaRodada } from './detectar.js';
 
 export { resumirErro } from './apoio-fonte.js';
 
 export interface DependenciasRodada extends ContextoFonte {
   fontes: readonly FontePreco[];
+  /** O Claude com orcamento, para avaliar as ofertas. Opcional. */
+  ia?: ContextoDeteccao['ia'];
   /**
    * Maximo de buscas por par origem x destino e fonte numa rodada (RF-05): a primeira sem
    * filtro e as seguintes excluindo as companhias ja vistas. Padrao 3.

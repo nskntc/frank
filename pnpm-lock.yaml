@@ -32,6 +32,9 @@ importers:
 
   apps/vigia:
     dependencies:
+      '@frank/agente':
+        specifier: workspace:*
+        version: link:../../packages/agente
       '@frank/banco':
         specifier: workspace:*
         version: link:../../packages/banco
@@ -44,6 +47,9 @@ importers:
       '@frank/fontes':
         specifier: workspace:*
         version: link:../../packages/fontes
+      '@frank/ia':
+        specifier: workspace:*
+        version: link:../../packages/ia
     devDependencies:
       '@frank/config':
         specifier: workspace:*

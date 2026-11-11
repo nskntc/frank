@@ -7,6 +7,7 @@ import {
 } from '@frank/banco';
 import type { NovaVigilancia } from '@frank/contratos';
 import { FonteIndisponivelError } from '@frank/fontes';
+import { IaIndisponivelError, type PedidoIa, type ProvedorLLM, type RespostaIa } from '@frank/ia';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { executarRodada } from './rodada.js';
 import { FonteFalsa, itinerario, logEmMemoria, vigilanciaExemplo } from './teste/apoio.js';
@@ -37,6 +38,20 @@ function mercado(precos: Record<string, number>, opcoes: { estrangeiro?: boolean
     opcoes.estrangeiro,
   );
   return { fonte, estado };
+}
+
+/** Claude falso: responde pelo `responder` (que recebe o pedido) e guarda os pedidos. */
+function iaFalsa(responder: (p: PedidoIa<unknown>) => Promise<unknown>) {
+  const pedidos: PedidoIa<unknown>[] = [];
+  const ia: ProvedorLLM & { pedidos: typeof pedidos } = {
+    nome: 'falsa',
+    pedidos,
+    async perguntar<T>(pedido: PedidoIa<T>): Promise<RespostaIa<T>> {
+      pedidos.push(pedido as PedidoIa<unknown>);
+      return { dados: pedido.schema.parse(await responder(pedido as PedidoIa<unknown>)), duracaoMs: 1 };
+    },
+  };
+  return ia;
 }
 
 function vigilancia(mudanca: Partial<NovaVigilancia> = {}) {
@@ -75,7 +90,7 @@ describe('detector no ciclo (RF-07 a RF-09)', () => {
     expect(fonte.consultas[1]?.companhias).toEqual(['AD']);
     const [oferta] = listarOfertas(db, { vigilanciaId: v.id });
     expect(oferta).toMatchObject({
-      status: 'detectada',
+      status: 'sem_avaliacao', // sem Claude configurado
       precoFinalCentavos: 79_000,
       motivos: ['abaixo_do_alvo'],
       reconferidaEm: t0.toISOString(),
@@ -161,6 +176,34 @@ describe('detector no ciclo (RF-07 a RF-09)', () => {
     );
     expect((await rodar(oscila, minutos(61))).resumo.ofertas).toBe(0);
     expect(listarOfertas(db).map((o) => o.precoFinalCentavos)).toEqual([79_000]);
+  });
+
+  it('com o Claude, a oferta nova sai avaliada', async () => {
+    vigilancia({ precoAlvoCentavos: 80_000 });
+    const { fonte } = mercado({ 'AD-1': 79_000 });
+    const ia = iaFalsa(async () => ({ valeAPena: true, pegadinhasExtras: [], resumo: 'Direto e dentro do alvo.' }));
+    const log = logEmMemoria();
+    await executarRodada({ db, fontes: [fonte], tetoDiarioPorFonte: 300, ia, log }, t0);
+
+    expect(listarOfertas(db)[0]).toMatchObject({
+      status: 'avaliada',
+      avaliacao: { valeAPena: true, resumo: 'Direto e dentro do alvo.' },
+    });
+    expect(ia.pedidos[0]?.tarefa).toBe('avaliar_oferta');
+  });
+
+  it('Claude indisponivel: a oferta fica sem avaliacao e a rodada segue', async () => {
+    vigilancia({ precoAlvoCentavos: 80_000 });
+    const { fonte } = mercado({ 'AD-1': 79_000 });
+    const ia = iaFalsa(async () => {
+      throw new IaIndisponivelError('limite', 'O limite de uso do seu plano do Claude acabou por agora.');
+    });
+    const log = logEmMemoria();
+    const resumo = await executarRodada({ db, fontes: [fonte], tetoDiarioPorFonte: 300, ia, log }, t0);
+
+    expect(resumo.ofertas).toBe(1);
+    expect(listarOfertas(db)[0]?.status).toBe('sem_avaliacao');
+    expect(log.linhas.some((l) => l.includes('ficou sem avaliação'))).toBe(true);
   });
 
   it('nao repete a oferta a cada hora; so cria outra se o preco cair mais', async () => {

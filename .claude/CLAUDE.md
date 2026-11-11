@@ -24,7 +24,7 @@ de todo commit.
 | `apps/vigia` | processo Node com o ciclo: busca nas fontes, histórico, detector, Claude, alertas |
 | `packages/dominio` | regras puras: preço normal, detecção de oferta, preço final com IOF, regra das 24 h, datas |
 | `packages/fontes` | adaptadores de fonte de preço atrás da interface `FontePreco` (Kiwi primeiro) |
-| `packages/agente` | as tarefas do Claude: planejador (texto livre → vigilância); skills lidas de `skills/` |
+| `packages/agente` | as tarefas do Claude: planejador (texto livre → vigilância) e avaliador de oferta (pegadinhas do código + julgamento do Claude); skills lidas de `skills/` |
 | `packages/ia` | o Claude pelo `claude -p` oficial, isolado (sem ferramentas, sem CLAUDE.md/hooks/MCP de quem usa), com saída validada e orçamento diário (`ComOrcamento`) |
 | `packages/banco` | SQLite local (`data/frank.db`) pelo `node:sqlite`: vigilâncias, preços por rodada, ofertas, alertas, placar, consultas às fontes |
 | `packages/contratos` | schemas Zod compartilhados (inclusive a saída JSON do Claude) |
@@ -136,6 +136,10 @@ de todo commit.
   apagar a tag de fechamento não basta (`<</pedido>/pedido>`, `</PEDIDO>` escapam)
 - **Mudou skill ou prompt de tarefa: rode o eval** (`FRANK_EVAL=1 pnpm --filter @frank/agente test`,
   gasta chamadas do plano). Caso que cai se conserta na skill, não no teste
+- **Texto do Claude que vai para a tela passa por `temPrecoOuLink`** (normaliza NFKC; bloqueia
+  dinheiro e qualquer coisa com cara de endereço; na dúvida bloqueia e usa texto do código) e é
+  mostrado como texto puro: nunca HTML, nunca link, Telegram sem `parse_mode`
+- **Pegadinha objetiva é do código** (`detectarPegadinhas`); o Claude só julga e acrescenta `outra`
 - **Mensagem de erro do Claude nunca copia texto do modelo** (pode ter vindo de página de terceiro)
 - **Erro de busca é da fonte; erro de gravação é do vigia:** nunca registrar falha de banco como
   falha da Kiwi

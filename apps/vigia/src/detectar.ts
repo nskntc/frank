@@ -1,12 +1,16 @@
+import { avaliarOferta, type EntradaAvaliacao } from '@frank/agente';
 import {
   marcarReconferida,
   menorOfertaAberta,
   menoresPorRodada,
+  obterOferta,
   type Oferta,
   precosDaRodada,
   registrarOferta,
   registrarPrecosVistos,
+  salvarAvaliacao,
 } from '@frank/banco';
+import type { ProvedorLLM } from '@frank/ia';
 import type { Itinerario, ResultadoRodadaVigilancia, Vigilancia } from '@frank/contratos';
 import {
   type Centavos,
@@ -32,6 +36,30 @@ export const JANELA_NORMAL_DIAS = 14;
 
 export interface ContextoDeteccao extends ContextoFonte {
   fontes: readonly FontePreco[];
+  /** O Claude, ja com orcamento. Sem ele, toda oferta fica "sem avaliacao" (RF-11). */
+  ia?: ProvedorLLM;
+}
+
+/**
+ * Pede a avaliacao ao Claude e grava. Claude ausente, indisponivel ou com resposta invalida:
+ * "sem avaliacao", e a rodada segue (RF-11). O motivo ja fica gravado pelo ComOrcamento.
+ */
+async function avaliarEGravar(
+  ctx: ContextoDeteccao,
+  oferta: Oferta,
+  entrada: EntradaAvaliacao,
+  rotulo: string,
+): Promise<void> {
+  if (!ctx.ia) {
+    salvarAvaliacao(ctx.db, oferta.id, null);
+    return;
+  }
+  try {
+    salvarAvaliacao(ctx.db, oferta.id, await avaliarOferta(ctx.ia, entrada));
+  } catch (erro) {
+    salvarAvaliacao(ctx.db, oferta.id, null);
+    ctx.log.aviso(`oferta de ${rotulo} ficou sem avaliação: ${resumirErro(erro)}`);
+  }
 }
 
 interface Avaliacao {
@@ -129,7 +157,22 @@ export async function detectarNaRodada(
   marcarReconferida(ctx.db, oferta.id, agora);
   const abaixo = oferta.percentualAbaixo !== null ? `, ${oferta.percentualAbaixo}% abaixo do normal` : '';
   ctx.log.info(`oferta: ${rotulo} por ${formatarReais(oferta.precoFinalCentavos)}${abaixo}`);
-  return oferta;
+
+  await avaliarEGravar(
+    ctx,
+    oferta,
+    {
+      vigilancia,
+      itinerario: reconferido,
+      precoFonteCentavos: reconferido.precoCentavos,
+      precoFinalCentavos: oferta.precoFinalCentavos,
+      precoNormalCentavos: normal,
+      percentualAbaixo: oferta.percentualAbaixo,
+      vendedorEstrangeiro: fonte.vendedorEstrangeiro ?? false,
+    },
+    rotulo,
+  );
+  return obterOferta(ctx.db, oferta.id) ?? oferta;
 }
 
 /** Busca de novo o mesmo voo. Devolve o itinerario reconferido, ou null (sumiu, erro, teto). */
