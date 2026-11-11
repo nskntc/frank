@@ -141,5 +141,11 @@ de todo commit.
   mostrado como texto puro: nunca HTML, nunca link, Telegram sem `parse_mode`
 - **Pegadinha objetiva é do código** (`detectarPegadinhas`); o Claude só julga e acrescenta `outra`
 - **Mensagem de erro do Claude nunca copia texto do modelo** (pode ter vindo de página de terceiro)
+- **SerpApi (Google Flights) é opcional e tem teto mensal** (240 de 250 grátis): referência de
+  preço 1 vez por semana por vigilância, "onde comprar" 3 consultas por oferta; toda chamada
+  tentada conta. A chave só vai no `api_key` da URL e nunca em log ou mensagem de erro
+- **Link de vendedor só da fonte:** Kiwi só `*.kiwi.com`; Google só `https://www.google.com/travel/flights...`
+  (o `google.com/url?q=` é redirecionador aberto)
+- **O vigia lê o `.env` da raiz** (`raizDoRepositorio`), não o da pasta `apps/vigia`
 - **Erro de busca é da fonte; erro de gravação é do vigia:** nunca registrar falha de banco como
   falha da Kiwi

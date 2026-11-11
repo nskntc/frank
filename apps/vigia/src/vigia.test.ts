@@ -107,6 +107,8 @@ describe('lerConfig', () => {
       tiqueMs: 60_000,
       limiteDiarioIa: 30,
       modeloIa: '',
+      chaveSerpApi: '',
+      tetoMensalSerpApi: 240,
     });
     expect(lerConfig({ FRANK_TETO_DIARIO_FONTE: '50' }).tetoDiarioPorFonte).toBe(50);
   });

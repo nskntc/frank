@@ -183,6 +183,11 @@ export function salvarReferencias(
   });
 }
 
+/** Apaga a referencia de uma fonte (a rota mudou: os pontos antigos sao de outra viagem). */
+export function apagarReferencias(db: Banco, vigilanciaId: string, fonte: string): void {
+  db.prepare('DELETE FROM referencias_preco WHERE vigilancia_id = ? AND fonte = ?').run(vigilanciaId, fonte);
+}
+
 export function listarReferencias(
   db: Banco,
   vigilanciaId: string,

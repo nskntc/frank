@@ -1,0 +1,447 @@
+{
+ "search_metadata": {
+  "google_flights_url": "https://www.google.com/travel/flights?exemplo"
+ },
+ "best_flights": [
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de Viracopos",
+      "id": "VCP",
+      "time": "2027-03-12 06:05"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-12 09:10"
+     },
+     "airline": "Azul",
+     "flight_number": "AD 4079"
+    }
+   ],
+   "price": 975,
+   "departure_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNUpTRkZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDFKUTA1RGRUaEJFZ1pCUkRRd056a2FDd2phK1FVUUFob0RRbEpNT0J4d2lZa0IiLFtbIlZDUCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkFEIiwiNDA3OSJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de Viracopos",
+      "id": "VCP",
+      "time": "2027-03-12 08:40"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-12 11:45"
+     },
+     "airline": "Azul",
+     "flight_number": "AD 2922"
+    }
+   ],
+   "price": 975,
+   "departure_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNUpTRkZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDFKUTA1RGRUaEJFZ1pCUkRJNU1qSWFDd2phK1FVUUFob0RRbEpNT0J4d2lZa0IiLFtbIlZDUCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkFEIiwiMjkyMiJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-12 10:45"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-12 13:55"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3414"
+    }
+   ],
+   "price": 1195,
+   "departure_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNUpTRkZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDFKUTA1RGRUaEJFZ1pNUVRNME1UUWFDd2lZcFFjUUFob0RRbEpNT0J4dzk2Y0IiLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXV0="
+  }
+ ],
+ "other_flights": [
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de Viracopos",
+      "id": "VCP",
+      "time": "2027-03-12 14:25"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-12 17:25"
+     },
+     "airline": "Azul",
+     "flight_number": "AD 4492"
+    }
+   ],
+   "price": 975,
+   "departure_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNUpTRkZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDFKUTA1RGRUaEJFZ1pCUkRRME9USWFDd2phK1FVUUFob0RRbEpNT0J4d2lZa0IiLFtbIlZDUCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkFEIiwiNDQ5MiJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de Viracopos",
+      "id": "VCP",
+      "time": "2027-03-12 23:10"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-13 02:15"
+     },
+     "airline": "Azul",
+     "flight_number": "AD 4092"
+    }
+   ],
+   "price": 975,
+   "departure_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNUpTRkZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDFKUTA1RGRUaEJFZ1pCUkRRd09USWFDd2phK1FVUUFob0RRbEpNT0J4d2lZa0IiLFtbIlZDUCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkFEIiwiNDA5MiJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-12 12:40"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-12 15:45"
+     },
+     "airline": "Azul",
+     "flight_number": "AD 4269"
+    }
+   ],
+   "price": 1081,
+   "departure_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNUpTRkZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDFKUTA1RGRUaEJFZ1pCUkRReU5qa2FDd2ozeXdZUUFob0RRbEpNT0J4dzc1Y0IiLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkFEIiwiNDI2OSJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de São Paulo/Guarulhos–Governador André Franco Montoro",
+      "id": "GRU",
+      "time": "2027-03-12 05:00"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-12 08:00"
+     },
+     "airline": "Azul",
+     "flight_number": "AD 4232"
+    }
+   ],
+   "price": 1083,
+   "departure_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNUpTRkZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDFKUTA1RGRUaEJFZ1pCUkRReU16SWFDd2kvelFZUUFob0RRbEpNT0J4d2s1Z0IiLFtbIkdSVSIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkFEIiwiNDIzMiJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de São Paulo/Guarulhos–Governador André Franco Montoro",
+      "id": "GRU",
+      "time": "2027-03-12 08:30"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-12 11:30"
+     },
+     "airline": "Azul",
+     "flight_number": "AD 2744"
+    }
+   ],
+   "price": 1083,
+   "departure_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNUpTRkZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDFKUTA1RGRUaEJFZ1pCUkRJM05EUWFDd2kvelFZUUFob0RRbEpNT0J4d2s1Z0IiLFtbIkdSVSIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkFEIiwiMjc0NCJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de São Paulo/Guarulhos–Governador André Franco Montoro",
+      "id": "GRU",
+      "time": "2027-03-12 10:45"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-12 13:55"
+     },
+     "airline": "Azul",
+     "flight_number": "AD 4064"
+    }
+   ],
+   "price": 1083,
+   "departure_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNUpTRkZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDFKUTA1RGRUaEJFZ1pCUkRRd05qUWFDd2kvelFZUUFob0RRbEpNT0J4d2s1Z0IiLFtbIkdSVSIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkFEIiwiNDA2NCJdXV0="
+  }
+ ],
+ "price_insights": {
+  "lowest_price": 975,
+  "price_level": "typical",
+  "typical_price_range": [
+   910,
+   1700
+  ],
+  "price_history": [
+   [
+    1789095600,
+    901
+   ],
+   [
+    1789182000,
+    901
+   ],
+   [
+    1789268400,
+    901
+   ],
+   [
+    1789354800,
+    901
+   ],
+   [
+    1789441200,
+    945
+   ],
+   [
+    1789527600,
+    718
+   ],
+   [
+    1789614000,
+    945
+   ],
+   [
+    1789700400,
+    976
+   ],
+   [
+    1789786800,
+    950
+   ],
+   [
+    1789873200,
+    950
+   ],
+   [
+    1789959600,
+    1012
+   ],
+   [
+    1790046000,
+    887
+   ],
+   [
+    1790132400,
+    887
+   ],
+   [
+    1790218800,
+    718
+   ],
+   [
+    1790305200,
+    675
+   ],
+   [
+    1790391600,
+    677
+   ],
+   [
+    1790478000,
+    679
+   ],
+   [
+    1790564400,
+    679
+   ],
+   [
+    1790650800,
+    925
+   ],
+   [
+    1790737200,
+    875
+   ],
+   [
+    1790823600,
+    875
+   ],
+   [
+    1790910000,
+    991
+   ],
+   [
+    1790996400,
+    975
+   ],
+   [
+    1791082800,
+    955
+   ],
+   [
+    1791169200,
+    897
+   ],
+   [
+    1791255600,
+    897
+   ],
+   [
+    1791342000,
+    1015
+   ],
+   [
+    1791428400,
+    1015
+   ],
+   [
+    1791514800,
+    1087
+   ],
+   [
+    1791601200,
+    1080
+   ],
+   [
+    1791687600,
+    1080
+   ],
+   [
+    1791774000,
+    1072
+   ],
+   [
+    1791860400,
+    985
+   ],
+   [
+    1791946800,
+    993
+   ],
+   [
+    1792033200,
+    1046
+   ],
+   [
+    1792119600,
+    1161
+   ],
+   [
+    1792206000,
+    1161
+   ],
+   [
+    1792292400,
+    1100
+   ],
+   [
+    1792378800,
+    1076
+   ],
+   [
+    1792465200,
+    1057
+   ],
+   [
+    1792551600,
+    1057
+   ],
+   [
+    1792638000,
+    1052
+   ],
+   [
+    1792724400,
+    1165
+   ],
+   [
+    1792810800,
+    1115
+   ],
+   [
+    1792897200,
+    1115
+   ],
+   [
+    1792983600,
+    1063
+   ],
+   [
+    1793070000,
+    1063
+   ],
+   [
+    1793156400,
+    1016
+   ],
+   [
+    1793242800,
+    1015
+   ],
+   [
+    1793329200,
+    1015
+   ],
+   [
+    1793415600,
+    965
+   ],
+   [
+    1793502000,
+    965
+   ],
+   [
+    1793588400,
+    910
+   ],
+   [
+    1793674800,
+    910
+   ],
+   [
+    1793761200,
+    817
+   ],
+   [
+    1793847600,
+    817
+   ],
+   [
+    1793934000,
+    817
+   ],
+   [
+    1794020400,
+    817
+   ],
+   [
+    1794106800,
+    817
+   ],
+   [
+    1794193200,
+    817
+   ],
+   [
+    1794279600,
+    817
+   ],
+   [
+    1794366000,
+    975
+   ]
+  ]
+ }
+}

@@ -1,0 +1,259 @@
+{
+ "search_metadata": {
+  "google_flights_url": "https://www.google.com/travel/flights?exemplo"
+ },
+ "best_flights": [
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-19 17:20"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional de Brasília - Presidente Juscelino Kubitschek",
+      "id": "BSB",
+      "time": "2027-03-19 20:00"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3425"
+    },
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de Brasília - Presidente Juscelino Kubitschek",
+      "id": "BSB",
+      "time": "2027-03-19 20:35"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-19 22:20"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3023"
+    }
+   ],
+   "price": 1195,
+   "booking_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNU9ZMUZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDVWUVZGR2RWZEJFZzFNUVRNME1qVjhURUV6TURJekdnc0ltS1VIRUFJYUEwSlNURGdjY1BlbkFRPT0iLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXSxbWyJSRUMiLCIyMDI3LTAzLTE5IiwiQlNCIixudWxsLCJMQSIsIjM0MjUiXSxbIkJTQiIsIjIwMjctMDMtMTkiLCJDR0giLG51bGwsIkxBIiwiMzAyMyJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-19 12:50"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-19 16:15"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3171"
+    }
+   ],
+   "price": 1303,
+   "booking_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNU9ZMUZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDVWUVZGR2RWZEJFZ1pNUVRNeE56RWFDd2pJK1FjUUFob0RRbEpNT0J4d2o3Y0IiLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXSxbWyJSRUMiLCIyMDI3LTAzLTE5IiwiQ0dIIixudWxsLCJMQSIsIjMxNzEiXV1d"
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-19 17:50"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-19 21:10"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3615"
+    }
+   ],
+   "price": 1303,
+   "booking_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNU9ZMUZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDVWUVZGR2RWZEJFZ1pNUVRNMk1UVWFDd2pJK1FjUUFob0RRbEpNT0J4d2o3Y0IiLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXSxbWyJSRUMiLCIyMDI3LTAzLTE5IiwiQ0dIIixudWxsLCJMQSIsIjM2MTUiXV1d"
+  }
+ ],
+ "other_flights": [
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-19 03:40"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional de Brasília - Presidente Juscelino Kubitschek",
+      "id": "BSB",
+      "time": "2027-03-19 06:20"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3123"
+    },
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de Brasília - Presidente Juscelino Kubitschek",
+      "id": "BSB",
+      "time": "2027-03-19 08:05"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-19 09:50"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3845"
+    }
+   ],
+   "price": 1195,
+   "booking_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNU9ZMUZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDVWUVZGR2RWZEJFZzFNUVRNeE1qTjhURUV6T0RRMUdnc0ltS1VIRUFJYUEwSlNURGdjY1BlbkFRPT0iLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXSxbWyJSRUMiLCIyMDI3LTAzLTE5IiwiQlNCIixudWxsLCJMQSIsIjMxMjMiXSxbIkJTQiIsIjIwMjctMDMtMTkiLCJDR0giLG51bGwsIkxBIiwiMzg0NSJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-19 11:10"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional de Brasília - Presidente Juscelino Kubitschek",
+      "id": "BSB",
+      "time": "2027-03-19 13:50"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3348"
+    },
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de Brasília - Presidente Juscelino Kubitschek",
+      "id": "BSB",
+      "time": "2027-03-19 17:15"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-19 19:00"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3011"
+    }
+   ],
+   "price": 1195,
+   "booking_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNU9ZMUZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDVWUVZGR2RWZEJFZzFNUVRNek5EaDhURUV6TURFeEdnc0ltS1VIRUFJYUEwSlNURGdjY1BlbkFRPT0iLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXSxbWyJSRUMiLCIyMDI3LTAzLTE5IiwiQlNCIixudWxsLCJMQSIsIjMzNDgiXSxbIkJTQiIsIjIwMjctMDMtMTkiLCJDR0giLG51bGwsIkxBIiwiMzAxMSJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-19 11:50"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional de Fortaleza - Pinto Martins (FOR)",
+      "id": "FOR",
+      "time": "2027-03-19 13:15"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 4778"
+    },
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de Fortaleza - Pinto Martins (FOR)",
+      "id": "FOR",
+      "time": "2027-03-19 17:55"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-19 21:30"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3468"
+    }
+   ],
+   "price": 1195,
+   "booking_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNU9ZMUZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDVWUVZGR2RWZEJFZzFNUVRRM056aDhURUV6TkRZNEdnc0ltS1VIRUFJYUEwSlNURGdjY1BlbkFRPT0iLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXSxbWyJSRUMiLCIyMDI3LTAzLTE5IiwiRk9SIixudWxsLCJMQSIsIjQ3NzgiXSxbIkZPUiIsIjIwMjctMDMtMTkiLCJDR0giLG51bGwsIkxBIiwiMzQ2OCJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-19 20:50"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto Internacional de Brasília - Presidente Juscelino Kubitschek",
+      "id": "BSB",
+      "time": "2027-03-19 23:30"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3565"
+    },
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional de Brasília - Presidente Juscelino Kubitschek",
+      "id": "BSB",
+      "time": "2027-03-20 07:10"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-20 08:55"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3707"
+    }
+   ],
+   "price": 1195,
+   "booking_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNU9ZMUZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDVWUVZGR2RWZEJFZzFNUVRNMU5qVjhURUV6TnpBM0dnc0ltS1VIRUFJYUEwSlNURGdjY1BlbkFRPT0iLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXSxbWyJSRUMiLCIyMDI3LTAzLTE5IiwiQlNCIixudWxsLCJMQSIsIjM1NjUiXSxbIkJTQiIsIjIwMjctMDMtMjAiLCJDR0giLG51bGwsIkxBIiwiMzcwNyJdXV0="
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-19 04:00"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-19 07:25"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3715"
+    }
+   ],
+   "price": 1303,
+   "booking_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNU9ZMUZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDVWUVZGR2RWZEJFZ1pNUVRNM01UVWFDd2pJK1FjUUFob0RRbEpNT0J4d2o3Y0IiLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXSxbWyJSRUMiLCIyMDI3LTAzLTE5IiwiQ0dIIixudWxsLCJMQSIsIjM3MTUiXV1d"
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Aeroporto Internacional do Recife/Guararapes - Gilberto Freyre",
+      "id": "REC",
+      "time": "2027-03-19 05:30"
+     },
+     "arrival_airport": {
+      "name": "Aeroporto de São Paulo/Congonhas–Deputado Freitas Nobre",
+      "id": "CGH",
+      "time": "2027-03-19 08:55"
+     },
+     "airline": "LATAM",
+     "flight_number": "LA 3977"
+    }
+   ],
+   "price": 1303,
+   "booking_token": "WyJDalJJZEZka1RIaEJXa3BxVm5kQlIwNU9ZMUZDUnkwdExTMHRMUzB0TFc5NVkycHZPVUZCUVVGQlIzSXdZMDVWUVZGR2RWZEJFZ1pNUVRNNU56Y2FDd2pJK1FjUUFob0RRbEpNT0J4d2o3Y0IiLFtbIkNHSCIsIjIwMjctMDMtMTIiLCJSRUMiLG51bGwsIkxBIiwiMzQxNCJdXSxbWyJSRUMiLCIyMDI3LTAzLTE5IiwiQ0dIIixudWxsLCJMQSIsIjM5NzciXV1d"
+  }
+ ]
+}

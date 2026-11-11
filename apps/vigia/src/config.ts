@@ -9,6 +9,10 @@ export interface ConfigVigia {
   limiteDiarioIa: number;
   /** Modelo do Claude (ex.: 'haiku', 'sonnet'). Vazio = o padrao do plano. */
   modeloIa: string;
+  /** Chave do SerpApi. Vazia = sem referencia do Google nem preco por vendedor. */
+  chaveSerpApi: string;
+  /** Consultas ao SerpApi em 30 dias (plano gratis: 250). */
+  tetoMensalSerpApi: number;
 }
 
 function inteiroPositivo(valor: string | undefined, nome: string, padrao: number): number {
@@ -27,5 +31,7 @@ export function lerConfig(env: NodeJS.ProcessEnv = process.env): ConfigVigia {
     tiqueMs: inteiroPositivo(env.FRANK_TIQUE_MS, 'FRANK_TIQUE_MS', 60_000),
     limiteDiarioIa: inteiroPositivo(env.FRANK_LIMITE_DIARIO_IA, 'FRANK_LIMITE_DIARIO_IA', 30),
     modeloIa: env.FRANK_MODELO ?? '',
+    chaveSerpApi: env.SERPAPI_API_KEY ?? '',
+    tetoMensalSerpApi: inteiroPositivo(env.FRANK_TETO_MENSAL_SERPAPI, 'FRANK_TETO_MENSAL_SERPAPI', 240),
   };
 }

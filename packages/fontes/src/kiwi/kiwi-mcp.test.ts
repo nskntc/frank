@@ -123,6 +123,11 @@ describe('lerResposta com erro', () => {
     expect(() => lerResposta(corpo)).toThrow(RespostaInvalidaError);
   });
 
+  it('link de compra de outro dominio vira resposta invalida', () => {
+    const adulterada = gravada.replace('https://www.kiwi.com/u/exemplo1', 'https://kiwi.com.exemplo-falso.example/x');
+    expect(() => lerResposta(adulterada)).toThrow(RespostaInvalidaError);
+  });
+
   it('link de compra que nao e https vira resposta invalida', () => {
     const adulterada = gravada.replace('https://www.kiwi.com/u/exemplo1', 'javascript:alert(1)');
     expect(() => lerResposta(adulterada)).toThrow(RespostaInvalidaError);

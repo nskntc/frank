@@ -1,5 +1,6 @@
-import { abrirBanco, caminhoDoBanco } from '@frank/banco';
-import { KiwiMcp } from '@frank/fontes';
+import { join } from 'node:path';
+import { abrirBanco, caminhoDoBanco, raizDoRepositorio } from '@frank/banco';
+import { KiwiMcp, SerpApiGoogleFlights } from '@frank/fontes';
 import { ClaudeCli, ComOrcamento } from '@frank/ia';
 import { lerConfig } from './config.js';
 import { log } from './log.js';
@@ -8,6 +9,13 @@ import { Vigia } from './vigia.js';
 
 /** Quanto o desligamento espera a rodada em andamento antes de sair mesmo assim. */
 const PRAZO_PARA_PARAR_MS = 15_000;
+
+// O .env fica na raiz do repositorio; o vigia roda em apps/vigia.
+try {
+  process.loadEnvFile(join(raizDoRepositorio(), '.env'));
+} catch {
+  // sem .env: valem as variaveis do ambiente
+}
 
 /** Liga o vigia: abre o banco da raiz do repo, consulta a Kiwi e roda ate receber Ctrl+C. */
 const config = lerConfig();
@@ -22,12 +30,17 @@ const vigia = new Vigia(
     ia: new ComOrcamento(new ClaudeCli(config.modeloIa ? { modelo: config.modeloIa } : {}), db, {
       limiteDiario: config.limiteDiarioIa,
     }),
+    ...(config.chaveSerpApi
+      ? { serpapi: new SerpApiGoogleFlights({ chave: config.chaveSerpApi }), tetoMensalSerpApi: config.tetoMensalSerpApi }
+      : {}),
     log,
   },
   config.tiqueMs,
 );
 
-log.info(`Frank: vigia ligado (banco em ${caminho}). Ctrl+C para parar.`);
+log.info(
+  `Frank: vigia ligado (banco em ${caminho}; Google Flights ${config.chaveSerpApi ? 'ligado' : 'desligado, sem SERPAPI_API_KEY'}). Ctrl+C para parar.`,
+);
 vigia.iniciar();
 
 let parando = false;

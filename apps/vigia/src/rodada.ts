@@ -17,6 +17,9 @@ export interface DependenciasRodada extends ContextoFonte {
   fontes: readonly FontePreco[];
   /** O Claude com orcamento, para avaliar as ofertas. Opcional. */
   ia?: ContextoDeteccao['ia'];
+  /** Google Flights via SerpApi: referencia de preco e "onde comprar". Opcional. */
+  serpapi?: ContextoDeteccao['serpapi'];
+  tetoMensalSerpApi?: number;
   /**
    * Maximo de buscas por par origem x destino e fonte numa rodada (RF-05): a primeira sem
    * filtro e as seguintes excluindo as companhias ja vistas. Padrao 3.

@@ -12,12 +12,17 @@ export type Banco = DatabaseSync;
  */
 export function caminhoDoBanco(de: string = process.cwd(), env = process.env): string {
   if (env.FRANK_BANCO) return resolve(env.FRANK_BANCO);
+  // Sem raiz achada, falha em vez de criar outro banco calado: o vigia e o painel
+  // acabariam em arquivos diferentes e o painel mostraria tudo vazio.
+  return join(raizDoRepositorio(de), 'data', 'frank.db');
+}
+
+/** A pasta do Frank (a que tem pnpm-workspace.yaml), procurada a partir de `de`. */
+export function raizDoRepositorio(de: string = process.cwd()): string {
   let pasta = resolve(de);
   for (;;) {
-    if (existsSync(join(pasta, 'pnpm-workspace.yaml'))) return join(pasta, 'data', 'frank.db');
+    if (existsSync(join(pasta, 'pnpm-workspace.yaml'))) return pasta;
     const acima = dirname(pasta);
-    // Sem raiz achada, falha em vez de criar outro banco calado: o vigia e o painel
-    // acabariam em arquivos diferentes e o painel mostraria tudo vazio.
     if (acima === pasta) throw new RaizNaoEncontradaError(de);
     pasta = acima;
   }

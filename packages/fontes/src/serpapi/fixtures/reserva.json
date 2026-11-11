@@ -1,0 +1,140 @@
+{
+ "search_metadata": {
+  "google_flights_url": "https://www.google.com/travel/flights?exemplo"
+ },
+ "booking_options": [
+  {
+   "together": {
+    "book_with": "LATAM",
+    "airline": true,
+    "price": 1195,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "Booking.com",
+    "price": 1212,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "Trip.com",
+    "price": 1256,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "Zupper",
+    "price": 1196,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "Decolar",
+    "price": 1314,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "maxmilhas",
+    "price": 1304,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "Mytrip",
+    "price": 1267,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "Flightnetwork",
+    "price": 1267,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "ViajaNet",
+    "price": 1314,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "Gotogate",
+    "price": 1267,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "Kiwi.com",
+    "price": 1372,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  },
+  {
+   "together": {
+    "book_with": "kiss&fly",
+    "price": 1443,
+    "marketed_as": [
+     "LA 3414",
+     "LA 3425",
+     "LA 3023"
+    ]
+   }
+  }
+ ]
+}

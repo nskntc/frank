@@ -34,6 +34,8 @@ export interface FontePreco {
   readonly limiteResultados?: number;
   /** Quem vende pela fonte e estrangeiro: compra com cartao brasileiro paga IOF de 3,5%. */
   readonly vendedorEstrangeiro?: boolean;
+  /** Nome do vendedor como aparece em "Onde comprar" (Kiwi: "Kiwi.com"). Padrao: `nome`. */
+  readonly vendedor?: string;
   /** Lanca FonteIndisponivelError ou RespostaInvalidaError; nunca devolve [] para esconder erro. */
   buscar(consulta: ConsultaVoo): Promise<Itinerario[]>;
 }

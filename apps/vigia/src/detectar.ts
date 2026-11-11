@@ -21,20 +21,20 @@ import {
   precoNormal,
   type ResultadoDetector,
 } from '@frank/dominio';
-import type { FontePreco } from '@frank/fontes';
+import type { ConsultaVoo, FontePreco } from '@frank/fontes';
 import {
-  type ContextoFonte,
   conferirMoeda,
   podeConsultar,
   registrarConsultaSemLancar,
   resumirErro,
 } from './apoio-fonte.js';
 import { companhiasDoResultado, consultasDaVigilancia } from './consultas.js';
+import { type ContextoGoogle, gravarOndeComprar, normalPelaReferencia } from './google.js';
 
 /** Janela do preco normal (SPEC-01 RF-07, calibrar). */
 export const JANELA_NORMAL_DIAS = 14;
 
-export interface ContextoDeteccao extends ContextoFonte {
+export interface ContextoDeteccao extends ContextoGoogle {
   fontes: readonly FontePreco[];
   /** O Claude, ja com orcamento. Sem ele, toda oferta fica "sem avaliacao" (RF-11). */
   ia?: ProvedorLLM;
@@ -112,11 +112,14 @@ export async function detectarNaRodada(
   const fonte = ctx.fontes.find((f) => f.nome === candidato.fonte);
   if (!fonte) return null;
 
+  const bases = consultasDaVigilancia(vigilancia);
   const desde = new Date(agora.getTime() - JANELA_NORMAL_DIAS * 86_400_000);
-  const normal = precoNormal(
+  const proprio = precoNormal(
     menoresPorRodada(ctx.db, vigilancia.id, desde, vigilancia.moeda, rodada),
     DETECTOR_PADRAO.minimoObservacoes,
   );
+  // Sem historico proprio suficiente, vale a referencia do Google (RF-07), se houver.
+  const normal = proprio ?? (bases[0] ? await normalPelaReferencia(ctx, vigilancia, bases[0], agora) : null);
 
   const primeira = avaliar(candidato.precoCentavos, fonte, vigilancia, normal);
   if (!primeira.deteccao.ehOferta) return null;
@@ -125,7 +128,13 @@ export async function detectarNaRodada(
   if (aberta !== null && primeira.precoFinal >= aberta) return null;
 
   const rotulo = `"${vigilancia.descricao}" ${itinerario.ida.de}→${itinerario.ida.para}`;
-  const reconferido = await reconferir(ctx, fonte, vigilancia, itinerario, candidato.idNaFonte, rotulo, agora, resultado);
+  const base = bases.find((b) => b.origem === itinerario.ida.de && b.destino === itinerario.ida.para);
+  if (!base) {
+    // Nunca reconferir com a busca de outro par: o voo "sumiria" e a oferta seria perdida calada.
+    ctx.log.aviso(`reconferência de ${rotulo} não feita: nenhuma busca da vigilância para esse par`);
+    return null;
+  }
+  const reconferido = await reconferir(ctx, fonte, vigilancia, base, itinerario, candidato.idNaFonte, rotulo, agora, resultado);
   if (!reconferido) return null;
 
   // O voo reconferido entra na mesma rodada (fica duas vezes nela; a mediana nao muda porque
@@ -155,8 +164,15 @@ export async function detectarNaRodada(
     agora,
   );
   marcarReconferida(ctx.db, oferta.id, agora);
-  const abaixo = oferta.percentualAbaixo !== null ? `, ${oferta.percentualAbaixo}% abaixo do normal` : '';
+  const p = oferta.percentualAbaixo;
+  const abaixo = p === null ? '' : p >= 0 ? `, ${p}% abaixo do normal` : `, ${-p}% acima do normal`;
   ctx.log.info(`oferta: ${rotulo} por ${formatarReais(oferta.precoFinalCentavos)}${abaixo}`);
+
+  try {
+    await gravarOndeComprar(ctx, oferta.id, fonte, base, reconferido, agora);
+  } catch (erro) {
+    ctx.log.aviso(`onde comprar de ${rotulo} não foi gravado: ${resumirErro(erro)}`);
+  }
 
   await avaliarEGravar(
     ctx,
@@ -180,6 +196,7 @@ async function reconferir(
   ctx: ContextoDeteccao,
   fonte: FontePreco,
   vigilancia: Vigilancia,
+  base: ConsultaVoo,
   itinerario: Itinerario,
   idNaFonte: string,
   rotulo: string,
@@ -188,14 +205,6 @@ async function reconferir(
 ): Promise<Itinerario | null> {
   if (!podeConsultar(ctx, fonte.nome, agora, resultado)) {
     ctx.log.aviso(`reconferência de ${rotulo} adiada: teto da ${fonte.nome}`);
-    return null;
-  }
-  const base = consultasDaVigilancia(vigilancia).find(
-    (b) => b.origem === itinerario.ida.de && b.destino === itinerario.ida.para,
-  );
-  if (!base) {
-    // Nunca reconferir com a busca de outro par: o voo "sumiria" e a oferta seria perdida calada.
-    ctx.log.aviso(`reconferência de ${rotulo} não feita: nenhuma busca da vigilância para esse par`);
     return null;
   }
   // So as companhias daquele voo: ele cabe nos 15 resultados da fonte.

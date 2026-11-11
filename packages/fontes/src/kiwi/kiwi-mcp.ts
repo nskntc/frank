@@ -91,7 +91,18 @@ function converterPerna(perna: NonNullable<ItinerarioKiwi['inbound']>): Perna {
   };
 }
 
+/** O link de compra da Kiwi so pode ser da propria Kiwi (rotulo "Kiwi.com" no "Onde comprar"). */
+export function linkDaKiwi(link: string): boolean {
+  try {
+    const host = new URL(link).hostname;
+    return host === 'kiwi.com' || host.endsWith('.kiwi.com');
+  } catch {
+    return false;
+  }
+}
+
 export function converterItinerario(bruto: ItinerarioKiwi, moeda: string): Itinerario {
+  if (!linkDaKiwi(bruto.bookingUrl)) throw new Error('link de compra fora do dominio da Kiwi');
   return itinerarioSchema.parse({
     fonte: NOME,
     idNaFonte: bruto.id,
@@ -146,6 +157,7 @@ export class KiwiMcp implements FontePreco {
   readonly limiteResultados = 15;
   /** Kiwi.com s.r.o., empresa tcheca: o link de compra leva a um vendedor estrangeiro. */
   readonly vendedorEstrangeiro = true;
+  readonly vendedor = 'Kiwi.com';
   private proximoId = 1;
 
   constructor(private readonly opcoes: OpcoesKiwi = {}) {}
