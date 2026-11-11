@@ -8,6 +8,8 @@ Status: **pauta** (ideia anotada) · **rascunho** · **publicado** (com link).
 
 | Data | Momento | Prova | O que ensina | Status |
 |---|---|---|---|---|
+| 2026-11-11 | O segundo agente revisor (caçador de falhas silenciosas) achou que, se a Kiwi batesse o limite diário ou o vigia caísse, o painel continuaria dizendo "tudo certo". Corrigido com sinal de vida e resultado de cada rodada gravados | issue #4 | Num agente que roda sozinho por semanas, o pior erro é o silencioso: ele para e ninguém sabe | pauta |
+| 2026-11-11 | Primeira rodada de verdade: o vigia acordou, consultou a Kiwi duas vezes e gravou 30 voos sozinho | diário de testes, issue #4 | O "agente que trabalha enquanto você dorme" começando a funcionar | pauta |
 | 2026-11-11 | Um agente revisor, criado só para revisar dados, achou erros que 97 testes não pegavam: o "preço normal" contava cada voo como uma observação, então uma busca só já passava do mínimo de 20 e voos caros inflavam a média (falsos "25% abaixo do normal") | issue #3, commit `3fa9b78` | Teste confirma o que você pensou; revisor independente acha o que você não pensou | pauta |
 | 2026-11-11 | No mesmo voo LATAM, o site da LATAM custava R$ 1.195 e a Kiwi R$ 1.372 (15% a mais, antes do IOF); 12 vendedores com preços diferentes | diário de testes, issue #18 | O agente não pode só achar o voo: precisa dizer onde comprar | pauta |
 | 2026-11-11 | O Google Flights entrega 60 dias de histórico de preço da rota junto da busca | diário de testes | Resolver o "começo frio": o agente sabe o que é preço normal no dia 1 | pauta |

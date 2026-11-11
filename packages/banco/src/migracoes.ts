@@ -127,4 +127,23 @@ export const MIGRACOES: readonly string[] = [
   );
   CREATE INDEX consultas_fonte_por_fonte ON consultas_fonte(fonte, em);
   `,
+
+  // 2 — quando o vigia rodou cada vigilancia pela ultima vez, com sucesso ou nao (issue #4).
+  // Sem isso, uma rodada que falha seria tentada de novo a cada tique e martelaria a fonte.
+  `
+  ALTER TABLE vigilancias ADD COLUMN ultima_rodada_em TEXT;
+  `,
+
+  // 3 — o que o painel precisa para nunca mostrar "tudo certo" quando o vigia nao trabalhou
+  // (revisao falha-silenciosa da issue #4): resultado da ultima rodada de cada vigilancia e um
+  // estado do vigia (sinal de vida, teto atingido por fonte, ultimo erro do ciclo).
+  `
+  ALTER TABLE vigilancias ADD COLUMN ultima_rodada_resultado TEXT;
+
+  CREATE TABLE estado_vigia (
+    chave TEXT PRIMARY KEY,
+    valor TEXT NOT NULL,
+    atualizado_em TEXT NOT NULL
+  );
+  `,
 ];

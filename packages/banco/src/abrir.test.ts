@@ -1,8 +1,16 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 import { afterEach, describe, expect, it } from 'vitest';
-import { abrirBanco, BancoMaisNovoError, emTransacao, versaoDoBanco } from './abrir.js';
+import {
+  abrirBanco,
+  BancoMaisNovoError,
+  caminhoDoBanco,
+  emTransacao,
+  RaizNaoEncontradaError,
+  versaoDoBanco,
+} from './abrir.js';
 import { MIGRACOES } from './migracoes.js';
 
 const pastas: string[] = [];
@@ -44,6 +52,47 @@ describe('abrirBanco', () => {
     db.exec(`PRAGMA user_version = ${MIGRACOES.length + 1}`);
     db.close();
     expect(() => abrirBanco(caminho)).toThrow(BancoMaisNovoError);
+  });
+});
+
+describe('migracao de um banco existente', () => {
+  it('leva da versao 1 para a atual sem perder vigilancias', () => {
+    const caminho = join(pastaTemporaria(), 'frank.db');
+    const antigo = new DatabaseSync(caminho);
+    antigo.exec(MIGRACOES[0] as string);
+    antigo.exec('PRAGMA user_version = 1');
+    antigo
+      .prepare(
+        `INSERT INTO vigilancias VALUES ('v1', 'teste', '["GRU"]', '["REC"]', '2027-03-12', '2027-03-12',
+           NULL, NULL, 1, 0, NULL, '[]', 0, NULL, 'BRL', 60, 1, 'x', 'x', 'x')`,
+      )
+      .run();
+    antigo.close();
+
+    const db = abrirBanco(caminho);
+    expect(versaoDoBanco(db)).toBe(MIGRACOES.length);
+    expect(db.prepare('SELECT id, ultima_rodada_em FROM vigilancias').all()).toEqual([
+      { id: 'v1', ultima_rodada_em: null },
+    ]);
+    db.close();
+  });
+});
+
+describe('caminhoDoBanco', () => {
+  it('acha data/frank.db na raiz do repositorio a partir de uma subpasta', () => {
+    const raiz = pastaTemporaria();
+    writeFileSync(join(raiz, 'pnpm-workspace.yaml'), '');
+    mkdirSync(join(raiz, 'apps', 'vigia'), { recursive: true });
+    expect(caminhoDoBanco(join(raiz, 'apps', 'vigia'), {})).toBe(join(raiz, 'data', 'frank.db'));
+  });
+
+  it('falha em vez de criar outro banco quando nao acha a raiz', () => {
+    expect(() => caminhoDoBanco(pastaTemporaria(), {})).toThrow(RaizNaoEncontradaError);
+  });
+
+  it('FRANK_BANCO tem prioridade', () => {
+    const outro = join(pastaTemporaria(), 'outro.db');
+    expect(caminhoDoBanco('.', { FRANK_BANCO: outro })).toBe(outro);
   });
 });
 

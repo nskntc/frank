@@ -67,4 +67,18 @@ export interface Vigilancia extends NovaVigilancia {
   atualizadaEm: string;
   /** Precos vistos antes disto nao contam para o preco normal (rota, datas ou filtros mudaram). */
   historicoDesde: string;
+  /** Ultima rodada do vigia, com sucesso ou nao. Null = nunca rodou. */
+  ultimaRodadaEm: string | null;
+  /** Como foi a ultima rodada. Null = nunca rodou (ou formato antigo ilegivel). */
+  ultimaRodadaResultado: ResultadoRodadaVigilancia | null;
+}
+
+/** Resultado da ultima rodada de uma vigilancia, para o painel mostrar "ultima checagem falhou". */
+export interface ResultadoRodadaVigilancia {
+  consultas: number;
+  itinerarios: number;
+  erros: number;
+  puladasPorTeto: number;
+  /** Mensagem curta do ultimo erro da rodada, sem token nem dado pessoal. */
+  ultimoErro: string | null;
 }

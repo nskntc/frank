@@ -1,11 +1,39 @@
-import { mkdirSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { existsSync, mkdirSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { MIGRACOES } from './migracoes.js';
 
 export type Banco = DatabaseSync;
 
-/** Caminho padrao: data/frank.db na raiz do repo (a pasta data/ esta no .gitignore). */
+/**
+ * O banco que o vigia e o painel dividem: `FRANK_BANCO` se definido; senao `data/frank.db` na
+ * raiz do repositorio (a pasta com `pnpm-workspace.yaml`), procurada a partir de `de`. O vigia e o
+ * painel rodam em pastas diferentes (apps/vigia, apps/web) e precisam abrir o mesmo arquivo.
+ */
+export function caminhoDoBanco(de: string = process.cwd(), env = process.env): string {
+  if (env.FRANK_BANCO) return resolve(env.FRANK_BANCO);
+  let pasta = resolve(de);
+  for (;;) {
+    if (existsSync(join(pasta, 'pnpm-workspace.yaml'))) return join(pasta, 'data', 'frank.db');
+    const acima = dirname(pasta);
+    // Sem raiz achada, falha em vez de criar outro banco calado: o vigia e o painel
+    // acabariam em arquivos diferentes e o painel mostraria tudo vazio.
+    if (acima === pasta) throw new RaizNaoEncontradaError(de);
+    pasta = acima;
+  }
+}
+
+export class RaizNaoEncontradaError extends Error {
+  constructor(de: string) {
+    super(
+      `Nao achei a pasta do Frank (com pnpm-workspace.yaml) a partir de "${de}". ` +
+        'Rode dentro do repositorio ou defina FRANK_BANCO com o caminho do banco.',
+    );
+    this.name = 'RaizNaoEncontradaError';
+  }
+}
+
+/** Caminho padrao relativo, para quem roda na raiz. Prefira `caminhoDoBanco()`. */
 export const CAMINHO_PADRAO = 'data/frank.db';
 
 /**

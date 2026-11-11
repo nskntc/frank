@@ -120,3 +120,10 @@ de todo commit.
 - **Transação no banco é `emTransacao`** (BEGIN IMMEDIATE, aninha com savepoint); nunca `BEGIN` à mão
 - **Conexão aberta no Windows prende o arquivo:** feche o banco em todo caminho de erro (e nos testes)
 - **Leitura de JSON gravado é tolerante** (`safeParse` → null); validação estrita só na escrita
+- **No Windows, `timeout -s INT` ou `kill` de outro programa não param o vigia** (não há sinal
+  POSIX); Ctrl+C no terminal funciona. Em teste automatizado, pare pelo PID (`Stop-Process`)
+- **`npx tsx -e "..."` no Git Bash não imprime nada:** escreva um arquivo `.ts` e rode com `tsx`
+- **Falha do vigia sempre vai para o banco, não só para o log:** `ultima_rodada_resultado` da
+  vigilância, `estado_vigia` (`vigia_visto_em`, `ultimo_erro_ciclo`, `teto:<fonte>`). O painel lê dali
+- **Erro de busca é da fonte; erro de gravação é do vigia:** nunca registrar falha de banco como
+  falha da Kiwi

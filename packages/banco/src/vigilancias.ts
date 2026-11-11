@@ -1,5 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import { type NovaVigilancia, novaVigilanciaSchema, type Vigilancia } from '@frank/contratos';
+import {
+  type NovaVigilancia,
+  novaVigilanciaSchema,
+  type ResultadoRodadaVigilancia,
+  type Vigilancia,
+} from '@frank/contratos';
 import { type Banco, emTransacao } from './abrir.js';
 
 interface LinhaVigilancia {
@@ -23,6 +28,25 @@ interface LinhaVigilancia {
   criada_em: string;
   atualizada_em: string;
   historico_desde: string;
+  ultima_rodada_em: string | null;
+  ultima_rodada_resultado: string | null;
+}
+
+function lerResultado(json: string | null): ResultadoRodadaVigilancia | null {
+  if (!json) return null;
+  try {
+    const r = JSON.parse(json) as Partial<ResultadoRodadaVigilancia>;
+    if (typeof r.consultas !== 'number' || typeof r.erros !== 'number') return null;
+    return {
+      consultas: r.consultas,
+      itinerarios: r.itinerarios ?? 0,
+      erros: r.erros,
+      puladasPorTeto: r.puladasPorTeto ?? 0,
+      ultimoErro: r.ultimoErro ?? null,
+    };
+  } catch {
+    return null;
+  }
 }
 
 function paraVigilancia(l: LinhaVigilancia): Vigilancia {
@@ -47,6 +71,8 @@ function paraVigilancia(l: LinhaVigilancia): Vigilancia {
     criadaEm: l.criada_em,
     atualizadaEm: l.atualizada_em,
     historicoDesde: l.historico_desde,
+    ultimaRodadaEm: l.ultima_rodada_em,
+    ultimaRodadaResultado: lerResultado(l.ultima_rodada_resultado),
   };
 }
 
@@ -112,6 +138,8 @@ export function criarVigilancia(db: Banco, nova: NovaVigilancia, agora: Date = n
     criadaEm: instante,
     atualizadaEm: instante,
     historicoDesde: instante,
+    ultimaRodadaEm: null,
+    ultimaRodadaResultado: null,
   };
 }
 
@@ -162,6 +190,36 @@ export function definirAtiva(db: Banco, id: string, ativa: boolean, agora: Date 
     .prepare('UPDATE vigilancias SET ativa = ?, atualizada_em = ? WHERE id = ?')
     .run(ativa ? 1 : 0, agora.toISOString(), id);
   return r.changes > 0;
+}
+
+/** O vigia terminou uma rodada desta vigilancia (com sucesso ou nao) e como foi. */
+export function marcarRodada(
+  db: Banco,
+  id: string,
+  agora: Date = new Date(),
+  resultado: ResultadoRodadaVigilancia | null = null,
+): void {
+  db.prepare('UPDATE vigilancias SET ultima_rodada_em = ?, ultima_rodada_resultado = ? WHERE id = ?').run(
+    agora.toISOString(),
+    resultado ? JSON.stringify(resultado) : null,
+    id,
+  );
+}
+
+/**
+ * Vigilancias ativas cuja proxima rodada ja venceu: nunca rodaram, ou a ultima rodada foi ha
+ * pelo menos `intervaloMinutos`. As que esperam ha mais tempo vem primeiro.
+ */
+export function vigilanciasDevidas(db: Banco, agora: Date = new Date()): Vigilancia[] {
+  const momento = agora.getTime();
+  return listarVigilancias(db, { soAtivas: true })
+    .filter((v) => {
+      if (v.ultimaRodadaEm === null) return true;
+      const ultima = Date.parse(v.ultimaRodadaEm);
+      // Data ilegivel conta como vencida: a vigilancia nunca pode ficar parada para sempre.
+      return Number.isNaN(ultima) || ultima + v.intervaloMinutos * 60_000 <= momento;
+    })
+    .sort((a, b) => (a.ultimaRodadaEm ?? '').localeCompare(b.ultimaRodadaEm ?? ''));
 }
 
 /** Apaga a vigilancia e tudo dela (precos, ofertas, alertas, placar). E pedido da pessoa. */

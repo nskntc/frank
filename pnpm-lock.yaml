@@ -32,6 +32,9 @@ importers:
 
   apps/vigia:
     dependencies:
+      '@frank/banco':
+        specifier: workspace:*
+        version: link:../../packages/banco
       '@frank/contratos':
         specifier: workspace:*
         version: link:../../packages/contratos
