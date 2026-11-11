@@ -14,6 +14,8 @@
   /* Um destaque so, para a acao principal: comprar. */
   --color-destaque: oklch(0.55 0.16 255);
   --color-aviso: oklch(0.75 0.15 75);
+  /* Estado bom (vigia ligado): so com texto ao lado, nunca a cor sozinha. */
+  --color-ok: oklch(0.6 0.14 150);
   /* Series dos graficos (paleta validada: azul e laranja, slots 1 e 2). */
   --serie-1: #2a78d6;
   --serie-2: #eb6834;

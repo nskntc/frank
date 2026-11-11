@@ -40,3 +40,12 @@ export function lerEstado(db: Banco, chave: string): ItemEstado | null {
     .get(chave) as { valor: string; atualizado_em: string } | undefined;
   return linha ? { valor: linha.valor, atualizadoEm: linha.atualizado_em } : null;
 }
+
+/** Estados cuja chave comeca com `prefixo` (ex.: 'teto:', 'erro_aviso:'), em ordem de chave. */
+export function listarEstado(db: Banco, prefixo: string): (ItemEstado & { chave: string })[] {
+  // Sem LIKE: '_' e '%' no prefixo seriam curingas.
+  const linhas = db
+    .prepare('SELECT chave, valor, atualizado_em FROM estado_vigia WHERE substr(chave, 1, ?) = ? ORDER BY chave')
+    .all(prefixo.length, prefixo) as { chave: string; valor: string; atualizado_em: string }[];
+  return linhas.map((l) => ({ chave: l.chave, valor: l.valor, atualizadoEm: l.atualizado_em }));
+}

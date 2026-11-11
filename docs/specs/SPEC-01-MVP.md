@@ -55,7 +55,7 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 | Id | Requisito | Aceite |
 |---|---|---|
 | RF-18 | Telas | Ofertas, Rotas vigiadas, Detalhe da rota (gráfico), Placar, Configurações |
-| RF-19 | Barra de status | última checagem, erro de fonte, Claude disponível, Telegram configurado |
+| RF-19 | Barra de status | vigia ligado ou parado há quanto tempo, última checagem, erro de fonte, teto de consultas, Claude disponível, falha de aviso, e-mail e Telegram configurados (só se existem; segredos ficam no `.env`) |
 | RF-20 | Placar | registrar à mão o preço e a hora do alerta do Google por rota e comparar com o Frank |
 
 ## Requisitos não funcionais

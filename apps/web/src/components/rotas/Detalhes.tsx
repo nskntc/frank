@@ -10,10 +10,25 @@ export function Detalhes({ v }: { v: NovaVigilancia }) {
     ['Ida', janela(v.idaDe, v.idaAte)],
     ['Volta', v.voltaDe && v.voltaAte ? janela(v.voltaDe, v.voltaAte) : 'só ida'],
     ['Passageiros', plural(v.adultos, 'adulto', 'adultos')],
-    ['Mala despachada', v.malasDespachadas ? plural(v.malasDespachadas, 'por pessoa', 'por pessoa') : 'não'],
-    ['Escalas', v.maxEscalas === null ? 'qualquer' : v.maxEscalas === 0 ? 'só voo direto' : `até ${v.maxEscalas}`],
+    [
+      'Mala despachada',
+      v.malasDespachadas ? plural(v.malasDespachadas, 'por pessoa', 'por pessoa') : 'não',
+    ],
+    [
+      'Escalas',
+      v.maxEscalas === null
+        ? 'qualquer'
+        : v.maxEscalas === 0
+          ? 'só voo direto'
+          : `até ${v.maxEscalas}`,
+    ],
     ['Companhias', v.companhias.length ? v.companhias.join(', ') : 'qualquer'],
-    ['Preço-alvo', v.precoAlvoCentavos !== null ? `até ${formatarReais(v.precoAlvoCentavos)} no total` : 'sem alvo: avisa o que fugir do normal'],
+    [
+      'Preço-alvo',
+      v.precoAlvoCentavos !== null
+        ? `até ${formatarReais(v.precoAlvoCentavos)} no total`
+        : 'sem alvo: avisa o que fugir do normal',
+    ],
     ['Checagem', `a cada ${v.intervaloMinutos} min`],
   ];
   return (

@@ -50,7 +50,10 @@ export function PainelRotas() {
     setErro(null);
     setPlano(null);
     setLendo(true);
-    const r = await chamar<Plano>('/api/vigilancias/planejar', { method: 'POST', body: JSON.stringify({ pedido }) });
+    const r = await chamar<Plano>('/api/vigilancias/planejar', {
+      method: 'POST',
+      body: JSON.stringify({ pedido }),
+    });
     setLendo(false);
     if (r.ok) setPlano(r.dados);
     else setErro({ erro: r.erro, problemas: r.problemas });
@@ -76,14 +79,22 @@ export function PainelRotas() {
 
   async function alternar(v: VigilanciaNaTela) {
     setOcupadoId(v.id);
-    const r = await chamar(`/api/vigilancias/${v.id}`, { method: 'PATCH', body: JSON.stringify({ ativa: !v.ativa }) });
+    const r = await chamar(`/api/vigilancias/${v.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ ativa: !v.ativa }),
+    });
     setOcupadoId(null);
     if (!r.ok) setErro({ erro: r.erro });
     await carregar();
   }
 
   async function apagar(v: VigilanciaNaTela) {
-    if (!window.confirm(`Apagar "${v.descricao}"? O histórico de preços e as ofertas dela também somem.`)) return;
+    if (
+      !window.confirm(
+        `Apagar "${v.descricao}"? O histórico de preços e as ofertas dela também somem.`,
+      )
+    )
+      return;
     setOcupadoId(v.id);
     const r = await chamar(`/api/vigilancias/${v.id}`, { method: 'DELETE' });
     setOcupadoId(null);
@@ -139,16 +150,25 @@ export function PainelRotas() {
             {lendo ? 'O Claude está lendo...' : 'Entender pedido'}
           </button>
           {editandoId && (
-            <button type="button" onClick={cancelarEdicao} className="min-h-11 rounded-lg border border-[var(--color-borda)] px-5 text-base">
+            <button
+              type="button"
+              onClick={cancelarEdicao}
+              className="min-h-11 rounded-lg border border-[var(--color-borda)] px-5 text-base"
+            >
               Cancelar edição
             </button>
           )}
-          <p className="text-sm text-[var(--color-texto-suave)]">Nada é salvo antes de você conferir.</p>
+          <p className="text-sm text-[var(--color-texto-suave)]">
+            Nada é salvo antes de você conferir.
+          </p>
         </div>
       </form>
 
       {erro && (
-        <div role="alert" className="mt-6 rounded-lg border border-[var(--color-aviso)] p-4 text-sm">
+        <div
+          role="alert"
+          className="mt-6 rounded-lg border border-[var(--color-aviso)] p-4 text-sm"
+        >
           <p className="font-medium">{erro.erro}</p>
           {erro.problemas && erro.problemas.length > 0 && (
             <ul className="mt-2 list-disc pl-5 text-[var(--color-texto-suave)]">

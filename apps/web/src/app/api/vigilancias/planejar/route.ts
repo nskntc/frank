@@ -15,14 +15,19 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   if (!pedidoDoPainel(request.headers)) return recusado();
   const corpo = (await request.json().catch(() => null)) as { pedido?: unknown } | null;
-  if (typeof corpo?.pedido !== 'string') return falha('Escreva a viagem que você quer vigiar.', 400);
+  if (typeof corpo?.pedido !== 'string')
+    return falha('Escreva a viagem que você quer vigiar.', 400);
 
   try {
     const plano = await planejarVigilancia(ia(), corpo.pedido);
     return ok({ ...plano, estimativa: estimarConsultas(plano.vigilancia) });
   } catch (erro) {
     if (erro instanceof PlanoInvalidoError) {
-      return falha('Não consegui montar a vigilância com esse pedido. Tente escrever de outro jeito.', 422, erro.problemas);
+      return falha(
+        'Não consegui montar a vigilância com esse pedido. Tente escrever de outro jeito.',
+        422,
+        erro.problemas,
+      );
     }
     if (erro instanceof IaIndisponivelError) return falha(erro.message, 503);
     if (erro instanceof RespostaIaInvalidaError) {

@@ -173,3 +173,8 @@ de todo commit.
   os números
 - **Gráficos do painel:** cores em `--serie-1`/`--serie-2` (validadas para daltonismo, claro e
   escuro), um eixo só, legenda, tabela ao lado e geometria testada em `lib/grafico.ts`
+- **Barra de status e Configurações leem `montarStatus`** (`apps/web/src/lib/status.ts`): todo
+  estado novo que o vigia gravar em `estado_vigia` precisa entrar ali, senão o painel não mostra.
+  Canais: só "configurado ou não", nunca o valor do `.env`
+- **Configuração editável pelo painel só pela rota `/api/configuracoes`** (zod + `pedidoDoPainel`);
+  segredo nunca é editado pelo navegador

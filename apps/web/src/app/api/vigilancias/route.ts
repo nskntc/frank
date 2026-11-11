@@ -11,7 +11,10 @@ export const dynamic = 'force-dynamic';
 /** As vigilancias, com a estimativa de consultas por dia de cada uma. */
 export async function GET(request: Request) {
   if (!pedidoDoPainel(request.headers)) return recusado();
-  const vigilancias = listarVigilancias(banco()).map((v) => ({ ...v, estimativa: estimarConsultas(v) }));
+  const vigilancias = listarVigilancias(banco()).map((v) => ({
+    ...v,
+    estimativa: estimarConsultas(v),
+  }));
   return ok(vigilancias);
 }
 
@@ -21,7 +24,11 @@ export async function POST(request: Request) {
   const corpo = (await request.json().catch(() => null)) as { vigilancia?: unknown } | null;
   const validada = novaVigilanciaSchema.safeParse(corpo?.vigilancia);
   if (!validada.success) {
-    return falha('A vigilância está fora do formato.', 400, validada.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
+    return falha(
+      'A vigilância está fora do formato.',
+      400,
+      validada.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`),
+    );
   }
   return ok(criarVigilancia(banco(), validada.data), 201);
 }
