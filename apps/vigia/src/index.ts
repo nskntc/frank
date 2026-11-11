@@ -1,4 +1,5 @@
 import { join } from 'node:path';
+import { canaisDoAmbiente } from '@frank/alertas';
 import { abrirBanco, caminhoDoBanco, raizDoRepositorio } from '@frank/banco';
 import { KiwiMcp, SerpApiGoogleFlights } from '@frank/fontes';
 import { ClaudeCli, ComOrcamento } from '@frank/ia';
@@ -13,12 +14,14 @@ const PRAZO_PARA_PARAR_MS = 15_000;
 // O .env fica na raiz do repositorio; o vigia roda em apps/vigia.
 try {
   process.loadEnvFile(join(raizDoRepositorio(), '.env'));
-} catch {
-  // sem .env: valem as variaveis do ambiente
+} catch (erro) {
+  // Sem .env, valem as variaveis do ambiente; .env ilegivel e erro de verdade.
+  if ((erro as { code?: string }).code !== 'ENOENT') throw erro;
 }
 
 /** Liga o vigia: abre o banco da raiz do repo, consulta a Kiwi e roda ate receber Ctrl+C. */
 const config = lerConfig();
+const canais = canaisDoAmbiente();
 const caminho = caminhoDoBanco();
 const db = abrirBanco(caminho);
 const vigia = new Vigia(
@@ -33,13 +36,15 @@ const vigia = new Vigia(
     ...(config.chaveSerpApi
       ? { serpapi: new SerpApiGoogleFlights({ chave: config.chaveSerpApi }), tetoMensalSerpApi: config.tetoMensalSerpApi }
       : {}),
+    canais,
     log,
   },
   config.tiqueMs,
 );
 
 log.info(
-  `Frank: vigia ligado (banco em ${caminho}; Google Flights ${config.chaveSerpApi ? 'ligado' : 'desligado, sem SERPAPI_API_KEY'}). Ctrl+C para parar.`,
+  `Frank: vigia ligado (banco em ${caminho}; Google Flights ${config.chaveSerpApi ? 'ligado' : 'desligado, sem SERPAPI_API_KEY'}; ` +
+    `avisos por ${canais.length ? canais.map((c) => c.nome).join(' e ') : 'nenhum canal (configure o e-mail no .env)'}). Ctrl+C para parar.`,
 );
 vigia.iniciar();
 

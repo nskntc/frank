@@ -12,6 +12,10 @@ export const CHAVES_ESTADO = {
   teto: (fonte: string) => `teto:${fonte}`,
   /** Motivo de o Claude estar indisponivel (sem login, limite, orcamento...). Some ao voltar. */
   iaIndisponivel: 'ia_indisponivel',
+  /** Ultimo erro de envio de aviso no canal. Some quando o canal volta a entregar. */
+  erroAviso: (canal: string) => `erro_aviso:${canal}`,
+  /** Ultimo aviso que o Frank desistiu de mandar depois de todas as tentativas. */
+  avisoDesistido: 'aviso_desistido',
 } as const;
 
 export function gravarEstado(db: Banco, chave: string, valor: string, agora: Date = new Date()): void {

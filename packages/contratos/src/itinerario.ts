@@ -18,8 +18,11 @@ export const trechoSchema = z.object({
   para: codigoAeroporto,
   partida: horarioLocal,
   chegada: horarioLocal,
-  /** Vem da fonte e vai ao Claude: limite de tamanho corta instrucao plantada longa. */
-  companhia: z.string().min(1).max(80),
+  /**
+   * Vem da fonte e vai ao Claude e ao aviso: limite de tamanho corta instrucao plantada longa, e
+   * sem caractere de controle uma quebra de linha nao injeta linha falsa no e-mail.
+   */
+  companhia: z.string().min(1).max(80).regex(/^[^\p{Cc}]+$/u),
   codigoCompanhia: z.string().min(2).max(3),
   numeroVoo: z.string().min(1),
 });

@@ -21,3 +21,6 @@ data/
 
 .DS_Store
 Thumbs.db
+
+# scripts temporarios de teste (nunca no repo)
+*.tmp.ts

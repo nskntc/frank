@@ -7,6 +7,10 @@ import type { Banco } from './abrir.js';
 export const CONFIGURACOES = {
   /** "Pago ate X% a mais para comprar direto na companhia" (RF-14). */
   toleranciaCompanhiaPct: { chave: 'tolerancia_companhia_pct', padrao: 5, min: 0, max: 50 },
+  /** Horario silencioso (RF-17): hora de inicio em Brasilia; -1 = desligado (padrao). */
+  silencioInicio: { chave: 'silencio_inicio', padrao: -1, min: -1, max: 23 },
+  /** Hora em que o silencio acaba (os avisos guardados saem nessa hora). */
+  silencioFim: { chave: 'silencio_fim', padrao: 7, min: 0, max: 23 },
 } as const;
 
 type Numerica = (typeof CONFIGURACOES)[keyof typeof CONFIGURACOES];

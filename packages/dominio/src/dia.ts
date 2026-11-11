@@ -47,6 +47,21 @@ export function diaNoFuso(instante: Date, fuso: string = FUSO_PADRAO): Dia {
   return lerDia(new Intl.DateTimeFormat('en-CA', { timeZone: fuso, year: 'numeric', month: '2-digit', day: '2-digit' }).format(instante));
 }
 
+/** A hora (0 a 23) de um instante num fuso (padrao: Brasilia). */
+export function horaNoFuso(instante: Date, fuso: string = FUSO_PADRAO): number {
+  const texto = new Intl.DateTimeFormat('en-GB', { timeZone: fuso, hour: '2-digit', hourCycle: 'h23' }).format(instante);
+  return Number(texto);
+}
+
+/**
+ * A hora cai no horario silencioso [inicio, fim)? Atravessa a meia-noite quando inicio > fim
+ * (ex.: 23 a 7). inicio = -1 ou inicio = fim: desligado.
+ */
+export function emSilencio(hora: number, inicio: number, fim: number): boolean {
+  if (inicio < 0 || inicio === fim) return false;
+  return inicio < fim ? hora >= inicio && hora < fim : hora >= inicio || hora < fim;
+}
+
 /** Dias de `de` ate `ate` (negativo se `ate` vem antes). */
 export function diasEntre(de: Dia, ate: Dia): number {
   return emDias(ate) - emDias(de);

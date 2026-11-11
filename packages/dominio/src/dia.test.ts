@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DiaInvalidoError, diaNoFuso, diasEntre, lerDia } from './dia.js';
+import { DiaInvalidoError, diaNoFuso, diasEntre, emSilencio, horaNoFuso, lerDia } from './dia.js';
 
 describe('lerDia', () => {
   it('aceita um dia de calendario valido', () => {
@@ -21,6 +21,24 @@ describe('diaNoFuso', () => {
 
   it('respeita outro fuso', () => {
     expect(diaNoFuso(new Date('2027-03-06T01:00:00Z'), 'UTC')).toBe('2027-03-06');
+  });
+});
+
+describe('horaNoFuso e emSilencio', () => {
+  it('le a hora em Brasilia', () => {
+    expect(horaNoFuso(new Date('2027-03-06T01:30:00Z'))).toBe(22);
+  });
+
+  it.each([
+    [23, 23, 7, true],
+    [3, 23, 7, true],
+    [7, 23, 7, false],
+    [12, 23, 7, false],
+    [13, 12, 14, true],
+    [3, -1, 7, false],
+    [3, 7, 7, false],
+  ])('hora %i com silencio de %i a %i: %s', (hora, inicio, fim, esperado) => {
+    expect(emSilencio(hora, inicio, fim)).toBe(esperado);
   });
 });
 

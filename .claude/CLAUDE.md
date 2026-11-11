@@ -24,6 +24,7 @@ de todo commit.
 | `apps/vigia` | processo Node com o ciclo: busca nas fontes, histórico, detector, Claude, alertas |
 | `packages/dominio` | regras puras: preço normal, detecção de oferta, preço final com IOF, regra das 24 h, datas |
 | `packages/fontes` | adaptadores de fonte de preço atrás da interface `FontePreco` (Kiwi primeiro) |
+| `packages/alertas` | avisos por e-mail (SMTP, `nodemailer`) e Telegram; fila por canal com novas tentativas; mensagem em texto puro montada pelo código |
 | `packages/agente` | as tarefas do Claude: planejador (texto livre → vigilância) e avaliador de oferta (pegadinhas do código + julgamento do Claude); skills lidas de `skills/` |
 | `packages/ia` | o Claude pelo `claude -p` oficial, isolado (sem ferramentas, sem CLAUDE.md/hooks/MCP de quem usa), com saída validada e orçamento diário (`ComOrcamento`) |
 | `packages/banco` | SQLite local (`data/frank.db`) pelo `node:sqlite`: vigilâncias, preços por rodada, ofertas, alertas, placar, consultas às fontes |
@@ -39,6 +40,7 @@ de todo commit.
 | `pnpm dev` | painel em `http://127.0.0.1:4321` e vigia juntos |
 | `pnpm verificar` | lint + typecheck + test + build (o mínimo antes de "pronto") |
 | `pnpm --filter @frank/dominio test` | só um pacote |
+| `pnpm --filter @frank/vigia testar-aviso` | manda um aviso de teste por cada canal do `.env` |
 | `FRANK_TESTE_AO_VIVO=1 pnpm --filter @frank/fontes exec vitest run` | inclui o teste que chama a Kiwi de verdade (Git Bash) |
 
 ## Fluxo de desenvolvimento
@@ -149,6 +151,10 @@ de todo commit.
 - **"Onde comprar" para a tela e o aviso é `ondeComprarDaOferta`** (banco): junta opções, tolerância
   (`configuracoes`), links de busca preenchida (`linkDeBusca`, só ida e volta, formatos da issue #1)
   e a regra das 24 h. Nunca montar a lista à mão
+- **Aviso é texto puro montado pelo código** (`montarMensagem`), nunca pelo Claude; sem HTML, Telegram
+  sem `parse_mode`. Senha do SMTP e token do Telegram nunca em log nem em `alertas.erro`
+- **Falha de aviso nunca fica só no terminal:** `estado_vigia` guarda `erro_aviso:<canal>` e
+  `aviso_desistido` para o painel
 - **O vigia lê o `.env` da raiz** (`raizDoRepositorio`), não o da pasta `apps/vigia`
 - **Erro de busca é da fonte; erro de gravação é do vigia:** nunca registrar falha de banco como
   falha da Kiwi

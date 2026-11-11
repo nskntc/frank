@@ -1,3 +1,4 @@
+import { type CanalAlerta, enviarAlertasPendentes } from '@frank/alertas';
 import { apagarEstado, CHAVES_ESTADO, gravarEstado } from '@frank/banco';
 import { type DependenciasRodada, executarRodada, resumirErro, type ResumoRodada } from './rodada.js';
 
@@ -15,10 +16,27 @@ export class Vigia {
   private ligado = false;
 
   constructor(
-    private readonly deps: DependenciasRodada,
+    private readonly deps: DependenciasRodada & { canais?: readonly CanalAlerta[] },
     private readonly tiqueMs: number = TIQUE_PADRAO_MS,
     private readonly relogio: () => Date = () => new Date(),
   ) {}
+
+  private adiadasAntes = 0;
+
+  /** Depois da rodada: manda os avisos pendentes. Falha aqui nunca derruba o vigia. */
+  private async avisar(agora: Date): Promise<void> {
+    if (!this.deps.canais?.length) return;
+    try {
+      const r = await enviarAlertasPendentes({ db: this.deps.db, canais: this.deps.canais, log: this.deps.log }, agora);
+      // So registra quando muda: no horario silencioso o vigia passa por aqui a cada minuto.
+      if (r.adiadas !== this.adiadasAntes && r.adiadas > 0) {
+        this.deps.log.info(`${r.adiadas} aviso(s) guardado(s) até o fim do horário silencioso`);
+      }
+      this.adiadasAntes = r.adiadas;
+    } catch (erro) {
+      this.deps.log.erro(`envio de avisos falhou: ${resumirErro(erro)}`);
+    }
+  }
 
   /** Uma rodada agora. Se ja ha uma rodando, devolve null sem comecar outra. */
   async tique(): Promise<ResumoRodada | null> {
@@ -37,6 +55,7 @@ export class Vigia {
     try {
       const resumo = await executarRodada(this.deps, agora);
       this.gravarSemLancar(() => apagarEstado(this.deps.db, CHAVES_ESTADO.ultimoErroCiclo));
+      await this.avisar(agora);
       if (resumo.vigilancias > 0) {
         this.deps.log.info(
           `rodada: ${resumo.vigilancias} vigilância(s), ${resumo.consultas} consulta(s), ` +

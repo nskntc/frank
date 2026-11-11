@@ -1,0 +1,33 @@
+{
+  "name": "@frank/alertas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@frank/banco": "workspace:*",
+    "@frank/contratos": "workspace:*",
+    "@frank/dominio": "workspace:*",
+    "nodemailer": "^10.5.0"
+  },
+  "devDependencies": {
+    "@frank/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/nodemailer": "^8.0.2",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

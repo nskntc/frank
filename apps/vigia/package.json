@@ -9,15 +9,17 @@
     "start": "node dist/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src",
-    "test": "vitest run"
+    "test": "vitest run",
+    "testar-aviso": "tsx src/testar-aviso.ts"
   },
   "dependencies": {
     "@frank/agente": "workspace:*",
+    "@frank/alertas": "workspace:*",
     "@frank/banco": "workspace:*",
-    "@frank/ia": "workspace:*",
     "@frank/contratos": "workspace:*",
     "@frank/dominio": "workspace:*",
-    "@frank/fontes": "workspace:*"
+    "@frank/fontes": "workspace:*",
+    "@frank/ia": "workspace:*"
   },
   "devDependencies": {
     "@frank/config": "workspace:*",

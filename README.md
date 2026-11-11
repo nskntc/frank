@@ -15,7 +15,8 @@ achar a passagem mais barata.
 2. O Claude transforma o pedido em buscas por companhia, aeroporto e data.
 3. O vigia confere os preços a cada 30 a 60 minutos, **sem IA**, e guarda tudo num histórico local.
 4. Quando um preço foge do normal, o Claude avalia se a oferta é real e se tem pegadinha.
-5. A oferta aparece no painel e no Telegram, com onde comprar e o preço final em cada vendedor.
+5. A oferta aparece no painel e chega no seu e-mail (ou Telegram), com onde comprar e o preço
+   final em cada vendedor.
 6. Você compra. No site da companhia, comprando com 7 dias ou mais de antecedência, dá pra desistir
    sem custo em até 24 horas (ANAC, Resolução 400, art. 11).
 
@@ -33,7 +34,8 @@ achar a passagem mais barata.
 
 - Node 22 ou mais novo e pnpm 10
 - [Claude Code](https://claude.com/claude-code) instalado e logado com um plano do Claude
-- Um bot do Telegram (grátis) para os avisos no celular
+- Uma conta de e-mail com envio por SMTP (Gmail com senha de app serve) para os avisos; Telegram é
+  opcional
 
 ## Documentação
 

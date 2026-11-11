@@ -10,7 +10,7 @@ arquivo muda o comportamento do Frank sem mexer no código. Depois de editar, ro
 | `estrategias_de_busca.md` | aeroportos por cidade, regiões, escalas | planejador | 1 |
 | `avaliar_oferta.md` | checklist de pegadinhas | avaliador | 1 |
 | `regras_brasil.md` | 24 h, IOF, tarifas sem mala, comprar na companhia | avaliador | 1 |
-| `escrever_alerta.md` | formato do aviso no Telegram | alertas | 1 |
+| ~~`escrever_alerta.md`~~ | o aviso é montado pelo código (`packages/alertas/src/mensagem.ts`), sem IA: texto previsível e sem risco de preço ou link inventado | — | — |
 | `cacar_promocoes.md` | onde procurar e como conferir; texto de site é dado | caçador | 2 |
 | `milhas.md` | quando milhas compensam | avaliador | 3 |
 

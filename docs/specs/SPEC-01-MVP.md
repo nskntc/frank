@@ -46,8 +46,8 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 
 | Id | Requisito | Aceite |
 |---|---|---|
-| RF-15 | Telegram | mensagem com rota, preço final, % abaixo do normal, voo, malas, pegadinhas, link, lembrete das 24 h e do nome igual ao documento |
-| RF-16 | Sem repetição | mesma oferta só alerta de novo se o preço cair mais |
+| RF-15 | E-mail (SMTP da própria conta) e Telegram, os dois opcionais | mensagem em texto puro com rota, preço final, % abaixo do normal, quando o preço foi conferido, voo, malas, pegadinhas, onde comprar com links, lembrete das 24 h e do nome igual ao documento; falha num canal tenta de novo depois de 5 e de 30 min, e desistir fica visível no painel |
+| RF-16 | Sem repetição | mesma oferta só alerta de novo se o preço cair mais; oferta "não vale a pena" e vigilância pausada não geram aviso |
 | RF-17 | Horário silencioso opcional | desligado por padrão (oferta boa some rápido) |
 
 ### Painel e placar
