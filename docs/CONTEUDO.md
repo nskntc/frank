@@ -8,6 +8,7 @@ Status: **pauta** (ideia anotada) · **rascunho** · **publicado** (com link).
 
 | Data | Momento | Prova | O que ensina | Status |
 |---|---|---|---|---|
+| 2026-11-11 | Você escreve a viagem em português e o Claude mostra o que entendeu e o que supôs antes de salvar | `docs/DIARIO-DE-TESTES.md` (tela Rotas) | IA que confessa as suposições: confirmação humana em vez de confiança cega | pauta |
 | 2026-11-11 | Primeiro aviso de verdade no e-mail. E o Frank recusou avisar uma "oferta" que estava 9% acima do normal: o Claude leu os números e disse "é tarifa comum, não promoção" | issue #11, diário de testes | Um agente bom também sabe quando ficar quieto | pauta |
 | 2026-11-11 | O revisor achou que um Wi-Fi caindo por 3 minutos faria o Frank desistir de um aviso para sempre, sem ninguém saber. Agora: tentativas em 5 e 30 min, fila por canal, e "desisti" aparece no painel | issue #11 | Agente que roda sozinho precisa de paciência e de transparência | pauta |
 | 2026-11-11 | "Pago até 5% a mais para comprar direto na companhia": com a Azul a R$ 1.083 e a Decolar a R$ 1.036 (4,5% a mais), o Frank destaca a Azul, porque ela dá as 24 h para desistir. O revisor ainda pegou que, com a volta por outro aeroporto, o link de busca abriria outra viagem | issue #10 | Uma regra pessoal simples muda a recomendação; e um link "quase certo" é um link errado | pauta |

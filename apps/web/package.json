@@ -7,16 +7,20 @@
     "dev": "next dev --hostname 127.0.0.1 --port 4321",
     "build": "next build",
     "start": "next start --hostname 127.0.0.1 --port 4321",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint src",
     "test": "vitest run"
   },
   "dependencies": {
+    "@frank/agente": "workspace:*",
+    "@frank/banco": "workspace:*",
     "@frank/contratos": "workspace:*",
     "@frank/dominio": "workspace:*",
+    "@frank/ia": "workspace:*",
     "next": "^16.4.6",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@frank/config": "workspace:*",

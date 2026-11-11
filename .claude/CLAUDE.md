@@ -158,3 +158,8 @@ de todo commit.
 - **O vigia lê o `.env` da raiz** (`raizDoRepositorio`), não o da pasta `apps/vigia`
 - **Erro de busca é da fonte; erro de gravação é do vigia:** nunca registrar falha de banco como
   falha da Kiwi
+- **Rota da API do painel começa com `pedidoDoPainel`** (`apps/web/src/lib/servidor/origem.ts`): host
+  local + mesma origem, até no GET. Banco e Claude só por `recursos.ts` (`server-only`)
+- **Código que roda dentro do Next não usa caminho relativo ao arquivo** (`import.meta.url`): o
+  Turbopack empacota e o caminho muda. Ache a raiz com `raizDoRepositorio()`
+- **`typecheck` do painel roda `next typegen` antes do `tsc`**: sem isso, tipos velhos em `.next/` quebram
