@@ -1,0 +1,23 @@
+node_modules/
+dist/
+.next/
+out/
+coverage/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# segredos: so o .env.example entra no git
+.env
+.env.*
+!.env.example
+
+# banco local e dados de quem usa (historico de precos, vigilancias)
+data/
+
+# Claude: permissoes locais de cada maquina
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+.DS_Store
+Thumbs.db
