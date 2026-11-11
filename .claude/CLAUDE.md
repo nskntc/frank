@@ -24,6 +24,7 @@ de todo commit.
 | `apps/vigia` | processo Node com o ciclo: busca nas fontes, histórico, detector, Claude, alertas |
 | `packages/dominio` | regras puras: preço normal, detecção de oferta, preço final com IOF, regra das 24 h, datas |
 | `packages/fontes` | adaptadores de fonte de preço atrás da interface `FontePreco` (Kiwi primeiro) |
+| `packages/ia` | o Claude pelo `claude -p` oficial, isolado (sem ferramentas, sem CLAUDE.md/hooks/MCP de quem usa), com saída validada e orçamento diário (`ComOrcamento`) |
 | `packages/banco` | SQLite local (`data/frank.db`) pelo `node:sqlite`: vigilâncias, preços por rodada, ofertas, alertas, placar, consultas às fontes |
 | `packages/contratos` | schemas Zod compartilhados (inclusive a saída JSON do Claude) |
 | `skills` | arquivos de conhecimento que vão junto no pedido ao Claude |
@@ -125,5 +126,11 @@ de todo commit.
 - **`npx tsx -e "..."` no Git Bash não imprime nada:** escreva um arquivo `.ts` e rode com `tsx`
 - **Falha do vigia sempre vai para o banco, não só para o log:** `ultima_rodada_resultado` da
   vigilância, `estado_vigia` (`vigia_visto_em`, `ultimo_erro_ciclo`, `teto:<fonte>`). O painel lê dali
+- **Chamar o Claude só por `ComOrcamento(new ClaudeCli())`**: nunca `claude -p` à mão. Instruções
+  do Frank (`sistema`) vão por arquivo; texto de fora só na `mensagem` (entrada padrão)
+- **`--json-schema` recusa a chave `$schema`** que o Zod gera (draft 2020-12): use `jsonSchemaPara`
+- **`--system-prompt-file` funciona, mas não aparece como item próprio no `--help`:** a conferência
+  checa `--system-prompt`; o teste ao vivo (`FRANK_TESTE_AO_VIVO=1`) prova o arquivo
+- **Mensagem de erro do Claude nunca copia texto do modelo** (pode ter vindo de página de terceiro)
 - **Erro de busca é da fonte; erro de gravação é do vigia:** nunca registrar falha de banco como
   falha da Kiwi

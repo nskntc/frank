@@ -146,4 +146,18 @@ export const MIGRACOES: readonly string[] = [
     atualizado_em TEXT NOT NULL
   );
   `,
+
+  // 4 — cada chamada ao Claude (issue #7): base do orcamento diario (RNF-03) e do aviso de
+  // "Claude indisponivel" no painel. Nunca guarda o texto do pedido nem da resposta.
+  `
+  CREATE TABLE chamadas_ia (
+    id INTEGER PRIMARY KEY,
+    tarefa TEXT NOT NULL,
+    em TEXT NOT NULL,
+    sucesso INTEGER NOT NULL,
+    erro TEXT,
+    duracao_ms INTEGER
+  );
+  CREATE INDEX chamadas_ia_por_em ON chamadas_ia(em);
+  `,
 ];

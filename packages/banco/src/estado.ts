@@ -10,6 +10,8 @@ export const CHAVES_ESTADO = {
   vigiaVistoEm: 'vigia_visto_em',
   ultimoErroCiclo: 'ultimo_erro_ciclo',
   teto: (fonte: string) => `teto:${fonte}`,
+  /** Motivo de o Claude estar indisponivel (sem login, limite, orcamento...). Some ao voltar. */
+  iaIndisponivel: 'ia_indisponivel',
 } as const;
 
 export function gravarEstado(db: Banco, chave: string, valor: string, agora: Date = new Date()): void {

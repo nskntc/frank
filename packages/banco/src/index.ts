@@ -1,5 +1,6 @@
 export * from './abrir.js';
 export * from './alertas.js';
+export * from './chamadas-ia.js';
 export * from './consultas.js';
 export * from './estado.js';
 export * from './ofertas.js';

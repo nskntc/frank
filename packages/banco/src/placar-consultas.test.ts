@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { abrirBanco, type Banco } from './abrir.js';
+import { contarChamadasIa, estadoIa, registrarChamadaIa } from './chamadas-ia.js';
 import { contarConsultas, estadoFonte, registrarConsulta } from './consultas.js';
 import { listarPlacar, type NovoRegistroPlacar, registrarPlacar } from './placar.js';
 import { instante, vigilanciaExemplo } from './teste/dados.js';
@@ -39,6 +40,20 @@ describe('placar', () => {
   it('recusa competidor desconhecido e data invalida', () => {
     expect(() => registrarPlacar(db, registro({ quem: 'kayak' as 'google' }))).toThrow();
     expect(() => registrarPlacar(db, registro({ vistoEm: new Date('ontem') }))).toThrow(RangeError);
+  });
+});
+
+describe('chamadas ao Claude', () => {
+  it('conta as chamadas do periodo e mostra o ultimo erro', () => {
+    registrarChamadaIa(db, { tarefa: 'avaliar_oferta', sucesso: true, duracaoMs: 900 }, instante('2026-11-10T08:00:00Z'));
+    registrarChamadaIa(db, { tarefa: 'planejar', sucesso: true }, instante('2026-11-11T08:00:00Z'));
+    registrarChamadaIa(db, { tarefa: 'planejar', sucesso: false, erro: 'limite do plano' }, instante('2026-11-11T09:00:00Z'));
+    expect(contarChamadasIa(db, instante('2026-11-11T00:00:00Z'))).toBe(2);
+    expect(estadoIa(db)).toEqual({
+      ultimaChamada: '2026-11-11T09:00:00.000Z',
+      ultimoSucesso: '2026-11-11T08:00:00.000Z',
+      ultimoErro: 'limite do plano',
+    });
   });
 });
 
