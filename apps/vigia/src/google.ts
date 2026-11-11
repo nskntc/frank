@@ -155,7 +155,14 @@ export async function gravarOndeComprar(
       const link = linkGoogleSeguro(r.linkGoogle);
       for (const o of r.opcoes) {
         if (o.vendedor.trim().toLowerCase() === nomeFonte.toLowerCase()) continue; // a da fonte tem link proprio
-        opcoes.push({ vendedor: o.vendedor, precoCentavos: o.precoCentavos, moeda: itinerario.moeda, estrangeiro: o.estrangeiro, link });
+        opcoes.push({
+          vendedor: o.vendedor,
+          precoCentavos: o.precoCentavos,
+          moeda: itinerario.moeda,
+          estrangeiro: o.estrangeiro,
+          ehCompanhia: o.ehCompanhia,
+          link,
+        });
       }
       if (!r.opcoes.length) ctx.log.info('onde comprar: o voo não apareceu no Google Flights; fica só a opção da fonte');
     } catch (erro) {

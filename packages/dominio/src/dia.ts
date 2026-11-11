@@ -35,6 +35,18 @@ function emDias(dia: Dia): number {
   return Date.parse(`${dia}T00:00:00Z`) / MS_POR_DIA;
 }
 
+/** Fuso padrao de quem usa o Frank (Brasil). */
+export const FUSO_PADRAO = 'America/Sao_Paulo';
+
+/**
+ * O dia de calendario de um instante num fuso (padrao: Brasilia). Entre 21h e 24h em Brasilia,
+ * o dia em UTC ja e o seguinte: usar UTC daria um dia a menos de antecedencia.
+ */
+export function diaNoFuso(instante: Date, fuso: string = FUSO_PADRAO): Dia {
+  // en-CA formata como AAAA-MM-DD.
+  return lerDia(new Intl.DateTimeFormat('en-CA', { timeZone: fuso, year: 'numeric', month: '2-digit', day: '2-digit' }).format(instante));
+}
+
 /** Dias de `de` ate `ate` (negativo se `ate` vem antes). */
 export function diasEntre(de: Dia, ate: Dia): number {
   return emDias(ate) - emDias(de);

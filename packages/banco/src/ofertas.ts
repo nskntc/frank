@@ -166,19 +166,21 @@ export interface OpcaoCompra {
   moeda: string;
   /** Vendedor estrangeiro: IOF de 3,5% no cartao (preco-final.ts). */
   estrangeiro: boolean;
+  /** A propria companhia aerea vende (24 h para desistir, atendimento direto). Padrao: false. */
+  ehCompanhia?: boolean;
   link: string | null;
 }
 
 /** Substitui as opcoes de compra da oferta pelas da consulta mais recente. */
 export function salvarOpcoesCompra(db: Banco, ofertaId: number, opcoes: readonly OpcaoCompra[]): void {
   const inserir = db.prepare(
-    `INSERT INTO opcoes_compra (oferta_id, vendedor, preco_centavos, moeda, estrangeiro, link)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO opcoes_compra (oferta_id, vendedor, preco_centavos, moeda, estrangeiro, eh_companhia, link)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
   );
   emTransacao(db, () => {
     db.prepare('DELETE FROM opcoes_compra WHERE oferta_id = ?').run(ofertaId);
     for (const o of opcoes) {
-      inserir.run(ofertaId, o.vendedor, o.precoCentavos, o.moeda, o.estrangeiro ? 1 : 0, o.link);
+      inserir.run(ofertaId, o.vendedor, o.precoCentavos, o.moeda, o.estrangeiro ? 1 : 0, o.ehCompanhia ? 1 : 0, o.link);
     }
   });
 }
@@ -186,7 +188,7 @@ export function salvarOpcoesCompra(db: Banco, ofertaId: number, opcoes: readonly
 export function listarOpcoesCompra(db: Banco, ofertaId: number): OpcaoCompra[] {
   const linhas = db
     .prepare(
-      `SELECT vendedor, preco_centavos, moeda, estrangeiro, link FROM opcoes_compra
+      `SELECT vendedor, preco_centavos, moeda, estrangeiro, eh_companhia, link FROM opcoes_compra
        WHERE oferta_id = ? ORDER BY preco_centavos`,
     )
     .all(ofertaId) as unknown as {
@@ -194,6 +196,7 @@ export function listarOpcoesCompra(db: Banco, ofertaId: number): OpcaoCompra[] {
     preco_centavos: number;
     moeda: string;
     estrangeiro: number;
+    eh_companhia: number;
     link: string | null;
   }[];
   return linhas.map((l) => ({
@@ -201,6 +204,7 @@ export function listarOpcoesCompra(db: Banco, ofertaId: number): OpcaoCompra[] {
     precoCentavos: l.preco_centavos,
     moeda: l.moeda,
     estrangeiro: l.estrangeiro === 1,
+    ehCompanhia: l.eh_companhia === 1,
     link: l.link,
   }));
 }

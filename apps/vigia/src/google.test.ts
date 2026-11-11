@@ -146,10 +146,10 @@ describe('onde comprar (RF-12)', () => {
     await rodar(kiwi(80_000), googleFalso());
     const [oferta] = listarOfertas(db);
     const opcoes = listarOpcoesCompra(db, oferta!.id);
-    expect(opcoes.map((o) => [o.vendedor, o.precoCentavos, o.estrangeiro])).toEqual([
-      ['Azul', 76_000, false],
-      ['Kiwi.com', 80_000, true],
-      ['Trip.com', 84_000, true],
+    expect(opcoes.map((o) => [o.vendedor, o.precoCentavos, o.estrangeiro, o.ehCompanhia])).toEqual([
+      ['Azul', 76_000, false, true],
+      ['Kiwi.com', 80_000, true, false],
+      ['Trip.com', 84_000, true, false],
     ]);
     expect(opcoes.find((o) => o.vendedor === 'Kiwi.com')?.link).toBe('https://example.com/AD-1');
     expect(opcoes.find((o) => o.vendedor === 'Azul')?.link).toBe('https://www.google.com/travel/flights?exemplo');

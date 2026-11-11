@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DiaInvalidoError, diasEntre, lerDia } from './dia.js';
+import { DiaInvalidoError, diaNoFuso, diasEntre, lerDia } from './dia.js';
 
 describe('lerDia', () => {
   it('aceita um dia de calendario valido', () => {
@@ -12,6 +12,16 @@ describe('lerDia', () => {
       expect(() => lerDia(valor)).toThrow(DiaInvalidoError);
     },
   );
+});
+
+describe('diaNoFuso', () => {
+  it('22h em Brasilia ainda e o mesmo dia, mesmo ja sendo o seguinte em UTC', () => {
+    expect(diaNoFuso(new Date('2027-03-06T01:00:00Z'))).toBe('2027-03-05');
+  });
+
+  it('respeita outro fuso', () => {
+    expect(diaNoFuso(new Date('2027-03-06T01:00:00Z'), 'UTC')).toBe('2027-03-06');
+  });
 });
 
 describe('diasEntre', () => {

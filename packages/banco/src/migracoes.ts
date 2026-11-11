@@ -160,4 +160,16 @@ export const MIGRACOES: readonly string[] = [
   );
   CREATE INDEX chamadas_ia_por_em ON chamadas_ia(em);
   `,
+
+  // 5 — onde comprar (issue #10): saber quem e a propria companhia (as 24 h para desistir so
+  // valem comprando nela) e configuracoes da pessoa (ex.: tolerancia para comprar direto).
+  `
+  ALTER TABLE opcoes_compra ADD COLUMN eh_companhia INTEGER NOT NULL DEFAULT 0;
+
+  CREATE TABLE configuracoes (
+    chave TEXT PRIMARY KEY,
+    valor TEXT NOT NULL,
+    atualizado_em TEXT NOT NULL
+  );
+  `,
 ];

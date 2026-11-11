@@ -8,6 +8,7 @@ Status: **pauta** (ideia anotada) · **rascunho** · **publicado** (com link).
 
 | Data | Momento | Prova | O que ensina | Status |
 |---|---|---|---|---|
+| 2026-11-11 | "Pago até 5% a mais para comprar direto na companhia": com a Azul a R$ 1.083 e a Decolar a R$ 1.036 (4,5% a mais), o Frank destaca a Azul, porque ela dá as 24 h para desistir. O revisor ainda pegou que, com a volta por outro aeroporto, o link de busca abriria outra viagem | issue #10 | Uma regra pessoal simples muda a recomendação; e um link "quase certo" é um link errado | pauta |
 | 2026-11-11 | Mesmo voo da Azul, 12 preços: R$ 1.036 na Decolar, R$ 1.083 na própria Azul e R$ 1.120,91 na Kiwi depois do IOF. O Frank mostra todos e sabe quem é empresa estrangeira | issue #18, diário de testes | Achar o voo é metade do trabalho; a outra metade é saber onde comprar | pauta |
 | 2026-11-11 | O avaliador de oferta: o código acha as pegadinhas que são fato (outro aeroporto, madrugada, escala longa, sem mala) e o Claude decide se vale a pena e explica como um amigo ("conte com o deslocamento até São Paulo") | issue #9, diário de testes | IA como juiz, mas com os fatos ancorados no código | pauta |
 | 2026-11-11 | O revisor de segurança mostrou que um nome de companhia "envenenado" poderia colocar um link falso de compra no aviso do Telegram: o filtro bloqueava "https://", mas deixava passar "voos-baratos.com". Trocamos a lista do que é proibido por "na dúvida, bloqueia" | issue #9 | Filtro de saída de IA: lista negra sempre tem furo | pauta |

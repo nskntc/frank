@@ -146,6 +146,9 @@ de todo commit.
   tentada conta. A chave só vai no `api_key` da URL e nunca em log ou mensagem de erro
 - **Link de vendedor só da fonte:** Kiwi só `*.kiwi.com`; Google só `https://www.google.com/travel/flights...`
   (o `google.com/url?q=` é redirecionador aberto)
+- **"Onde comprar" para a tela e o aviso é `ondeComprarDaOferta`** (banco): junta opções, tolerância
+  (`configuracoes`), links de busca preenchida (`linkDeBusca`, só ida e volta, formatos da issue #1)
+  e a regra das 24 h. Nunca montar a lista à mão
 - **O vigia lê o `.env` da raiz** (`raizDoRepositorio`), não o da pasta `apps/vigia`
 - **Erro de busca é da fonte; erro de gravação é do vigia:** nunca registrar falha de banco como
   falha da Kiwi
