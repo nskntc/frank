@@ -36,9 +36,17 @@ export function montarArgumentos(consulta: ConsultaVoo): Record<string, unknown>
     locale: 'pt',
     sort: 'price',
   };
+  if (consulta.idaAte && consulta.idaAte !== consulta.ida) {
+    args.departureDateTo = dataKiwi(consulta.idaAte);
+  }
   if (consulta.volta) args.returnDate = dataKiwi(consulta.volta);
+  if (consulta.volta && consulta.voltaAte && consulta.voltaAte !== consulta.volta) {
+    args.returnDateTo = dataKiwi(consulta.voltaAte);
+  }
   if (consulta.maxEscalas !== undefined) args.max_sector_stopovers = consulta.maxEscalas;
+  // A Kiwi nao aceita os dois juntos; `companhias` (escolha da pessoa) tem prioridade.
   if (consulta.companhias?.length) args.select_airlines = consulta.companhias.join(',');
+  else if (consulta.excluirCompanhias?.length) args.exclude_airlines = consulta.excluirCompanhias.join(',');
   if (consulta.aceitarPassagensSeparadas !== undefined) {
     args.allow_self_transfer = consulta.aceitarPassagensSeparadas;
   }
@@ -134,6 +142,8 @@ export function lerResposta(corpo: string): Itinerario[] {
 /** Fonte Kiwi.com pelo servidor MCP publico (sem chave). */
 export class KiwiMcp implements FontePreco {
   readonly nome = NOME;
+  /** Medido em 2026-11-10: toda busca devolveu no maximo 15 itinerarios. */
+  readonly limiteResultados = 15;
   private proximoId = 1;
 
   constructor(private readonly opcoes: OpcoesKiwi = {}) {}

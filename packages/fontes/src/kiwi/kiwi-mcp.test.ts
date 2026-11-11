@@ -50,6 +50,27 @@ describe('montarArgumentos', () => {
   });
 });
 
+describe('montarArgumentos: janelas e exclusao', () => {
+  it('manda a janela de datas so quando ela tem mais de um dia', () => {
+    const args = montarArgumentos({
+      ...consulta,
+      idaAte: lerDia('2027-03-14'),
+      voltaAte: lerDia('2027-03-19'),
+    });
+    expect(args).toMatchObject({ departureDate: '12/03/2027', departureDateTo: '14/03/2027' });
+    expect(args).not.toHaveProperty('returnDateTo');
+  });
+
+  it('exclui companhias, mas a escolha da pessoa tem prioridade', () => {
+    expect(montarArgumentos({ ...consulta, excluirCompanhias: ['AD'] })).toMatchObject({
+      exclude_airlines: 'AD',
+    });
+    const ambos = montarArgumentos({ ...consulta, companhias: ['LA'], excluirCompanhias: ['AD'] });
+    expect(ambos).toMatchObject({ select_airlines: 'LA' });
+    expect(ambos).not.toHaveProperty('exclude_airlines');
+  });
+});
+
 describe('lerResposta (resposta gravada em 2026-11-10)', () => {
   const itinerarios = lerResposta(gravada);
 

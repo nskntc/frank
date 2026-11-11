@@ -13,7 +13,13 @@ const config = lerConfig();
 const caminho = caminhoDoBanco();
 const db = abrirBanco(caminho);
 const vigia = new Vigia(
-  { db, fontes: [new KiwiMcp()], tetoDiarioPorFonte: config.tetoDiarioPorFonte, log },
+  {
+    db,
+    fontes: [new KiwiMcp()],
+    tetoDiarioPorFonte: config.tetoDiarioPorFonte,
+    maxBuscasPorPar: config.maxBuscasPorPar,
+    log,
+  },
   config.tiqueMs,
 );
 

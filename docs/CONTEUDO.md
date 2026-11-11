@@ -8,6 +8,7 @@ Status: **pauta** (ideia anotada) · **rascunho** · **publicado** (com link).
 
 | Data | Momento | Prova | O que ensina | Status |
 |---|---|---|---|---|
+| 2026-11-11 | A Kiwi mostra só 15 voos e escondia LATAM e Gol atrás da Azul. O Frank agora busca de novo "sem as companhias que já vi" até a resposta não vir cheia: de 1 companhia para 3, com 75 voos numa rodada | issue #5, diário de testes | Contornar o limite de uma ferramenta com uma estratégia simples (planejamento) | pauta |
 | 2026-11-11 | O segundo agente revisor (caçador de falhas silenciosas) achou que, se a Kiwi batesse o limite diário ou o vigia caísse, o painel continuaria dizendo "tudo certo". Corrigido com sinal de vida e resultado de cada rodada gravados | issue #4 | Num agente que roda sozinho por semanas, o pior erro é o silencioso: ele para e ninguém sabe | pauta |
 | 2026-11-11 | Primeira rodada de verdade: o vigia acordou, consultou a Kiwi duas vezes e gravou 30 voos sozinho | diário de testes, issue #4 | O "agente que trabalha enquanto você dorme" começando a funcionar | pauta |
 | 2026-11-11 | Um agente revisor, criado só para revisar dados, achou erros que 97 testes não pegavam: o "preço normal" contava cada voo como uma observação, então uma busca só já passava do mínimo de 20 e voos caros inflavam a média (falsos "25% abaixo do normal") | issue #3, commit `3fa9b78` | Teste confirma o que você pensou; revisor independente acha o que você não pensou | pauta |

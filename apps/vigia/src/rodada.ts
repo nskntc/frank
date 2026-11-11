@@ -11,7 +11,7 @@ import {
 } from '@frank/banco';
 import type { Itinerario, ResultadoRodadaVigilancia, Vigilancia } from '@frank/contratos';
 import type { ConsultaVoo, FontePreco } from '@frank/fontes';
-import { consultasDaVigilancia } from './consultas.js';
+import { consultasDaVigilancia, proximaExclusao } from './consultas.js';
 import type { Logger } from './log.js';
 
 const UM_DIA_MS = 86_400_000;
@@ -21,8 +21,15 @@ export interface DependenciasRodada {
   fontes: readonly FontePreco[];
   /** Maximo de consultas por fonte nas ultimas 24 h (SPEC-01 RF-04). */
   tetoDiarioPorFonte: number;
+  /**
+   * Maximo de buscas por par origem x destino e fonte numa rodada (RF-05): a primeira sem
+   * filtro e as seguintes excluindo as companhias ja vistas. Padrao 3.
+   */
+  maxBuscasPorPar?: number;
   log: Logger;
 }
+
+export const MAX_BUSCAS_POR_PAR_PADRAO = 3;
 
 export interface ResumoRodada {
   vigilancias: number;
@@ -108,22 +115,43 @@ async function rodarVigilancia(
   agora: Date,
   resultado: ResultadoRodadaVigilancia,
 ): Promise<void> {
-  const desde24h = new Date(agora.getTime() - UM_DIA_MS);
+  const maxBuscas = deps.maxBuscasPorPar ?? MAX_BUSCAS_POR_PAR_PADRAO;
 
-  for (const consulta of consultasDaVigilancia(vigilancia)) {
+  for (const base of consultasDaVigilancia(vigilancia)) {
     for (const fonte of deps.fontes) {
-      if (contarConsultas(deps.db, fonte.nome, desde24h) >= deps.tetoDiarioPorFonte) {
-        resultado.puladasPorTeto++;
-        resultado.ultimoErro = `${fonte.nome}: teto de ${deps.tetoDiarioPorFonte} consultas em 24 h atingido`;
-        gravarEstado(deps.db, CHAVES_ESTADO.teto(fonte.nome), String(deps.tetoDiarioPorFonte), agora);
-        deps.log.aviso(resultado.ultimoErro);
-        continue;
+      let excluidas: string[] = [];
+      for (let busca = 0; busca < maxBuscas; busca++) {
+        if (!podeConsultar(deps, fonte.nome, agora, resultado)) break;
+        const consulta = excluidas.length ? { ...base, excluirCompanhias: excluidas } : base;
+        resultado.consultas++;
+        const itinerarios = await consultarEGravar(deps, fonte, consulta, vigilancia, rodada, agora, resultado);
+        // Com companhias escolhidas pela pessoa, nao ha o que excluir: uma busca so.
+        if (itinerarios === null || base.companhias?.length) break;
+        const proxima = proximaExclusao(itinerarios, fonte.limiteResultados, excluidas);
+        if (proxima === null) break;
+        excluidas = proxima;
       }
-      apagarEstado(deps.db, CHAVES_ESTADO.teto(fonte.nome));
-      resultado.consultas++;
-      await consultarEGravar(deps, fonte, consulta, vigilancia, rodada, agora, resultado);
     }
   }
+}
+
+/** Confere o teto de 24 h da fonte. Atingido: fica gravado para o painel e na rodada. */
+function podeConsultar(
+  deps: DependenciasRodada,
+  fonte: string,
+  agora: Date,
+  resultado: ResultadoRodadaVigilancia,
+): boolean {
+  const desde24h = new Date(agora.getTime() - UM_DIA_MS);
+  if (contarConsultas(deps.db, fonte, desde24h) >= deps.tetoDiarioPorFonte) {
+    resultado.puladasPorTeto++;
+    resultado.ultimoErro = `${fonte}: teto de ${deps.tetoDiarioPorFonte} consultas em 24 h atingido`;
+    gravarEstado(deps.db, CHAVES_ESTADO.teto(fonte), String(deps.tetoDiarioPorFonte), agora);
+    deps.log.aviso(resultado.ultimoErro);
+    return false;
+  }
+  apagarEstado(deps.db, CHAVES_ESTADO.teto(fonte));
+  return true;
 }
 
 async function consultarEGravar(
@@ -134,8 +162,9 @@ async function consultarEGravar(
   rodada: string,
   agora: Date,
   resultado: ResultadoRodadaVigilancia,
-): Promise<void> {
-  const rotulo = `${fonte.nome} ${consulta.origem}→${consulta.destino}`;
+): Promise<Itinerario[] | null> {
+  const excluindo = consulta.excluirCompanhias?.length ? ` sem ${consulta.excluirCompanhias.join(',')}` : '';
+  const rotulo = `${fonte.nome} ${consulta.origem}→${consulta.destino}${excluindo}`;
 
   // 1. A busca: erro aqui e da fonte.
   let itinerarios: Itinerario[];
@@ -146,7 +175,7 @@ async function consultarEGravar(
     resultado.ultimoErro = `${rotulo}: ${resumirErro(erro)}`;
     registrarConsultaSemLancar(deps, fonte.nome, { sucesso: false, erro: resumirErro(erro) }, agora);
     deps.log.aviso(resultado.ultimoErro);
-    return;
+    return null;
   }
 
   const moedaErrada = conferirMoeda(itinerarios, vigilancia.moeda);
@@ -155,7 +184,7 @@ async function consultarEGravar(
     resultado.ultimoErro = `${rotulo}: ${moedaErrada}`;
     registrarConsultaSemLancar(deps, fonte.nome, { sucesso: false, erro: moedaErrada }, agora);
     deps.log.aviso(resultado.ultimoErro);
-    return;
+    return null;
   }
   registrarConsultaSemLancar(deps, fonte.nome, { sucesso: true }, agora);
 
@@ -163,9 +192,11 @@ async function consultarEGravar(
   try {
     registrarPrecosVistos(deps.db, vigilancia.id, rodada, itinerarios, agora);
     resultado.itinerarios += itinerarios.length;
+    return itinerarios;
   } catch (erro) {
     resultado.erros++;
     resultado.ultimoErro = `não consegui gravar os preços de ${rotulo}: ${resumirErro(erro)}`;
     deps.log.erro(resultado.ultimoErro);
+    return null;
   }
 }
