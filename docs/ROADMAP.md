@@ -29,9 +29,11 @@ Feito em 2026-11-11:
       regra das 24 h
 - [x] Painel com as 4 telas navegáveis em estado vazio, conferido em 360/768/1280 px, claro e escuro
 
-A fazer:
+- [x] Repositório público no GitHub, CI verde
+- [x] Termos de uso da Kiwi lidos (resultado no diário)
+- [x] Issues da Fase 1 abertas a partir da [SPEC-01](specs/SPEC-01-MVP.md) (#3 a #17)
 
-1. Criar o repositório no GitHub e o primeiro push (CI verde lá)
-2. Ler os termos de uso da Kiwi e registrar a conclusão no diário
-3. Testar quais sites de companhia e agência aceitam link de busca preenchido
-4. Abrir as issues da Fase 1 a partir da [SPEC-01](specs/SPEC-01-MVP.md)
+A fazer (issues no GitHub, marco "Fase 0 — Fundação"):
+
+1. #1 Testar quais sites aceitam link de busca preenchido (manual)
+2. #2 Decidir se pedimos confirmação à Kiwi sobre o uso do conector
