@@ -28,9 +28,16 @@ function vistoEm(instante: string): string {
   return `${partes.day}/${partes.month} às ${partes.hour}:${partes.minute}`;
 }
 
-/** "2027-03-12T10:45:00" -> "12/03 10:45" (horario local do aeroporto, como a fonte manda). */
-function quando(horario: string): string {
-  return `${horario.slice(8, 10)}/${horario.slice(5, 7)} ${horario.slice(11, 16)}`;
+const DIAS_DA_SEMANA = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'] as const;
+
+/**
+ * "2027-03-12T10:45:00" -> "sex 12/03 10:45" (horario local do aeroporto, como a fonte manda).
+ * O dia da semana sai da data local, sem fuso: o calendario do proprio aeroporto.
+ */
+export function quando(horario: string): string {
+  const [ano, mes, dia] = [Number(horario.slice(0, 4)), Number(horario.slice(5, 7)), Number(horario.slice(8, 10))];
+  const semana = DIAS_DA_SEMANA.at(new Date(Date.UTC(ano, mes - 1, dia)).getUTCDay());
+  return `${semana ?? ''} ${horario.slice(8, 10)}/${horario.slice(5, 7)} ${horario.slice(11, 16)}`.trim();
 }
 
 function descreverPerna(nome: string, p: Perna): string {

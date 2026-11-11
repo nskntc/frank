@@ -18,7 +18,7 @@ import { canaisDoAmbiente } from './canais.js';
 import { type CanalAlerta, CanalFalhouError, type Logger, type MensagemAlerta } from './canal.js';
 import { EmailSmtp } from './email.js';
 import { enviarAlertasPendentes } from './enviar.js';
-import { montarMensagem } from './mensagem.js';
+import { montarMensagem, quando } from './mensagem.js';
 import { TelegramBot } from './telegram.js';
 
 // Dados ficticios (repo publico).
@@ -111,12 +111,23 @@ describe('montarMensagem', () => {
     expect(m.assunto).toBe('Frank: CGH -> REC por R$ 1.083,00');
     expect(m.texto).toContain('Preço conferido na fonte em 11/11 às 23:05 (horário de Brasília).');
     expect(m.texto).toContain('(28% abaixo do normal)');
-    expect(m.texto).toContain('Ida: CGH 12/03 10:45 -> REC 12/03 13:55, Azul, direto');
+    expect(m.texto).toContain('Ida: CGH sex 12/03 10:45 -> REC sex 12/03 13:55, Azul, direto');
+    expect(m.texto).toContain('Volta: REC sex 19/03 17:20 -> CGH sex 19/03 20:35');
     expect(m.texto).toContain('Vale a pena: Direto e bem abaixo do normal.');
     expect(m.texto).toContain('- Tarifa só com bagagem de mão.');
     expect(m.texto).toContain('* Azul: R$ 1.083,00 [24 h para desistir]');
     expect(m.texto).toContain('  https://www.voeazul.com.br/x');
     expect(m.texto).toContain('nome exatamente como no documento');
+  });
+});
+
+describe('quando', () => {
+  it.each([
+    ['2027-03-14T08:00:00', 'dom 14/03 08:00'],
+    ['2027-03-15T23:59:00', 'seg 15/03 23:59'],
+    ['2028-02-29T06:10:00', 'ter 29/02 06:10'],
+  ])('%s -> %s', (horario, esperado) => {
+    expect(quando(horario)).toBe(esperado);
   });
 });
 
