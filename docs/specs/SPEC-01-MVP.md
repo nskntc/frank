@@ -28,7 +28,7 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 
 | Id | Requisito | Aceite |
 |---|---|---|
-| RF-07 | Preço normal da rota | mediana dos últimos 14 dias com no mínimo 20 observações *(calibrar)*. Antes disso, vale a referência do Google Flights (histórico de 60 dias e faixa típica, buscados via SerpApi quando a vigilância é criada); sem chave do SerpApi, só o preço-alvo vale |
+| RF-07 | Preço normal da rota | mediana do menor preço de cada rodada (um ciclo do vigia, com todas as buscas da vigilância) nos últimos 14 dias, com no mínimo 20 rodadas *(calibrar)*; preços de antes de uma mudança de rota, datas ou filtros não contam. Antes disso, vale a referência do Google Flights (histórico de 60 dias e faixa típica, buscados via SerpApi quando a vigilância é criada); sem chave do SerpApi, só o preço-alvo vale |
 | RF-08 | Regra de oferta | preço final ≤ preço-alvo, ou 25% abaixo do normal *(calibrar)* |
 | RF-09 | Reconferir antes de avisar | nova consulta na fonte; preço subiu acima da regra, não avisa |
 | RF-10 | Avaliação pelo Claude | JSON validado com `valeAPena`, `pegadinhas[]` e `resumo`; preço nunca vem do Claude |

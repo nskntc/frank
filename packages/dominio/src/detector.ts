@@ -8,8 +8,9 @@ export const DETECTOR_PADRAO = {
 } as const;
 
 /**
- * Preco normal da rota: mediana dos precos vistos. Abaixo do minimo de observacoes
- * devolve null, e o detector usa so o preco-alvo (historico curto engana).
+ * Preco normal da rota: mediana das observacoes. Uma observacao = o menor preco de uma rodada
+ * do vigia (banco: `menoresPorRodada`), nunca cada itinerario. Abaixo do minimo devolve null, e o
+ * detector usa so o preco-alvo (historico curto engana).
  */
 export function precoNormal(
   historico: readonly Centavos[],

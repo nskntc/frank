@@ -1,0 +1,170 @@
+import { randomUUID } from 'node:crypto';
+import { type NovaVigilancia, novaVigilanciaSchema, type Vigilancia } from '@frank/contratos';
+import { type Banco, emTransacao } from './abrir.js';
+
+interface LinhaVigilancia {
+  id: string;
+  descricao: string;
+  origens: string;
+  destinos: string;
+  ida_de: string;
+  ida_ate: string;
+  volta_de: string | null;
+  volta_ate: string | null;
+  adultos: number;
+  malas_despachadas: number;
+  max_escalas: number | null;
+  companhias: string;
+  aceitar_passagens_separadas: number;
+  preco_alvo_centavos: number | null;
+  moeda: string;
+  intervalo_minutos: number;
+  ativa: number;
+  criada_em: string;
+  atualizada_em: string;
+  historico_desde: string;
+}
+
+function paraVigilancia(l: LinhaVigilancia): Vigilancia {
+  return {
+    id: l.id,
+    descricao: l.descricao,
+    origens: JSON.parse(l.origens) as string[],
+    destinos: JSON.parse(l.destinos) as string[],
+    idaDe: l.ida_de,
+    idaAte: l.ida_ate,
+    voltaDe: l.volta_de,
+    voltaAte: l.volta_ate,
+    adultos: l.adultos,
+    malasDespachadas: l.malas_despachadas,
+    maxEscalas: l.max_escalas,
+    companhias: JSON.parse(l.companhias) as string[],
+    aceitarPassagensSeparadas: l.aceitar_passagens_separadas === 1,
+    precoAlvoCentavos: l.preco_alvo_centavos,
+    moeda: l.moeda,
+    intervaloMinutos: l.intervalo_minutos,
+    ativa: l.ativa === 1,
+    criadaEm: l.criada_em,
+    atualizadaEm: l.atualizada_em,
+    historicoDesde: l.historico_desde,
+  };
+}
+
+function parametros(v: NovaVigilancia): (string | number | null)[] {
+  return [
+    v.descricao,
+    JSON.stringify(v.origens),
+    JSON.stringify(v.destinos),
+    v.idaDe,
+    v.idaAte,
+    v.voltaDe,
+    v.voltaAte,
+    v.adultos,
+    v.malasDespachadas,
+    v.maxEscalas,
+    JSON.stringify(v.companhias),
+    v.aceitarPassagensSeparadas ? 1 : 0,
+    v.precoAlvoCentavos,
+    v.moeda,
+    v.intervaloMinutos,
+  ];
+}
+
+/**
+ * Campos que mudam a viagem (e portanto o preco esperado). Mudar descricao, preco-alvo ou
+ * intervalo nao muda a viagem e mantem o historico.
+ */
+function mudouAViagem(antes: NovaVigilancia, depois: NovaVigilancia): boolean {
+  const viagem = (v: NovaVigilancia) =>
+    JSON.stringify([
+      v.origens,
+      v.destinos,
+      v.idaDe,
+      v.idaAte,
+      v.voltaDe,
+      v.voltaAte,
+      v.adultos,
+      v.malasDespachadas,
+      v.maxEscalas,
+      v.companhias,
+      v.aceitarPassagensSeparadas,
+      v.moeda,
+    ]);
+  return viagem(antes) !== viagem(depois);
+}
+
+/** Valida pelo schema antes de gravar: nada fora do formato entra no banco. */
+export function criarVigilancia(db: Banco, nova: NovaVigilancia, agora: Date = new Date()): Vigilancia {
+  const valida = novaVigilanciaSchema.parse(nova);
+  const id = randomUUID();
+  const instante = agora.toISOString();
+  db.prepare(
+    `INSERT INTO vigilancias (descricao, origens, destinos, ida_de, ida_ate, volta_de, volta_ate,
+       adultos, malas_despachadas, max_escalas, companhias, aceitar_passagens_separadas,
+       preco_alvo_centavos, moeda, intervalo_minutos, id, ativa, criada_em, atualizada_em,
+       historico_desde)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
+  ).run(...parametros(valida), id, instante, instante, instante);
+  return {
+    ...valida,
+    id,
+    ativa: true,
+    criadaEm: instante,
+    atualizadaEm: instante,
+    historicoDesde: instante,
+  };
+}
+
+export function obterVigilancia(db: Banco, id: string): Vigilancia | null {
+  const linha = db.prepare('SELECT * FROM vigilancias WHERE id = ?').get(id) as
+    | LinhaVigilancia
+    | undefined;
+  return linha ? paraVigilancia(linha) : null;
+}
+
+export function listarVigilancias(db: Banco, filtro: { soAtivas?: boolean } = {}): Vigilancia[] {
+  const sql = filtro.soAtivas
+    ? 'SELECT * FROM vigilancias WHERE ativa = 1 ORDER BY criada_em'
+    : 'SELECT * FROM vigilancias ORDER BY criada_em';
+  return (db.prepare(sql).all() as unknown as LinhaVigilancia[]).map(paraVigilancia);
+}
+
+/**
+ * Troca todos os campos editaveis (o painel manda a vigilancia inteira, ja confirmada). Se a
+ * viagem mudou, o historico de preco recomeca a contar a partir de agora.
+ */
+export function atualizarVigilancia(
+  db: Banco,
+  id: string,
+  dados: NovaVigilancia,
+  agora: Date = new Date(),
+): Vigilancia | null {
+  const valida = novaVigilanciaSchema.parse(dados);
+  const instante = agora.toISOString();
+  return emTransacao(db, () => {
+    const antes = obterVigilancia(db, id);
+    if (!antes) return null;
+    const historicoDesde = mudouAViagem(antes, valida) ? instante : antes.historicoDesde;
+    db.prepare(
+      `UPDATE vigilancias SET descricao = ?, origens = ?, destinos = ?, ida_de = ?, ida_ate = ?,
+         volta_de = ?, volta_ate = ?, adultos = ?, malas_despachadas = ?, max_escalas = ?,
+         companhias = ?, aceitar_passagens_separadas = ?, preco_alvo_centavos = ?, moeda = ?,
+         intervalo_minutos = ?, atualizada_em = ?, historico_desde = ?
+       WHERE id = ?`,
+    ).run(...parametros(valida), instante, historicoDesde, id);
+    return obterVigilancia(db, id);
+  });
+}
+
+/** Pausar (false) ou retomar (true). Devolve false se a vigilancia nao existe. */
+export function definirAtiva(db: Banco, id: string, ativa: boolean, agora: Date = new Date()): boolean {
+  const r = db
+    .prepare('UPDATE vigilancias SET ativa = ?, atualizada_em = ? WHERE id = ?')
+    .run(ativa ? 1 : 0, agora.toISOString(), id);
+  return r.changes > 0;
+}
+
+/** Apaga a vigilancia e tudo dela (precos, ofertas, alertas, placar). E pedido da pessoa. */
+export function apagarVigilancia(db: Banco, id: string): boolean {
+  return db.prepare('DELETE FROM vigilancias WHERE id = ?').run(id).changes > 0;
+}

@@ -24,6 +24,7 @@ de todo commit.
 | `apps/vigia` | processo Node com o ciclo: busca nas fontes, histórico, detector, Claude, alertas |
 | `packages/dominio` | regras puras: preço normal, detecção de oferta, preço final com IOF, regra das 24 h, datas |
 | `packages/fontes` | adaptadores de fonte de preço atrás da interface `FontePreco` (Kiwi primeiro) |
+| `packages/banco` | SQLite local (`data/frank.db`) pelo `node:sqlite`: vigilâncias, preços por rodada, ofertas, alertas, placar, consultas às fontes |
 | `packages/contratos` | schemas Zod compartilhados (inclusive a saída JSON do Claude) |
 | `skills` | arquivos de conhecimento que vão junto no pedido ao Claude |
 | `docs` | specs, roadmap, decisões, riscos, técnicas de IA, diário de testes |
@@ -110,3 +111,10 @@ de todo commit.
 - **Kiwi responde em text/event-stream** mesmo na chamada simples: ler as linhas `data:`
 - **Busca comum na web não é fonte de preço:** devolve "a partir de" e datas vizinhas
 - **ESLint fica no 9 e TypeScript no ~6.0** (mesmas travas do JN, ver ADR-001)
+- **Preço normal conta rodadas, não itinerários:** uma busca traz dezenas de voos; o histórico
+  usa o menor preço de cada rodada do vigia (`menoresPorRodada`). Todas as buscas de um ciclo
+  gravam a mesma `rodada`
+- **`node:sqlite` mostra "ExperimentalWarning"** ao iniciar: é esperado, não é erro
+- **Transação no banco é `emTransacao`** (BEGIN IMMEDIATE, aninha com savepoint); nunca `BEGIN` à mão
+- **Conexão aberta no Windows prende o arquivo:** feche o banco em todo caminho de erro (e nos testes)
+- **Leitura de JSON gravado é tolerante** (`safeParse` → null); validação estrita só na escrita
