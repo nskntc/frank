@@ -28,7 +28,7 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 
 | Id | Requisito | Aceite |
 |---|---|---|
-| RF-07 | Preço normal da rota | mediana dos últimos 14 dias com no mínimo 20 observações *(calibrar)*; antes disso, só o preço-alvo vale |
+| RF-07 | Preço normal da rota | mediana dos últimos 14 dias com no mínimo 20 observações *(calibrar)*. Antes disso, vale a referência do Google Flights (histórico de 60 dias e faixa típica, buscados via SerpApi quando a vigilância é criada); sem chave do SerpApi, só o preço-alvo vale |
 | RF-08 | Regra de oferta | preço final ≤ preço-alvo, ou 25% abaixo do normal *(calibrar)* |
 | RF-09 | Reconferir antes de avisar | nova consulta na fonte; preço subiu acima da regra, não avisa |
 | RF-10 | Avaliação pelo Claude | JSON validado com `valeAPena`, `pegadinhas[]` e `resumo`; preço nunca vem do Claude |
@@ -38,8 +38,8 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 
 | Id | Requisito | Aceite |
 |---|---|---|
-| RF-12 | Links prontos | link da fonte e links de busca preenchida no site da companhia e em agências (os que aceitarem, conforme teste) |
-| RF-13 | Preço final e etiquetas | IOF de 3,5% somado em vendedor estrangeiro; etiquetas "24 h para desistir", "empresa estrangeira", "passagens separadas" |
+| RF-12 | Preço em cada vendedor | quando surge uma oferta, consultar as opções de compra do Google Flights via SerpApi (3 consultas por oferta) e mostrar o preço em cada vendedor (companhia, agências, Kiwi); sem chave do SerpApi ou sem cota, mostrar os links de busca preenchida (LATAM, Gol, Azul, Decolar, testados na issue #1) |
+| RF-13 | Preço final e etiquetas | IOF de 3,5% somado em vendedor estrangeiro; etiquetas "24 h para desistir", "empresa estrangeira", "passagens separadas"; teto mensal de consultas ao SerpApi respeitado (plano grátis: 250) |
 | RF-14 | Tolerância para comprar direto | configuração "pago até X% a mais na companhia" muda a opção destacada |
 
 ### Alertas
@@ -74,5 +74,5 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 
 ## Fora do MVP
 
-Caçador de promoções, preço por vendedor automático (SerpApi), milhas, painel pelo celular, alerta
-no WhatsApp, navegador no site da companhia, compra automática. Ver [`../ROADMAP.md`](../ROADMAP.md).
+Caçador de promoções, milhas, painel pelo celular, alerta no WhatsApp, compra automática. Robô nos
+sites de companhia e agência está descartado (bloqueiam com 403). Ver [`../ROADMAP.md`](../ROADMAP.md).

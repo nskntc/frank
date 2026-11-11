@@ -10,7 +10,7 @@ Data: 2026-11-11 · Status: **aceita** (confirmada pelo dono do projeto em 2026-
 | Painel | Next.js 16 (App Router), React 19, Tailwind 4, ícones Lucide; servido só em `127.0.0.1` |
 | API local | rotas do próprio Next (`app/api`), sem servidor separado |
 | Vigia | processo Node em TypeScript (`apps/vigia`) com o ciclo |
-| Banco | SQLite local num arquivo (`data/frank.db`); biblioteca escolhida no card do esqueleto |
+| Banco | SQLite local num arquivo (`data/frank.db`) pelo `node:sqlite` embutido no Node (sem módulo nativo para compilar; mostra um aviso de "experimental" ao iniciar) |
 | Domínio | `packages/dominio`, funções puras usadas pelo painel e pelo vigia |
 | Contratos | Zod, inclusive para validar a saída JSON do Claude |
 | IA | `claude -p --output-format json` atrás de `ProvedorLLM` |

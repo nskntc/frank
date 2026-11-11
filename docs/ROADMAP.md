@@ -6,7 +6,7 @@ Cada fase termina com algo que roda e com conteúdo publicado sobre o que foi ap
 |---|---|---|---|
 | 0. Fundação | repositório, docs, metodologia do Claude, esqueleto do monorepo, CI, cliente da Kiwi com teste | `pnpm verificar` verde no CI; uma busca real na Kiwi passa pelo adaptador | "Comecei um agente que caça passagem" · "Liguei o Claude numa fonte de passagens" |
 | 1. MVP | vigia, histórico, detector, planejador e avaliador com o Claude, painel com 5 telas, Telegram, links de Onde comprar, placar manual | ver [`specs/SPEC-01-MVP.md`](specs/SPEC-01-MVP.md) | "Um agente que trabalha enquanto você dorme" · "Por que meu agente nunca inventa um preço" |
-| 2. Corrida | 30 dias contra o alerta do Google em rotas definidas antes; caçador de promoções; preço por vendedor via SerpApi; defesa contra injeção de prompt | resultado da corrida publicado, com as rotas em que o Google ganhou | "30 dias: meu agente contra o Google" · "Como um site pode sequestrar seu agente" |
+| 2. Corrida | 30 dias contra o alerta do Google em rotas definidas antes; caçador de promoções; defesa contra injeção de prompt | resultado da corrida publicado, com as rotas em que o Google ganhou | "30 dias: meu agente contra o Google" · "Como um site pode sequestrar seu agente" |
 | 3. Expansão | milhas ou dinheiro; painel pelo celular; segunda fonte de preço (robô nos sites de companhia e agência está descartado: bloqueiam com 403, teste de 2026-11-11) | cada item com teste e entrada no diário | "Milhas ou dinheiro: o agente decide" |
 | Talvez | alerta no WhatsApp; compra automática (Duffel) | só se a corrida mostrar que o aviso chega tarde demais | |
 

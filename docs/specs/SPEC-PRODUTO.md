@@ -67,9 +67,11 @@ A Kiwi é o radar: descobre o momento, o voo e a data. Nem sempre é o melhor lu
 | Agência brasileira | às vezes mais barata, atendimento em português, CDC | taxa, remarcação pela agência, regra de desistência de cada uma |
 | Kiwi | às vezes a mais barata; junta companhias que não vendem juntas | empresa estrangeira (IOF de 3,5% no cartão), passagens separadas, reclamações de reembolso |
 
-- MVP: **links prontos** para a mesma busca no site da companhia e em agências; a pessoa vê o preço lá
-- Fase 2: preço por vendedor automático pelas "opções de compra" do Google Flights via SerpApi,
-  chamado só quando há oferta
+- MVP: **preço em cada vendedor** pelas "opções de compra" do Google Flights via SerpApi, chamado só
+  quando há oferta. No teste de 2026-11-11, o mesmo voo LATAM custava R$ 1.195 no site da LATAM e
+  R$ 1.372 na Kiwi
+- Sem chave ou sem cota do SerpApi: **links prontos** para a mesma busca na LATAM, Gol, Azul e
+  Decolar (os quatro testados e funcionando)
 - Configuração: "pago até X% a mais para comprar direto na companhia"
 
 ## Alerta no Telegram
@@ -95,7 +97,7 @@ O lado do Google é registrado à mão (robô no Google Flights viola os termos)
 | Kiwi.com (MCP, `https://mcp.kiwi.com`) | preços e link de compra | grátis, sem limites publicados | MVP |
 | Claude Code (`claude -p`) | planejador e avaliador | plano da pessoa | MVP |
 | Telegram Bot API | aviso no celular | grátis | MVP |
-| SerpApi (Google Flights) | preço por vendedor; lado do Google no placar | 100 a 250 buscas/mês grátis | Fase 2 |
+| SerpApi (Google Flights) | preço por vendedor; histórico de 60 dias da rota | 250 consultas/mês grátis | MVP (opcional) |
 | Busca na web do Claude | caçador de promoções | plano da pessoa | Fase 2 |
 | Travelpayouts (Data API) | preço típico antes de existir histórico | grátis | talvez |
 | Duffel | compra automática | US$ 3 por pedido | fora de escopo por ora |
