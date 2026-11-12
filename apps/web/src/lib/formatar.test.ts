@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { diaComSemana, haQuanto, janela, plural, duracao, horario, intervalo, quandoEmBrasilia } from './formatar';
+import {
+  diaComSemana,
+  haQuanto,
+  janela,
+  plural,
+  duracao,
+  horario,
+  intervalo,
+  quandoEmBrasilia,
+} from './formatar';
 
 describe('formatar', () => {
   it('dia com o dia da semana', () => {

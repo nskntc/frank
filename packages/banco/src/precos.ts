@@ -226,3 +226,29 @@ export function serieDaVigilancia(db: Banco, vigilanciaId: string, moeda: string
     .all(vigilanciaId, moeda) as unknown as { rodada: string; em: string; menor: number }[];
   return linhas.map((l) => ({ rodada: l.rodada, em: l.em, precoCentavos: l.menor }));
 }
+
+/**
+ * O itinerario mais barato de cada dia (de Brasilia, sempre -03:00), do dia mais novo ao mais
+ * antigo, com o mesmo recorte do grafico (moeda e historico_desde). Empate de preco no dia: fica
+ * o visto por ultimo (o link mais fresco). Base do botao de compra da tabela por dia.
+ */
+export function maisBaratoPorDia(
+  db: Banco,
+  vigilanciaId: string,
+  moeda: string,
+): (PrecoVisto & { dia: string })[] {
+  const linhas = db
+    .prepare(
+      `WITH vistos AS (
+         SELECT p.*, date(p.visto_em, '-3 hours') AS dia,
+                ROW_NUMBER() OVER (PARTITION BY date(p.visto_em, '-3 hours')
+                                   ORDER BY p.preco_centavos, p.visto_em DESC, p.id DESC) AS ordem
+         FROM precos_vistos p
+         JOIN vigilancias v ON v.id = p.vigilancia_id
+         WHERE p.vigilancia_id = ? AND p.moeda = ? AND p.visto_em >= v.historico_desde
+       )
+       SELECT * FROM vistos WHERE ordem = 1 ORDER BY dia DESC`,
+    )
+    .all(vigilanciaId, moeda) as unknown as (LinhaPrecoVisto & { dia: string })[];
+  return linhas.map((l) => ({ ...paraPrecoVisto(l), dia: l.dia }));
+}

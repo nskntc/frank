@@ -8,6 +8,7 @@ Status: **pauta** (ideia anotada) · **rascunho** · **publicado** (com link).
 
 | Data | Momento | Prova | O que ensina | Status |
 |---|---|---|---|---|
+| 2026-11-12 | "Aonde eu clico para comprar?": o agente só mostrava o botão quando achava oferta, e quem usa queria comprar mesmo sem ela | print do pedido e da tela com Mais barato agora (#20) | O agente decide quando avisar; quem decide quando comprar é a pessoa: a interface precisa servir aos dois | pauta |
 | 2026-11-12 | Do git clone ao primeiro pedido entendido em 5 passos, sem Docker e sem chave de API: o Frank usa o Claude Code já logado de quem instala | README (#17) e o teste na pasta limpa | Agente local que reaproveita a assinatura de quem usa: custo zero de infraestrutura | pauta |
 | 2026-11-12 | Placar Frank × Google: o agente local avisou o mesmo preço horas antes do alerta do Google Flights (dados fictícios até a corrida de 30 dias de verdade) | prints do Placar (#16) | Definir a métrica antes de medir: o que conta como "mesmo preço" (2%) e quem marca ponto | pauta |
 | 2026-11-11 | Agente que roda por dias precisa dizer quando parou: o computador hibernou e o painel mostra "vigia parado há 6 h" em vez de fingir que está tudo bem | prints de Configurações (#15) | Observabilidade em agente de longa duração | pauta |

@@ -88,8 +88,62 @@ describe('detalheDaRota', () => {
       AGORA,
     );
     expect(detalheDaRota(db, id, AGORA)?.dias).toEqual([
-      { dia: '2027-01-20', frank: 80_000, google: 99_000 },
-      { dia: '2027-01-19', frank: 90_000, google: null },
+      { dia: '2027-01-20', frank: 80_000, google: 99_000, link: it0().linkCompra },
+      { dia: '2027-01-19', frank: 90_000, google: null, link: it0().linkCompra },
     ]);
+  });
+});
+
+describe('mais barato agora', () => {
+  const voo = (idNaFonte: string, preco: number, extra: object = {}) => ({
+    ...it0(),
+    idNaFonte,
+    precoCentavos: preco,
+    linkCompra: `https://www.kiwi.com/u/${idNaFonte}`,
+    ...extra,
+  });
+
+  it('sem checagem, nada', () => {
+    expect(detalheDaRota(db, id, AGORA)?.agora).toEqual([]);
+  });
+
+  it('os 3 mais baratos da ultima checagem, sem repetir voo nem misturar moeda', () => {
+    registrarPrecosVistos(db, id, 'velha', [voo('v', 10_000)], new Date('2027-01-20T10:00:00Z'));
+    registrarPrecosVistos(
+      db,
+      id,
+      'nova',
+      [
+        voo('d', 130_000),
+        voo('a', 100_000),
+        voo('a', 100_000),
+        voo('e', 5_000, { moeda: 'EUR' }),
+        voo('b', 110_000),
+        voo('c', 120_000),
+      ],
+      new Date('2027-01-20T14:00:00Z'),
+    );
+    const agora = detalheDaRota(db, id, AGORA)?.agora ?? [];
+    expect(agora.map((v) => [v.itinerario.idNaFonte, v.precoCentavos, v.link])).toEqual([
+      ['a', 100_000, 'https://www.kiwi.com/u/a'],
+      ['b', 110_000, 'https://www.kiwi.com/u/b'],
+      ['c', 120_000, 'https://www.kiwi.com/u/c'],
+    ]);
+    expect(agora[0]).toMatchObject({ vendedor: 'Kiwi.com', estrangeiro: true });
+  });
+
+  it('linha gravada fora do formato (link http, versao antiga) nao vira botao nem quebra a tela', () => {
+    // O contrato recusa http na escrita; aqui a linha entra crua, como num banco antigo.
+    db.prepare(
+      `INSERT INTO precos_vistos (vigilancia_id, rodada, fonte, id_na_fonte, visto_em,
+         preco_centavos, moeda, itinerario) VALUES (?, 'r', 'kiwi', 'x', ?, 100000, 'BRL', ?)`,
+    ).run(
+      id,
+      '2027-01-20T14:00:00.000Z',
+      JSON.stringify(voo('x', 100_000, { linkCompra: 'http://www.kiwi.com/u/x' })),
+    );
+    const d = detalheDaRota(db, id, AGORA);
+    expect(d?.agora).toEqual([]);
+    expect(d?.dias).toEqual([{ dia: '2027-01-20', frank: 100_000, google: null, link: null }]);
   });
 });

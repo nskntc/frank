@@ -52,8 +52,17 @@ describe('montarPlacar', () => {
   });
 
   it('novo menor preco que o Google nunca avisou: so o Frank achou', () => {
-    const p = montarPlacar([frank(0, 95_000), frank(4, 99_000), frank(9, 70_000)], [google(1, 95_000)], 'BRL');
-    expect(p.linhas.map((l) => l.motivo)).toEqual(['disputado', 'frank_antes', 'repetido', 'so_frank']);
+    const p = montarPlacar(
+      [frank(0, 95_000), frank(4, 99_000), frank(9, 70_000)],
+      [google(1, 95_000)],
+      'BRL',
+    );
+    expect(p.linhas.map((l) => l.motivo)).toEqual([
+      'disputado',
+      'frank_antes',
+      'repetido',
+      'so_frank',
+    ]);
     expect(p.pontos).toEqual({ frank: 2, google: 0 });
   });
 
@@ -85,7 +94,9 @@ describe('montarPlacar', () => {
 
 describe('instanteDeBrasilia', () => {
   it('converte o horario de Brasilia para UTC', () => {
-    expect(instanteDeBrasilia('2027-01-10', '23:30')?.toISOString()).toBe('2027-01-11T02:30:00.000Z');
+    expect(instanteDeBrasilia('2027-01-10', '23:30')?.toISOString()).toBe(
+      '2027-01-11T02:30:00.000Z',
+    );
   });
   it('recusa data ou hora que nao existe', () => {
     expect(instanteDeBrasilia('2027-02-31', '10:00')).toBeNull();
@@ -112,7 +123,11 @@ describe('lerReais', () => {
 
 describe('resultadoDoLance', () => {
   it('explica cada linha em uma frase', () => {
-    const p = montarPlacar([frank(0, 90_000), frank(9, 60_000)], [google(3, 90_000), google(4, 50_000)], 'BRL');
+    const p = montarPlacar(
+      [frank(0, 90_000), frank(9, 60_000)],
+      [google(3, 90_000), google(4, 50_000)],
+      'BRL',
+    );
     expect(p.linhas.map(resultadoDoLance)).toEqual([
       'Comparado com o alerta do Google',
       'O Frank já tinha avisado esse preço 3 h antes',
@@ -124,7 +139,8 @@ describe('resultadoDoLance', () => {
 
 describe('placar de exemplo (aceite da issue #16)', () => {
   it('rota de teste com dados ficticios: Frank 3 x 1 Google', async () => {
-    const { abrirBanco, avisosEntregues, criarVigilancia, listarPlacar } = await import('@frank/banco');
+    const { abrirBanco, avisosEntregues, criarVigilancia, listarPlacar } =
+      await import('@frank/banco');
     const { EXEMPLOS, semearPlacar } = await import('./teste/exemplo');
     const db = abrirBanco(':memory:');
     const agora = new Date('2027-01-20T15:00:00Z');

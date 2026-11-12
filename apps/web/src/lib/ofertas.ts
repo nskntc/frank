@@ -52,7 +52,7 @@ export function linkSeguro(link: string | null | undefined): string | null {
 }
 
 /** Nome de vitrine das fontes e se vendem como empresa estrangeira (IOF ja no preco da oferta). */
-const FONTES: Record<string, { nome: string; estrangeira: boolean }> = {
+export const FONTES: Record<string, { nome: string; estrangeira: boolean }> = {
   kiwi: { nome: 'Kiwi.com', estrangeira: true },
 };
 

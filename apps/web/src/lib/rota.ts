@@ -1,12 +1,16 @@
+import { detectarPegadinhas } from '@frank/agente';
 import {
   type Banco,
   listarReferencias,
+  maisBaratoPorDia,
   menoresPorRodada,
   obterVigilancia,
   serieDaVigilancia,
+  ultimaRodada,
 } from '@frank/banco';
-import type { Vigilancia } from '@frank/contratos';
+import type { Itinerario, Vigilancia } from '@frank/contratos';
 import { type Centavos, DETECTOR_PADRAO, diaNoFuso, mediana, precoNormal } from '@frank/dominio';
+import { FONTES, linkSeguro } from './ofertas';
 
 const DIA_MS = 86_400_000;
 
@@ -20,7 +24,24 @@ export interface LinhaDoDia {
   dia: string;
   frank: Centavos | null;
   google: Centavos | null;
+  /** Link (so https) do voo mais barato que o Frank viu no dia. */
+  link: string | null;
 }
+
+/** Um voo da ultima checagem, pronto para a tela: nao e oferta, so o mais barato do momento. */
+export interface VooNaTela {
+  chave: string;
+  itinerario: Itinerario;
+  precoCentavos: Centavos;
+  vendedor: string;
+  estrangeiro: boolean;
+  link: string | null;
+  vistoEm: string;
+  pegadinhas: string[];
+}
+
+/** Quantos voos o "Mais barato agora" mostra. */
+export const VOOS_AGORA = 3;
 
 export interface DetalheRota {
   vigilancia: Vigilancia;
@@ -32,6 +53,8 @@ export interface DetalheRota {
   normal: { centavos: Centavos; base: 'proprio' | 'google' } | null;
   /** Para a tabela: um dia por linha, do mais novo ao mais antigo. */
   dias: LinhaDoDia[];
+  /** Os mais baratos da ultima checagem (sempre ha onde clicar, mesmo sem oferta). */
+  agora: VooNaTela[];
 }
 
 function meioDiaEmBrasilia(dia: string): number {
@@ -55,12 +78,16 @@ function normalDaRota(
   return m === null ? null : { centavos: Math.round(m), base: 'google' };
 }
 
-function porDia(frank: Ponto[], google: Ponto[]): LinhaDoDia[] {
+function porDia(
+  frank: Ponto[],
+  google: Ponto[],
+  links: ReadonlyMap<string, string | null>,
+): LinhaDoDia[] {
   const dias = new Map<string, LinhaDoDia>();
   const linha = (dia: string) => {
     let l = dias.get(dia);
     if (!l) {
-      l = { dia, frank: null, google: null };
+      l = { dia, frank: null, google: null, link: links.get(dia) ?? null };
       dias.set(dia, l);
     }
     return l;
@@ -71,6 +98,36 @@ function porDia(frank: Ponto[], google: Ponto[]): LinhaDoDia[] {
   }
   for (const p of google) linha(diaNoFuso(new Date(p.t))).google = p.precoCentavos;
   return [...dias.values()].sort((a, b) => b.dia.localeCompare(a.dia));
+}
+
+/** Os mais baratos da ultima checagem, sem repetir o mesmo voo, na moeda da rota. */
+function voosAgora(db: Banco, v: Vigilancia): VooNaTela[] {
+  const vistos = new Set<string>();
+  const voos: VooNaTela[] = [];
+  for (const p of ultimaRodada(db, v.id)) {
+    const it = p.itinerario;
+    const chave = `${p.fonte}:${p.idNaFonte}`;
+    if (!it || p.moeda !== v.moeda || vistos.has(chave)) continue;
+    vistos.add(chave);
+    const fonte = FONTES[p.fonte];
+    voos.push({
+      chave,
+      itinerario: it,
+      precoCentavos: p.precoCentavos,
+      vendedor: fonte?.nome ?? p.fonte,
+      estrangeiro: fonte?.estrangeira ?? false,
+      link: linkSeguro(it.linkCompra),
+      vistoEm: p.vistoEm,
+      pegadinhas: detectarPegadinhas({
+        itinerario: it,
+        vigilancia: v,
+        vendedorEstrangeiro: false, // aparece ao lado do vendedor
+        percentualAbaixo: null,
+      }).map((x) => x.descricao),
+    });
+    if (voos.length === VOOS_AGORA) break;
+  }
+  return voos;
 }
 
 /** Tudo que a tela de detalhe da rota mostra (RF-18). Null se a vigilancia nao existe. */
@@ -92,6 +149,16 @@ export function detalheDaRota(db: Banco, id: string, agora: Date = new Date()): 
     frank,
     google,
     normal: normalDaRota(db, vigilancia, google, agora),
-    dias: porDia(frank, google),
+    dias: porDia(
+      frank,
+      google,
+      new Map(
+        maisBaratoPorDia(db, id, vigilancia.moeda).map((p) => [
+          p.dia,
+          linkSeguro(p.itinerario?.linkCompra),
+        ]),
+      ),
+    ),
+    agora: voosAgora(db, vigilancia),
   };
 }

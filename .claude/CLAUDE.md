@@ -186,3 +186,5 @@ de todo commit.
   `pnpm --filter @frank/banco build` (o `pnpm verificar` já compila)
 - **Instalação mudou? Teste do zero:** clone numa pasta limpa, `pnpm install`, `.env` copiado do
   exemplo e `pnpm start`, seguindo o README. Nunca com o `.env` de verdade
+- **Painel em uso na 4321:** o `pnpm start` de quem usa pode estar ligado. Teste visual em outra
+  porta (4322) e avise que recompilar o `apps/web` exige reiniciar o painel dela

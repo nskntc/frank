@@ -7,6 +7,7 @@ import {
   precosDaRodada,
   registrarPrecosVistos,
   salvarReferencias,
+  maisBaratoPorDia,
   serieDaVigilancia,
   ultimaRodada,
 } from './precos.js';
@@ -130,5 +131,23 @@ describe('serieDaVigilancia (grafico da rota)', () => {
       { rodada: 'r1', em: '2026-11-06T10:00:00.000Z', precoCentavos: 99_000 },
       { rodada: 'r2', em: '2026-11-06T11:00:00.000Z', precoCentavos: 105_000 },
     ]);
+  });
+});
+
+describe('maisBaratoPorDia (botao de compra da tabela)', () => {
+  it('o mais barato de cada dia de Brasilia, o mais novo primeiro; empate fica com o mais recente', () => {
+    const r = (rodada: string, id: string, preco: number, quando: string) =>
+      registrarPrecosVistos(db, vigilanciaId, rodada, [itinerarioExemplo(id, preco)], instante(quando));
+    // 01:00 UTC do dia 3 ainda e dia 2 em Brasilia.
+    r('r1', 'a', 90_000, '2026-11-02T15:00:00Z');
+    r('r2', 'b', 85_000, '2026-11-03T01:00:00Z');
+    r('r3', 'c', 95_000, '2026-11-03T12:00:00Z');
+    r('r4', 'd', 95_000, '2026-11-03T18:00:00Z');
+    registrarPrecosVistos(db, vigilanciaId, 'r5', [{ ...itinerarioExemplo('e', 1_000), moeda: 'EUR' }], instante('2026-11-03T19:00:00Z'));
+    expect(maisBaratoPorDia(db, vigilanciaId, 'BRL').map((p) => [p.dia, p.idNaFonte, p.precoCentavos])).toEqual([
+      ['2026-11-03', 'd', 95_000],
+      ['2026-11-02', 'b', 85_000],
+    ]);
+    expect(maisBaratoPorDia(db, vigilanciaId, 'BRL')[0]?.itinerario?.linkCompra).toBe('https://www.kiwi.com/u/d');
   });
 });

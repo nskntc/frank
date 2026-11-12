@@ -70,7 +70,10 @@ export default async function PlacarPagina() {
     placar: montarPlacar(avisosEntregues(db, v.id), listarPlacar(db, v.id), v.moeda),
   }));
   const total = rotas.reduce(
-    (t, r) => ({ frank: t.frank + r.placar.pontos.frank, google: t.google + r.placar.pontos.google }),
+    (t, r) => ({
+      frank: t.frank + r.placar.pontos.frank,
+      google: t.google + r.placar.pontos.google,
+    }),
     { frank: 0, google: 0 },
   );
 
@@ -99,8 +102,8 @@ export default async function PlacarPagina() {
               Google.
             </li>
             <li>
-              Cada novo menor preço do Frank que o Google ainda não tinha avisado também é ponto
-              do Frank.
+              Cada novo menor preço do Frank que o Google ainda não tinha avisado também é ponto do
+              Frank.
             </li>
             <li>
               Até {MARGEM_MESMO_PRECO_PCT}% de diferença conta como o mesmo preço: os sites

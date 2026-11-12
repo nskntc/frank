@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { GraficoPreco } from '@/components/rota/GraficoPreco';
+import { MaisBaratoAgora } from '@/components/rota/MaisBaratoAgora';
 import { diaComSemana, janela, plural } from '@/lib/formatar';
 import { detalheDaRota } from '@/lib/rota';
 import { hostLocal } from '@/lib/servidor/origem';
@@ -79,6 +80,8 @@ export default async function DetalheDaRota({ params }: { params: Promise<{ id: 
         />
       </dl>
 
+      <MaisBaratoAgora voos={d.agora} />
+
       <section className="mt-8" aria-label="Preço ao longo do tempo">
         <h2 className="text-lg font-semibold">Preço ao longo do tempo</h2>
         {semDados ? (
@@ -102,29 +105,60 @@ export default async function DetalheDaRota({ params }: { params: Promise<{ id: 
                 Ver em tabela ({plural(d.dias.length, 'dia', 'dias')})
               </summary>
               <div className="mt-2 overflow-x-auto">
-                <table className="w-full text-sm tabular-nums">
+                <table className="w-full text-[13px] tabular-nums sm:text-sm">
                   <thead>
                     <tr className="border-b border-[var(--color-borda)] text-left text-[var(--color-texto-suave)]">
-                      <th className="py-2 pr-4 font-normal">Dia</th>
-                      <th className="py-2 pr-4 text-right font-normal">Menor do Frank</th>
-                      <th className="py-2 text-right font-normal">Google</th>
+                      <th className="py-2 pr-2 whitespace-nowrap md:pr-4 font-normal">Dia</th>
+                      <th className="py-2 pr-2 whitespace-nowrap md:pr-4 text-right font-normal">
+                        Menor do Frank
+                      </th>
+                      <th className="py-2 pr-2 whitespace-nowrap md:pr-4 text-right font-normal">
+                        Google
+                      </th>
+                      <th className="py-2 font-normal">
+                        <span className="sr-only">Comprar</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {d.dias.map((l) => (
                       <tr key={l.dia} className="border-b border-[var(--color-borda)]">
-                        <td className="py-2 pr-4">{diaComSemana(l.dia)}</td>
-                        <td className="py-2 pr-4 text-right">
+                        <td className="py-2 pr-2 whitespace-nowrap md:pr-4">
+                          {/* No celular, sem o ano: a tabela cabe com o botao de compra. */}
+                          <span className="sm:hidden" aria-hidden>
+                            {diaComSemana(l.dia).slice(0, -5)}
+                          </span>
+                          <span className="hidden sm:inline">{diaComSemana(l.dia)}</span>
+                          <span className="sr-only sm:hidden">{diaComSemana(l.dia)}</span>
+                        </td>
+                        <td className="py-2 pr-2 whitespace-nowrap md:pr-4 text-right">
                           {l.frank !== null ? formatarReais(l.frank) : '—'}
                         </td>
-                        <td className="py-2 text-right">
+                        <td className="py-2 pr-2 whitespace-nowrap md:pr-4 text-right">
                           {l.google !== null ? formatarReais(l.google) : '—'}
+                        </td>
+                        <td className="py-1 text-right">
+                          {l.link ? (
+                            <a
+                              href={l.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`Comprar o voo mais barato de ${diaComSemana(l.dia)}`}
+                              className="inline-flex min-h-11 items-center rounded-lg border border-[var(--color-borda)] px-2.5 font-medium whitespace-nowrap md:px-3"
+                            >
+                              Comprar
+                            </a>
+                          ) : null}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+              <p className="mt-2 text-xs text-[var(--color-texto-suave)]">
+                Comprar abre o voo mais barato que o Frank viu naquele dia. O site mostra o preço de
+                hoje, que pode ter mudado.
+              </p>
             </details>
           </>
         )}

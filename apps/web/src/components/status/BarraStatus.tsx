@@ -30,8 +30,7 @@ export async function BarraStatus() {
   const alerta = s.vigia.estado !== 'ligado' || s.problemas.length > 0;
   let principal: string;
   if (s.vigia.estado === 'nunca')
-    principal =
-      'O vigia ainda não rodou. Ligue com pnpm start na pasta do Frank.';
+    principal = 'O vigia ainda não rodou. Ligue com pnpm start na pasta do Frank.';
   else if (s.vigia.estado === 'parado' && s.vigia.vistoEm)
     principal = `Vigia parado ${haQuanto(s.vigia.vistoEm)}: computador dormindo ou vigia desligado.`;
   else principal = 'Vigia ligado';
