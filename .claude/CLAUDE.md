@@ -37,7 +37,8 @@ de todo commit.
 | Comando | O que faz |
 |---|---|
 | `pnpm install` | instala tudo (gerenciador é **pnpm**, nunca npm) |
-| `pnpm dev` | painel em `http://127.0.0.1:4321` e vigia juntos |
+| `pnpm start` | uso de verdade: compila e liga painel (`http://127.0.0.1:4321`) e vigia juntos |
+| `pnpm dev` | desenvolvimento: o mesmo, recarregando a cada mudança |
 | `pnpm verificar` | lint + typecheck + test + build (o mínimo antes de "pronto") |
 | `pnpm --filter @frank/dominio test` | só um pacote |
 | `pnpm --filter @frank/vigia testar-aviso` | manda um aviso de teste por cada canal do `.env` |
@@ -183,3 +184,5 @@ de todo commit.
   do Google, da tabela `placar`. Hora digitada é de Brasília, sempre -03:00 (`instanteDeBrasilia`)
 - **O web lê `@frank/banco` compilado:** função nova no banco só aparece no web depois de
   `pnpm --filter @frank/banco build` (o `pnpm verificar` já compila)
+- **Instalação mudou? Teste do zero:** clone numa pasta limpa, `pnpm install`, `.env` copiado do
+  exemplo e `pnpm start`, seguindo o README. Nunca com o `.env` de verdade

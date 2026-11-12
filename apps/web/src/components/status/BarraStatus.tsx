@@ -31,7 +31,7 @@ export async function BarraStatus() {
   let principal: string;
   if (s.vigia.estado === 'nunca')
     principal =
-      'O vigia ainda não rodou. Ligue com pnpm dev (ou pnpm --filter @frank/vigia start).';
+      'O vigia ainda não rodou. Ligue com pnpm start na pasta do Frank.';
   else if (s.vigia.estado === 'parado' && s.vigia.vistoEm)
     principal = `Vigia parado ${haQuanto(s.vigia.vistoEm)}: computador dormindo ou vigia desligado.`;
   else principal = 'Vigia ligado';

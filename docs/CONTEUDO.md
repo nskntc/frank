@@ -8,6 +8,7 @@ Status: **pauta** (ideia anotada) · **rascunho** · **publicado** (com link).
 
 | Data | Momento | Prova | O que ensina | Status |
 |---|---|---|---|---|
+| 2026-11-12 | Do git clone ao primeiro pedido entendido em 5 passos, sem Docker e sem chave de API: o Frank usa o Claude Code já logado de quem instala | README (#17) e o teste na pasta limpa | Agente local que reaproveita a assinatura de quem usa: custo zero de infraestrutura | pauta |
 | 2026-11-12 | Placar Frank × Google: o agente local avisou o mesmo preço horas antes do alerta do Google Flights (dados fictícios até a corrida de 30 dias de verdade) | prints do Placar (#16) | Definir a métrica antes de medir: o que conta como "mesmo preço" (2%) e quem marca ponto | pauta |
 | 2026-11-11 | Agente que roda por dias precisa dizer quando parou: o computador hibernou e o painel mostra "vigia parado há 6 h" em vez de fingir que está tudo bem | prints de Configurações (#15) | Observabilidade em agente de longa duração | pauta |
 | 2026-11-11 | O gráfico da rota põe lado a lado o que o Frank viu a cada checagem e a referência diária do Google, com as linhas do preço normal e do alvo | prints do detalhe da rota (#14) | Mostrar a régua que o agente usa para decidir, não só a decisão | pauta |
