@@ -178,3 +178,8 @@ de todo commit.
   Canais: só "configurado ou não", nunca o valor do `.env`
 - **Configuração editável pelo painel só pela rota `/api/configuracoes`** (zod + `pedidoDoPainel`);
   segredo nunca é editado pelo navegador
+- **Regra do placar só em `montarPlacar`** (`apps/web/src/lib/placar.ts`, com teste de cada caso):
+  o lado do Frank vem de `avisosEntregues` (um por oferta, mesmo indo por e-mail e Telegram); o
+  do Google, da tabela `placar`. Hora digitada é de Brasília, sempre -03:00 (`instanteDeBrasilia`)
+- **O web lê `@frank/banco` compilado:** função nova no banco só aparece no web depois de
+  `pnpm --filter @frank/banco build` (o `pnpm verificar` já compila)

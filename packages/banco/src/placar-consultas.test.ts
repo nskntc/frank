@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { abrirBanco, type Banco } from './abrir.js';
 import { contarChamadasIa, estadoIa, registrarChamadaIa } from './chamadas-ia.js';
 import { contarConsultas, estadoFonte, registrarConsulta } from './consultas.js';
-import { listarPlacar, type NovoRegistroPlacar, registrarPlacar } from './placar.js';
+import { avisosEntregues, registrarAlerta } from './alertas.js';
+import { apagarPlacar, listarPlacar, type NovoRegistroPlacar, registrarPlacar } from './placar.js';
 import { instante, vigilanciaExemplo } from './teste/dados.js';
 import { criarVigilancia } from './vigilancias.js';
 
@@ -40,6 +41,29 @@ describe('placar', () => {
   it('recusa competidor desconhecido e data invalida', () => {
     expect(() => registrarPlacar(db, registro({ quem: 'kayak' as 'google' }))).toThrow();
     expect(() => registrarPlacar(db, registro({ vistoEm: new Date('ontem') }))).toThrow(RangeError);
+  });
+
+  it('apaga um registro digitado errado', () => {
+    const id = registrarPlacar(db, registro({ quem: 'google' }));
+    expect(apagarPlacar(db, id)).toBe(true);
+    expect(apagarPlacar(db, id)).toBe(false);
+    expect(listarPlacar(db, vigilanciaId)).toEqual([]);
+  });
+});
+
+describe('avisosEntregues', () => {
+  const aviso = { vigilanciaId: '', ofertaId: null, fonte: 'kiwi', idNaFonte: 'a1', canal: 'email', precoCentavos: 90_000, moeda: 'BRL', sucesso: true };
+
+  it('um por aviso, pelo primeiro envio com sucesso, sem contar falhas', () => {
+    const v = { ...aviso, vigilanciaId };
+    registrarAlerta(db, { ...v, sucesso: false, erro: 'x' }, instante('2026-11-12T08:00:00Z'));
+    registrarAlerta(db, v, instante('2026-11-12T08:05:00Z'));
+    registrarAlerta(db, { ...v, canal: 'telegram' }, instante('2026-11-12T08:06:00Z'));
+    registrarAlerta(db, { ...v, precoCentavos: 85_000 }, instante('2026-11-13T10:00:00Z'));
+    expect(avisosEntregues(db, vigilanciaId)).toEqual([
+      { enviadoEm: '2026-11-12T08:05:00.000Z', precoCentavos: 90_000, moeda: 'BRL' },
+      { enviadoEm: '2026-11-13T10:00:00.000Z', precoCentavos: 85_000, moeda: 'BRL' },
+    ]);
   });
 });
 

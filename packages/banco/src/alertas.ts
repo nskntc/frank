@@ -103,3 +103,27 @@ export function menorPrecoJaAvisado(
     .get(vigilanciaId, fonte, idNaFonte, moeda, excetoOfertaId, excetoOfertaId) as { menor: number | null } | undefined;
   return linha?.menor ?? null;
 }
+
+export interface AvisoEntregue {
+  /** Primeiro envio com sucesso (o mesmo aviso pode ter ido por e-mail e Telegram). */
+  enviadoEm: string;
+  precoCentavos: Centavos;
+  moeda: string;
+}
+
+/**
+ * Avisos que o Frank entregou numa vigilancia, um por oferta (ou por itinerario + preco, se a
+ * oferta foi apagada), na ordem em que chegaram. Base do placar contra o Google (RF-20).
+ */
+export function avisosEntregues(db: Banco, vigilanciaId: string): AvisoEntregue[] {
+  const linhas = db
+    .prepare(
+      `SELECT MIN(enviado_em) AS enviado_em, preco_centavos, moeda FROM alertas
+       WHERE vigilancia_id = ? AND sucesso = 1
+       GROUP BY COALESCE(CAST(oferta_id AS TEXT), fonte || ':' || id_na_fonte || ':' || preco_centavos),
+                preco_centavos, moeda
+       ORDER BY enviado_em`,
+    )
+    .all(vigilanciaId) as unknown as { enviado_em: string; preco_centavos: number; moeda: string }[];
+  return linhas.map((l) => ({ enviadoEm: l.enviado_em, precoCentavos: l.preco_centavos, moeda: l.moeda }));
+}

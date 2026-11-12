@@ -71,3 +71,8 @@ export function listarPlacar(db: Banco, vigilanciaId: string): RegistroPlacar[] 
     observacao: l.observacao,
   }));
 }
+
+/** Apaga um registro feito a mao (ex.: digitado errado). False se nao existia. */
+export function apagarPlacar(db: Banco, id: number): boolean {
+  return Number(db.prepare('DELETE FROM placar WHERE id = ?').run(id).changes) > 0;
+}

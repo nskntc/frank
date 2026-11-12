@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { diaComSemana, haQuanto, janela, plural, duracao, horario } from './formatar';
+import { diaComSemana, haQuanto, janela, plural, duracao, horario, intervalo, quandoEmBrasilia } from './formatar';
 
 describe('formatar', () => {
   it('dia com o dia da semana', () => {
@@ -40,5 +40,19 @@ describe('duracao', () => {
     expect(duracao(11_100)).toBe('3 h 05 min');
     expect(duracao(3_600)).toBe('1 h');
     expect(duracao(2_700)).toBe('45 min');
+  });
+});
+
+describe('quandoEmBrasilia e intervalo', () => {
+  it('mostra o instante no horario de Brasilia, com o dia da semana', () => {
+    // 02:10 UTC de quinta = 23:10 de quarta em Brasilia.
+    expect(quandoEmBrasilia('2026-11-12T02:10:00.000Z')).toBe('qua 11/11 23:10');
+    expect(quandoEmBrasilia('lixo')).toBe('lixo');
+  });
+
+  it('tempo entre avisos, sem sinal', () => {
+    expect(intervalo(12 * 60_000)).toBe('12 min');
+    expect(intervalo(-(3 * 60 + 20) * 60_000)).toBe('3 h 20 min');
+    expect(intervalo(3 * 24 * 3_600_000)).toBe('3 dias');
   });
 });

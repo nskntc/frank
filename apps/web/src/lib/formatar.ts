@@ -52,3 +52,28 @@ export function duracao(segundos: number): string {
   if (h === 0) return `${resto} min`;
   return resto ? `${h} h ${String(resto).padStart(2, '0')} min` : `${h} h`;
 }
+
+const PARTES_BRASILIA = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Sao_Paulo',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+/** Instante ISO -> "qua 12/11 08:30", no horario de Brasilia. */
+export function quandoEmBrasilia(instante: string): string {
+  const d = new Date(instante);
+  if (Number.isNaN(d.getTime())) return instante;
+  const p = Object.fromEntries(PARTES_BRASILIA.formatToParts(d).map((x) => [x.type, x.value]));
+  return horario(`${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`);
+}
+
+/** Tempo entre dois avisos: "12 min", "3 h 20 min", "2 dias". Sempre positivo. */
+export function intervalo(ms: number): string {
+  const min = Math.round(Math.abs(ms) / 60_000);
+  if (min < 48 * 60) return duracao(min * 60);
+  return `${Math.round(min / (24 * 60))} dias`;
+}

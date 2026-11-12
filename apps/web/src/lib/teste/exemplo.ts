@@ -4,6 +4,8 @@ import {
   criarVigilancia,
   type OpcaoCompra,
   registrarOferta,
+  registrarAlerta,
+  registrarPlacar,
   registrarPrecosVistos,
   salvarReferencias,
   salvarAvaliacao,
@@ -242,4 +244,49 @@ export function semearHistorico(
   });
   salvarReferencias(db, vigilanciaId, 'google', 'BRL', pontos, agora);
   return rodadas;
+}
+
+/**
+ * Corrida ficticia de uma rota contra o Google (RF-20), em horas antes de `agora`: o Frank sai
+ * na frente duas vezes, o Google uma, e um preco so o Frank achou. Avisos do Frank vao para
+ * `alertas` (e-mail e Telegram do mesmo aviso: conta uma vez so).
+ */
+export function semearPlacar(db: Banco, vigilanciaId: string, agora: Date): void {
+  const h = (horas: number) => new Date(agora.getTime() - horas * 3_600_000);
+  const aviso = (horas: number, preco: number, id: string) => {
+    for (const canal of ['email', 'telegram']) {
+      registrarAlerta(
+        db,
+        {
+          vigilanciaId,
+          ofertaId: null,
+          fonte: 'kiwi',
+          idNaFonte: id,
+          canal,
+          precoCentavos: preco,
+          moeda: 'BRL',
+          sucesso: true,
+        },
+        h(horas),
+      );
+    }
+  };
+  const google = (horas: number, preco: number, confirmado: boolean, observacao: string | null) =>
+    registrarPlacar(db, {
+      vigilanciaId,
+      quem: 'google',
+      vistoEm: h(horas),
+      precoCentavos: preco,
+      moeda: 'BRL',
+      confirmado,
+      observacao,
+    });
+
+  aviso(20 * 24, 104_000, 'p1');
+  google(20 * 24 - 5, 104_900, true, null);
+  google(14 * 24, 99_800, false, 'só aparecia com escala longa');
+  aviso(13 * 24 + 2, 99_000, 'p2');
+  aviso(6 * 24, 89_000, 'p3');
+  google(6 * 24 - 3.5, 89_500, true, null);
+  aviso(18, 75_000, 'p4');
 }
