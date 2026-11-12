@@ -120,7 +120,11 @@ function mudouAViagem(antes: NovaVigilancia, depois: NovaVigilancia): boolean {
 }
 
 /** Valida pelo schema antes de gravar: nada fora do formato entra no banco. */
-export function criarVigilancia(db: Banco, nova: NovaVigilancia, agora: Date = new Date()): Vigilancia {
+export function criarVigilancia(
+  db: Banco,
+  nova: NovaVigilancia,
+  agora: Date = new Date(),
+): Vigilancia {
   const valida = novaVigilanciaSchema.parse(nova);
   const id = randomUUID();
   const instante = agora.toISOString();
@@ -145,8 +149,7 @@ export function criarVigilancia(db: Banco, nova: NovaVigilancia, agora: Date = n
 
 export function obterVigilancia(db: Banco, id: string): Vigilancia | null {
   const linha = db.prepare('SELECT * FROM vigilancias WHERE id = ?').get(id) as
-    | LinhaVigilancia
-    | undefined;
+    LinhaVigilancia | undefined;
   return linha ? paraVigilancia(linha) : null;
 }
 
@@ -172,7 +175,10 @@ export function atualizarVigilancia(
   return emTransacao(db, () => {
     const antes = obterVigilancia(db, id);
     if (!antes) return null;
-    const historicoDesde = mudouAViagem(antes, valida) ? instante : antes.historicoDesde;
+    const mudou = mudouAViagem(antes, valida);
+    const historicoDesde = mudou ? instante : antes.historicoDesde;
+    // Viagem nova (outros pares): o rodizio recomeca do primeiro par, num ciclo novo.
+    if (mudou) gravarRodizio(db, id, null);
     db.prepare(
       `UPDATE vigilancias SET descricao = ?, origens = ?, destinos = ?, ida_de = ?, ida_ate = ?,
          volta_de = ?, volta_ate = ?, adultos = ?, malas_despachadas = ?, max_escalas = ?,
@@ -185,11 +191,41 @@ export function atualizarVigilancia(
 }
 
 /** Pausar (false) ou retomar (true). Devolve false se a vigilancia nao existe. */
-export function definirAtiva(db: Banco, id: string, ativa: boolean, agora: Date = new Date()): boolean {
+export function definirAtiva(
+  db: Banco,
+  id: string,
+  ativa: boolean,
+  agora: Date = new Date(),
+): boolean {
   const r = db
     .prepare('UPDATE vigilancias SET ativa = ?, atualizada_em = ? WHERE id = ?')
     .run(ativa ? 1 : 0, agora.toISOString(), id);
   return r.changes > 0;
+}
+
+/**
+ * Onde o rodizio de pares parou (issue #19): o id de rodada do ciclo em andamento e o indice do
+ * proximo par. Null = sem ciclo em andamento (a proxima rodada comeca do primeiro par).
+ */
+export interface Rodizio {
+  ciclo: string;
+  proximoPar: number;
+}
+
+export function obterRodizio(db: Banco, id: string): Rodizio | null {
+  const l = db.prepare('SELECT ciclo, proximo_par FROM vigilancias WHERE id = ?').get(id) as
+    { ciclo: string | null; proximo_par: number } | undefined;
+  if (!l?.ciclo || l.proximo_par < 1) return null;
+  return { ciclo: l.ciclo, proximoPar: l.proximo_par };
+}
+
+/** Grava onde o rodizio parou; null fecha o ciclo (todos os pares cobertos). */
+export function gravarRodizio(db: Banco, id: string, r: Rodizio | null): void {
+  db.prepare('UPDATE vigilancias SET ciclo = ?, proximo_par = ? WHERE id = ?').run(
+    r?.ciclo ?? null,
+    r?.proximoPar ?? 0,
+    id,
+  );
 }
 
 /** O vigia terminou uma rodada desta vigilancia (com sucesso ou nao) e como foi. */
@@ -199,11 +235,9 @@ export function marcarRodada(
   agora: Date = new Date(),
   resultado: ResultadoRodadaVigilancia | null = null,
 ): void {
-  db.prepare('UPDATE vigilancias SET ultima_rodada_em = ?, ultima_rodada_resultado = ? WHERE id = ?').run(
-    agora.toISOString(),
-    resultado ? JSON.stringify(resultado) : null,
-    id,
-  );
+  db.prepare(
+    'UPDATE vigilancias SET ultima_rodada_em = ?, ultima_rodada_resultado = ? WHERE id = ?',
+  ).run(agora.toISOString(), resultado ? JSON.stringify(resultado) : null, id);
 }
 
 /**

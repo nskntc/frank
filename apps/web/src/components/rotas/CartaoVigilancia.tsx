@@ -1,5 +1,6 @@
 import { formatarReais } from '@frank/dominio';
 import Link from 'next/link';
+import { descreverRodizio, emHoras } from '@/lib/estimativa';
 import { haQuanto, janela } from '@/lib/formatar';
 import type { VigilanciaNaTela } from './tipos';
 
@@ -54,10 +55,13 @@ export function CartaoVigilancia({ v, ocupado, aoPausar, aoEditar, aoApagar }: P
       >
         {e.texto}
       </p>
-      {!v.estimativa.cabeNoTeto && (
-        <p className="mt-1 text-sm text-[var(--color-aviso)]">
-          Até {v.estimativa.consultasPorDia} consultas por dia: passa do teto, parte das rotas fica
-          sem checagem.
+      {v.estimativa.ajustado && (
+        <p className="mt-1 text-sm text-[var(--color-texto-suave)]">
+          Rota ampla: o Frank reveza, {descreverRodizio(v.estimativa)}
+          {v.estimativa.intervaloMinutos !== v.intervaloMinutos
+            ? `, checando a cada ${emHoras(v.estimativa.intervaloMinutos)}`
+            : ''}
+          .
         </p>
       )}
       <div className="mt-3 flex flex-wrap gap-2">

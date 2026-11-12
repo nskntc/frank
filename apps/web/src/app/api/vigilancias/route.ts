@@ -1,6 +1,6 @@
 import { criarVigilancia, listarVigilancias } from '@frank/banco';
 import { novaVigilanciaSchema } from '@frank/contratos';
-import { estimarConsultas } from '@/lib/estimativa';
+import { estimarConsultas, limitesDoAmbiente } from '@/lib/estimativa';
 import { pedidoDoPainel } from '@/lib/servidor/origem';
 import { banco } from '@/lib/servidor/recursos';
 import { falha, ok, recusado } from '@/lib/servidor/resposta';
@@ -8,12 +8,22 @@ import { falha, ok, recusado } from '@/lib/servidor/resposta';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/** As vigilancias, com a estimativa de consultas por dia de cada uma. */
+/**
+ * As vigilancias, com a estimativa de consultas por dia de cada uma junto com as outras ativas
+ * (a pausada, como se fosse retomada).
+ */
 export async function GET(request: Request) {
   if (!pedidoDoPainel(request.headers)) return recusado();
-  const vigilancias = listarVigilancias(banco()).map((v) => ({
+  const todas = listarVigilancias(banco());
+  const ativas = todas.filter((v) => v.ativa);
+  const limites = limitesDoAmbiente();
+  const vigilancias = todas.map((v) => ({
     ...v,
-    estimativa: estimarConsultas(v),
+    estimativa: estimarConsultas(
+      v,
+      ativas.filter((o) => o.id !== v.id),
+      limites,
+    ),
   }));
   return ok(vigilancias);
 }

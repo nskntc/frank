@@ -1,3 +1,4 @@
+import { descreverRodizio, emHoras } from '@/lib/estimativa';
 import { Detalhes } from './Detalhes';
 import type { Plano } from './tipos';
 
@@ -37,14 +38,21 @@ export function CartaoPlano({ plano, salvando, editando, aoSalvar, aoCorrigir }:
         </div>
       )}
 
-      <p
-        className={`mt-4 text-sm ${estimativa.cabeNoTeto ? 'text-[var(--color-texto-suave)]' : 'text-[var(--color-aviso)]'}`}
-      >
-        Até {estimativa.consultasPorDia} consultas por dia ({estimativa.pares}{' '}
-        {estimativa.pares === 1 ? 'par' : 'pares'} de aeroportos).
-        {!estimativa.cabeNoTeto &&
-          ' Passa do teto de 300 por dia: parte das rotas vai ficar sem checagem. Tire alguns destinos ou aumente o intervalo.'}
-      </p>
+      <div className="mt-4 space-y-1 text-sm text-[var(--color-texto-suave)]">
+        <p>
+          Até {estimativa.consultasPorDia} consultas por dia ({estimativa.pares}{' '}
+          {estimativa.pares === 1 ? 'par' : 'pares'} de aeroportos).
+        </p>
+        {estimativa.ajustado && (
+          <p>
+            Para caber no limite diário de consultas, o Frank reveza: {descreverRodizio(estimativa)}
+            {estimativa.intervaloMinutos !== plano.vigilancia.intervaloMinutos
+              ? `, com checagem a cada ${emHoras(estimativa.intervaloMinutos)} em vez de ${emHoras(plano.vigilancia.intervaloMinutos)}`
+              : ''}
+            . Quer todos em toda checagem? Tire alguns destinos.
+          </p>
+        )}
+      </div>
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         <button

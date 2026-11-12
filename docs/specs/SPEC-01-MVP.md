@@ -20,7 +20,7 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 
 | Id | Requisito | Aceite |
 |---|---|---|
-| RF-04 | Vigia consulta a fonte no intervalo da vigilância | padrão 60 min, mínimo 30 *(calibrar)*; teto diário de consultas por fonte |
+| RF-04 | Vigia consulta a fonte no intervalo da vigilância | padrão 60 min, mínimo 30 *(calibrar)*; teto diário de consultas por fonte; rota ampla reveza os pares (e, se preciso, espaça as checagens) para caber em 80% do teto, dividido entre as rotas ativas; o painel mostra o custo antes de salvar (#19) |
 | RF-05 | Busca dividida por companhia e aeroporto | uma vigilância São Paulo → Recife traz Azul, LATAM e Gol, não só a primeira |
 | RF-06 | Todo preço visto vai para o histórico | hora, fonte, voo, companhia, escalas, malas, preço em centavos |
 

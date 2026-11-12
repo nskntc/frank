@@ -6,8 +6,10 @@ import {
   atualizarVigilancia,
   criarVigilancia,
   definirAtiva,
+  gravarRodizio,
   listarVigilancias,
   marcarRodada,
+  obterRodizio,
   obterVigilancia,
   vigilanciasDevidas,
 } from './vigilancias.js';
@@ -35,7 +37,13 @@ describe('vigilancias', () => {
 
   it('guarda o resultado da ultima rodada', () => {
     const v = criarVigilancia(db, vigilanciaExemplo);
-    const resultado = { consultas: 2, itinerarios: 0, erros: 2, puladasPorTeto: 0, ultimoErro: 'kiwi: HTTP 503' };
+    const resultado = {
+      consultas: 2,
+      itinerarios: 0,
+      erros: 2,
+      puladasPorTeto: 0,
+      ultimoErro: 'kiwi: HTTP 503',
+    };
     marcarRodada(db, v.id, instante('2026-11-11T12:00:00Z'), resultado);
     expect(obterVigilancia(db, v.id)?.ultimaRodadaResultado).toEqual(resultado);
   });
@@ -43,15 +51,21 @@ describe('vigilancias', () => {
   it('data de rodada ilegivel conta como vencida, para nunca parar para sempre', () => {
     const v = criarVigilancia(db, vigilanciaExemplo);
     db.prepare(`UPDATE vigilancias SET ultima_rodada_em = 'lixo' WHERE id = ?`).run(v.id);
-    expect(vigilanciasDevidas(db, instante('2026-11-11T12:00:00Z')).map((x) => x.id)).toEqual([v.id]);
+    expect(vigilanciasDevidas(db, instante('2026-11-11T12:00:00Z')).map((x) => x.id)).toEqual([
+      v.id,
+    ]);
   });
 
   it('so fica devida de novo depois do intervalo, mesmo que a rodada tenha falhado', () => {
     const v = criarVigilancia(db, vigilanciaExemplo); // intervalo de 60 min
-    expect(vigilanciasDevidas(db, instante('2026-11-11T12:00:00Z')).map((x) => x.id)).toEqual([v.id]);
+    expect(vigilanciasDevidas(db, instante('2026-11-11T12:00:00Z')).map((x) => x.id)).toEqual([
+      v.id,
+    ]);
     marcarRodada(db, v.id, instante('2026-11-11T12:00:00Z'));
     expect(vigilanciasDevidas(db, instante('2026-11-11T12:59:00Z'))).toHaveLength(0);
-    expect(vigilanciasDevidas(db, instante('2026-11-11T13:00:00Z')).map((x) => x.id)).toEqual([v.id]);
+    expect(vigilanciasDevidas(db, instante('2026-11-11T13:00:00Z')).map((x) => x.id)).toEqual([
+      v.id,
+    ]);
   });
 
   it('nao devolve vigilancia pausada e poe a mais atrasada primeiro', () => {
@@ -61,7 +75,10 @@ describe('vigilancias', () => {
     marcarRodada(db, a.id, instante('2026-11-11T10:00:00Z'));
     marcarRodada(db, b.id, instante('2026-11-11T09:00:00Z'));
     definirAtiva(db, c.id, false);
-    expect(vigilanciasDevidas(db, instante('2026-11-11T12:00:00Z')).map((x) => x.id)).toEqual([b.id, a.id]);
+    expect(vigilanciasDevidas(db, instante('2026-11-11T12:00:00Z')).map((x) => x.id)).toEqual([
+      b.id,
+      a.id,
+    ]);
   });
 
   it('recusa vigilancia fora do formato', () => {
@@ -87,7 +104,10 @@ describe('vigilancias', () => {
 
   it.each([
     ['destino', { destinos: ['SSA'] }],
-    ['datas', { idaDe: '2027-07-10', idaAte: '2027-07-10', voltaDe: '2027-07-17', voltaAte: '2027-07-17' }],
+    [
+      'datas',
+      { idaDe: '2027-07-10', idaAte: '2027-07-10', voltaDe: '2027-07-17', voltaAte: '2027-07-17' },
+    ],
     ['malas', { malasDespachadas: 1 }],
     ['moeda', { moeda: 'USD' }],
   ])('mudar %s recomeca o historico', (_nome, mudanca) => {
@@ -114,5 +134,25 @@ describe('vigilancias', () => {
     expect(atualizarVigilancia(db, 'nao-existe', vigilanciaExemplo)).toBeNull();
     expect(definirAtiva(db, 'nao-existe', false)).toBe(false);
     expect(apagarVigilancia(db, 'nao-existe')).toBe(false);
+  });
+});
+
+describe('rodizio de pares', () => {
+  it('sem ciclo: null; grava, le e fecha', () => {
+    const { id } = criarVigilancia(db, vigilanciaExemplo, instante('2026-11-11T12:00:00.000Z'));
+    expect(obterRodizio(db, id)).toBeNull();
+    gravarRodizio(db, id, { ciclo: '2026-11-11T13:00:00.000Z', proximoPar: 3 });
+    expect(obterRodizio(db, id)).toEqual({ ciclo: '2026-11-11T13:00:00.000Z', proximoPar: 3 });
+    gravarRodizio(db, id, null);
+    expect(obterRodizio(db, id)).toBeNull();
+  });
+
+  it('mudar a viagem recomeca o rodizio; mudar so o preco-alvo nao', () => {
+    const { id } = criarVigilancia(db, vigilanciaExemplo, instante('2026-11-11T12:00:00.000Z'));
+    gravarRodizio(db, id, { ciclo: 'c1', proximoPar: 2 });
+    atualizarVigilancia(db, id, { ...vigilanciaExemplo, precoAlvoCentavos: 50_000 });
+    expect(obterRodizio(db, id)).toEqual({ ciclo: 'c1', proximoPar: 2 });
+    atualizarVigilancia(db, id, { ...vigilanciaExemplo, destinos: ['SSA'] });
+    expect(obterRodizio(db, id)).toBeNull();
   });
 });

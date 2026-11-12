@@ -1,5 +1,13 @@
-import { marcarRodada, registrarPrecosVistos, vigilanciasDevidas } from '@frank/banco';
+import {
+  gravarRodizio,
+  listarVigilancias,
+  marcarRodada,
+  obterRodizio,
+  registrarPrecosVistos,
+  vigilanciasDevidas,
+} from '@frank/banco';
 import type { Itinerario, ResultadoRodadaVigilancia, Vigilancia } from '@frank/contratos';
+import { planejarConsultas, type PlanoVigilancia } from '@frank/dominio';
 import type { ConsultaVoo, FontePreco } from '@frank/fontes';
 import {
   type ContextoFonte,
@@ -62,13 +70,20 @@ export async function executarRodada(
     puladasPorTeto: 0,
     ofertas: 0,
   };
-  const rodada = agora.toISOString();
+  const planos = planosDoVigia(deps);
 
   for (const vigilancia of vigilanciasDevidas(deps.db, agora)) {
+    const plano = planos.get(vigilancia.id);
+    if (plano && !venceuNoPlano(vigilancia, plano, agora)) continue;
     resumo.vigilancias++;
     const resultado = novoResultado();
     try {
-      await rodarVigilancia(deps, vigilancia, rodada, agora, resultado);
+      // Sem plano (nao deveria acontecer: so ativas sao devidas), consulta tudo como antes.
+      const { rodada, inicio } = cicloDaRodada(deps, vigilancia, plano, agora);
+      const bases = consultasDaVigilancia(vigilancia);
+      const fatia = bases.slice(inicio, inicio + (plano?.paresPorRodada ?? bases.length));
+      const cobertos = await rodarVigilancia(deps, vigilancia, fatia, rodada, agora, resultado);
+      avancarRodizio(deps, vigilancia, rodada, inicio, cobertos, bases.length);
       if (resultado.itinerarios > 0) {
         try {
           if (await detectarNaRodada(deps, vigilancia, rodada, agora, resultado)) resumo.ofertas++;
@@ -92,30 +107,104 @@ export async function executarRodada(
         marcarRodada(deps.db, vigilancia.id, agora, resultado);
       } catch (erro) {
         resumo.erros++;
-        deps.log.erro(`não consegui marcar a rodada de "${vigilancia.descricao}": ${resumirErro(erro)}`);
+        deps.log.erro(
+          `não consegui marcar a rodada de "${vigilancia.descricao}": ${resumirErro(erro)}`,
+        );
       }
     }
   }
   return resumo;
 }
 
+/**
+ * O plano de consultas de todas as vigilancias ativas (issue #19): quantos pares cada uma consulta
+ * por rodada e de quanto em quanto tempo, para todas juntas caberem no teto diario.
+ */
+export function planosDoVigia(deps: DependenciasRodada): Map<string, PlanoVigilancia> {
+  const maxBuscas = deps.maxBuscasPorPar ?? MAX_BUSCAS_POR_PAR_PADRAO;
+  return planejarConsultas(
+    listarVigilancias(deps.db, { soAtivas: true }).map((v) => ({
+      id: v.id,
+      pares: v.origens.length * v.destinos.length,
+      buscasPorPar: v.companhias.length ? 1 : maxBuscas,
+      intervaloMinutos: v.intervaloMinutos,
+    })),
+    deps.tetoDiarioPorFonte,
+  );
+}
+
+/** Com intervalo aumentado pelo plano, a vigilancia so roda quando esse intervalo venceu. */
+function venceuNoPlano(v: Vigilancia, plano: PlanoVigilancia, agora: Date): boolean {
+  if (v.ultimaRodadaEm === null) return true;
+  const ultima = Date.parse(v.ultimaRodadaEm);
+  return Number.isNaN(ultima) || ultima + plano.intervaloMinutos * 60_000 <= agora.getTime();
+}
+
+/**
+ * Continua o ciclo em andamento (mesmo id de rodada, a partir do proximo par) ou comeca outro.
+ * Ciclo velho demais (vigia desligado por muito tempo) recomeca: precos de dias atras nao se
+ * misturam com os de agora na mesma "rodada".
+ */
+function cicloDaRodada(
+  deps: DependenciasRodada,
+  v: Vigilancia,
+  plano: PlanoVigilancia | undefined,
+  agora: Date,
+): { rodada: string; inicio: number } {
+  const novo = { rodada: agora.toISOString(), inicio: 0 };
+  const r = obterRodizio(deps.db, v.id);
+  if (!r || !plano || r.proximoPar >= plano.pares) return novo;
+  const idade = agora.getTime() - Date.parse(r.ciclo);
+  if (Number.isNaN(idade) || idade > 2 * plano.minutosParaCobrirTodos * 60_000) return novo;
+  return { rodada: r.ciclo, inicio: r.proximoPar };
+}
+
+/**
+ * Grava onde o rodizio parou. Par que nao chegou a ser consultado (teto) fica para a proxima
+ * rodada: assim nunca sao sempre os mesmos pares de fora.
+ */
+function avancarRodizio(
+  deps: DependenciasRodada,
+  v: Vigilancia,
+  rodada: string,
+  inicio: number,
+  cobertos: number,
+  pares: number,
+): void {
+  const proximo = inicio + cobertos;
+  if (cobertos === 0 && inicio === 0) return;
+  gravarRodizio(deps.db, v.id, proximo >= pares ? null : { ciclo: rodada, proximoPar: proximo });
+}
+
+/** Consulta os pares da fatia. Devolve quantos pares tiveram ao menos uma consulta. */
 async function rodarVigilancia(
   deps: DependenciasRodada,
   vigilancia: Vigilancia,
+  fatia: readonly ConsultaVoo[],
   rodada: string,
   agora: Date,
   resultado: ResultadoRodadaVigilancia,
-): Promise<void> {
+): Promise<number> {
   const maxBuscas = deps.maxBuscasPorPar ?? MAX_BUSCAS_POR_PAR_PADRAO;
+  let cobertos = 0;
 
-  for (const base of consultasDaVigilancia(vigilancia)) {
+  for (const base of fatia) {
+    const antes = resultado.consultas;
     for (const fonte of deps.fontes) {
       let excluidas: string[] = [];
       for (let busca = 0; busca < maxBuscas; busca++) {
         if (!podeConsultar(deps, fonte.nome, agora, resultado)) break;
         const consulta = excluidas.length ? { ...base, excluirCompanhias: excluidas } : base;
         resultado.consultas++;
-        const itinerarios = await consultarEGravar(deps, fonte, consulta, vigilancia, rodada, agora, resultado);
+        const itinerarios = await consultarEGravar(
+          deps,
+          fonte,
+          consulta,
+          vigilancia,
+          rodada,
+          agora,
+          resultado,
+        );
         // Com companhias escolhidas pela pessoa, nao ha o que excluir: uma busca so.
         if (itinerarios === null || base.companhias?.length) break;
         const proxima = proximaExclusao(itinerarios, fonte.limiteResultados, excluidas);
@@ -123,7 +212,11 @@ async function rodarVigilancia(
         excluidas = proxima;
       }
     }
+    // Nenhuma consulta neste par: a fonte bateu o teto. O resto fica para a proxima rodada.
+    if (resultado.consultas === antes) break;
+    cobertos++;
   }
+  return cobertos;
 }
 
 async function consultarEGravar(
@@ -135,7 +228,9 @@ async function consultarEGravar(
   agora: Date,
   resultado: ResultadoRodadaVigilancia,
 ): Promise<Itinerario[] | null> {
-  const excluindo = consulta.excluirCompanhias?.length ? ` sem ${consulta.excluirCompanhias.join(',')}` : '';
+  const excluindo = consulta.excluirCompanhias?.length
+    ? ` sem ${consulta.excluirCompanhias.join(',')}`
+    : '';
   const rotulo = `${fonte.nome} ${consulta.origem}→${consulta.destino}${excluindo}`;
 
   // 1. A busca: erro aqui e da fonte.
@@ -145,7 +240,12 @@ async function consultarEGravar(
   } catch (erro) {
     resultado.erros++;
     resultado.ultimoErro = `${rotulo}: ${resumirErro(erro)}`;
-    registrarConsultaSemLancar(deps, fonte.nome, { sucesso: false, erro: resumirErro(erro) }, agora);
+    registrarConsultaSemLancar(
+      deps,
+      fonte.nome,
+      { sucesso: false, erro: resumirErro(erro) },
+      agora,
+    );
     deps.log.aviso(resultado.ultimoErro);
     return null;
   }

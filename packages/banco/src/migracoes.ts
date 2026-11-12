@@ -172,4 +172,12 @@ export const MIGRACOES: readonly string[] = [
     atualizado_em TEXT NOT NULL
   );
   `,
+
+  // 6 — rodizio de pares (issue #19): uma vigilancia ampla consulta parte dos pares em cada
+  // rodada. ciclo e o id de rodada compartilhado pelas rodadas parciais (o detector e o preco
+  // normal veem o ciclo inteiro); proximo_par e de onde a proxima rodada continua.
+  `
+  ALTER TABLE vigilancias ADD COLUMN ciclo TEXT;
+  ALTER TABLE vigilancias ADD COLUMN proximo_par INTEGER NOT NULL DEFAULT 0;
+  `,
 ];

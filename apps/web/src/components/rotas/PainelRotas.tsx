@@ -52,7 +52,7 @@ export function PainelRotas() {
     setLendo(true);
     const r = await chamar<Plano>('/api/vigilancias/planejar', {
       method: 'POST',
-      body: JSON.stringify({ pedido }),
+      body: JSON.stringify(editandoId ? { pedido, editandoId } : { pedido }),
     });
     setLendo(false);
     if (r.ok) setPlano(r.dados);

@@ -121,6 +121,10 @@ de todo commit.
 - **Preço normal conta rodadas, não itinerários:** uma busca traz dezenas de voos; o histórico
   usa o menor preço de cada rodada do vigia (`menoresPorRodada`). Todas as buscas de um ciclo
   gravam a mesma `rodada`
+- **Rota ampla reveza pares (#19):** cada rodada cobre uma fatia (`planejarConsultas`, em
+  `@frank/dominio`, a mesma conta no vigia e no painel); as rodadas parciais gravam o id do ciclo
+  (`vigilancias.ciclo`), nunca o próprio instante. Senão o preço normal compara fatias diferentes
+  e o destino barato vira oferta falsa
 - **`node:sqlite` mostra "ExperimentalWarning"** ao iniciar: é esperado, não é erro
 - **Transação no banco é `emTransacao`** (BEGIN IMMEDIATE, aninha com savepoint); nunca `BEGIN` à mão
 - **Conexão aberta no Windows prende o arquivo:** feche o banco em todo caminho de erro (e nos testes)
