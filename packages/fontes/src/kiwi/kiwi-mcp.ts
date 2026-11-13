@@ -6,6 +6,7 @@ import {
   type FontePreco,
   FonteIndisponivelError,
   RespostaInvalidaError,
+  semResposta,
 } from '../fonte.js';
 import { type ItinerarioKiwi, respostaRpcKiwi, resultadoBuscaKiwi } from './formato.js';
 
@@ -181,7 +182,9 @@ export class KiwiMcp implements FontePreco {
         signal: AbortSignal.timeout(this.opcoes.tempoLimiteMs ?? TEMPO_LIMITE_MS),
       });
     } catch (erro) {
-      throw new FonteIndisponivelError(NOME, 'sem resposta (rede ou tempo limite)', { cause: erro });
+      throw new FonteIndisponivelError(NOME, semResposta(erro, this.opcoes.tempoLimiteMs ?? TEMPO_LIMITE_MS), {
+        cause: erro,
+      });
     }
     if (!resposta.ok) throw new FonteIndisponivelError(NOME, `HTTP ${resposta.status}`);
     return lerResposta(await resposta.text());

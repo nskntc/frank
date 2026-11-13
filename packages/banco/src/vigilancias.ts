@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
+  falhouInteira,
   type NovaVigilancia,
   novaVigilanciaSchema,
   type ResultadoRodadaVigilancia,
@@ -43,6 +44,7 @@ function lerResultado(json: string | null): ResultadoRodadaVigilancia | null {
       erros: r.erros,
       puladasPorTeto: r.puladasPorTeto ?? 0,
       ultimoErro: r.ultimoErro ?? null,
+      ...(r.repeticao ? { repeticao: true } : {}),
     };
   } catch {
     return null;
@@ -240,19 +242,43 @@ export function marcarRodada(
   ).run(agora.toISOString(), resultado ? JSON.stringify(resultado) : null, id);
 }
 
+/** Depois de uma rodada que falhou inteira, a tentativa extra vem neste prazo (issue #23). */
+export const REPETIR_FALHA_MINUTOS = 10;
+
+/**
+ * Minutos entre a ultima rodada e a proxima: o intervalo (o da vigilancia ou o do plano de
+ * consultas), ou REPETIR_FALHA_MINUTOS se a ultima falhou inteira e ainda nao era a repeticao.
+ */
+export function minutosAteAProxima(v: Vigilancia, intervaloMinutos = v.intervaloMinutos): number {
+  const r = v.ultimaRodadaResultado;
+  return falhouInteira(r) && !r?.repeticao
+    ? Math.min(REPETIR_FALHA_MINUTOS, intervaloMinutos)
+    : intervaloMinutos;
+}
+
+/** A proxima rodada da vigilancia ja venceu? Nunca rodou ou data ilegivel: sim. */
+export function rodadaVencida(
+  v: Vigilancia,
+  agora: Date,
+  intervaloMinutos = v.intervaloMinutos,
+): boolean {
+  if (v.ultimaRodadaEm === null) return true;
+  const ultima = Date.parse(v.ultimaRodadaEm);
+  // Data ilegivel conta como vencida: a vigilancia nunca pode ficar parada para sempre.
+  return (
+    Number.isNaN(ultima) ||
+    ultima + minutosAteAProxima(v, intervaloMinutos) * 60_000 <= agora.getTime()
+  );
+}
+
 /**
  * Vigilancias ativas cuja proxima rodada ja venceu: nunca rodaram, ou a ultima rodada foi ha
- * pelo menos `intervaloMinutos`. As que esperam ha mais tempo vem primeiro.
+ * pelo menos `intervaloMinutos` (10 min, se ela falhou inteira). As que esperam ha mais tempo
+ * vem primeiro.
  */
 export function vigilanciasDevidas(db: Banco, agora: Date = new Date()): Vigilancia[] {
-  const momento = agora.getTime();
   return listarVigilancias(db, { soAtivas: true })
-    .filter((v) => {
-      if (v.ultimaRodadaEm === null) return true;
-      const ultima = Date.parse(v.ultimaRodadaEm);
-      // Data ilegivel conta como vencida: a vigilancia nunca pode ficar parada para sempre.
-      return Number.isNaN(ultima) || ultima + v.intervaloMinutos * 60_000 <= momento;
-    })
+    .filter((v) => rodadaVencida(v, agora))
     .sort((a, b) => (a.ultimaRodadaEm ?? '').localeCompare(b.ultimaRodadaEm ?? ''));
 }
 

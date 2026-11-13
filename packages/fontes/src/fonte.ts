@@ -63,3 +63,20 @@ export class RespostaInvalidaError extends Error {
     this.name = 'RespostaInvalidaError';
   }
 }
+
+/**
+ * Por que o fetch nao trouxe resposta, em poucas palavras (issue #23): "tempo limite" (a fonte
+ * nao respondeu a tempo) ou "sem conexao" (a rede local caiu, ex.: logo depois de acordar o
+ * computador). So o codigo do erro entra na mensagem, nunca a URL (pode carregar chave).
+ */
+export function semResposta(erro: unknown, tempoLimiteMs: number): string {
+  const nome = erro instanceof Error ? erro.name : '';
+  if (nome === 'TimeoutError' || nome === 'AbortError') {
+    return `sem resposta em ${Math.round(tempoLimiteMs / 1000)} s (tempo limite)`;
+  }
+  const causa = (erro as { cause?: { code?: unknown } } | null)?.cause;
+  const codigo = causa?.code ?? (erro as { code?: unknown } | null)?.code;
+  return typeof codigo === 'string' && /^[A-Z][A-Z0-9_]{1,39}$/.test(codigo)
+    ? `sem conexão (${codigo})`
+    : 'sem conexão';
+}

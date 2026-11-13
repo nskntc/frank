@@ -1,4 +1,4 @@
-import type { Vigilancia } from '@frank/contratos';
+import { falhouInteira, type Vigilancia } from '@frank/contratos';
 import { haQuanto } from './formatar';
 
 /**
@@ -8,7 +8,7 @@ import { haQuanto } from './formatar';
 export type Situacao =
   | { tipo: 'pausada' }
   | { tipo: 'nunca_rodou' }
-  | { tipo: 'falhou'; quando: string; erro: string | null }
+  | { tipo: 'falhou'; quando: string; erro: string | null; tentaLogo: boolean }
   | { tipo: 'sem_voos'; quando: string; nuncaAchou: boolean; sugestoes: Sugestao[] }
   | { tipo: 'ok'; quando: string; voos: number; erros: number; erro: string | null };
 
@@ -134,7 +134,12 @@ export function situacaoDaRota(v: Vigilancia, jaAchouVoo: boolean): Situacao {
   const r = v.ultimaRodadaResultado;
   if (!r) return { tipo: 'ok', quando, voos: 0, erros: 0, erro: null };
   if (r.itinerarios === 0 && (r.erros > 0 || r.puladasPorTeto > 0)) {
-    return { tipo: 'falhou', quando, erro: r.ultimoErro };
+    return {
+      tipo: 'falhou',
+      quando,
+      erro: r.ultimoErro,
+      tentaLogo: falhouInteira(r) && !r.repeticao,
+    };
   }
   if (r.itinerarios === 0 && r.consultas > 0) {
     return { tipo: 'sem_voos', quando, nuncaAchou: !jaAchouVoo, sugestoes: sugestoesSemVoos(v) };

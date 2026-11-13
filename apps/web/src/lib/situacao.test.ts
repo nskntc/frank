@@ -52,7 +52,7 @@ describe('situacaoDaRota', () => {
         },
         false,
       ),
-    ).toMatchObject({ tipo: 'falhou', erro: 'kiwi: HTTP 503' });
+    ).toMatchObject({ tipo: 'falhou', erro: 'kiwi: HTTP 503', tentaLogo: true });
     expect(situacaoDaRota(V, false)).toMatchObject({ tipo: 'sem_voos', nuncaAchou: true });
     expect(
       situacaoDaRota(

@@ -102,6 +102,18 @@ describe('executarRodada', () => {
     const outraVez = await executarRodada(deps([fonte]), new Date('2026-11-11T12:01:00.000Z'));
     expect(outraVez.vigilancias).toBe(0);
     expect(fonte.consultas).toHaveLength(2);
+
+    // Uma tentativa extra em 10 min (issue #23); falhando de novo, so no intervalo normal.
+    expect(
+      (await executarRodada(deps([fonte]), new Date('2026-11-11T12:10:00.000Z'))).vigilancias,
+    ).toBe(1);
+    expect(obterVigilancia(db, v.id)?.ultimaRodadaResultado?.repeticao).toBe(true);
+    expect(
+      (await executarRodada(deps([fonte]), new Date('2026-11-11T12:20:00.000Z'))).vigilancias,
+    ).toBe(0);
+    expect(
+      (await executarRodada(deps([fonte]), new Date('2026-11-11T13:10:00.000Z'))).vigilancias,
+    ).toBe(1);
   });
 
   it('teto de 24 h atingido fica visivel para o painel, nao so no log', async () => {

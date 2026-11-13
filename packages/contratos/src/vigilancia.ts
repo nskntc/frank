@@ -81,4 +81,17 @@ export interface ResultadoRodadaVigilancia {
   puladasPorTeto: number;
   /** Mensagem curta do ultimo erro da rodada, sem token nem dado pessoal. */
   ultimoErro: string | null;
+  /**
+   * Esta rodada foi a tentativa extra depois de uma rodada que falhou inteira (issue #23). Se
+   * falhar de novo, a proxima espera o intervalo normal: uma tentativa extra por falha.
+   */
+  repeticao?: boolean;
+}
+
+/**
+ * Todas as consultas da rodada falharam (ex.: rede fora logo depois de acordar o computador).
+ * Rodada so pulada por teto (zero consultas) nao conta: tentar antes nao adianta (issue #23).
+ */
+export function falhouInteira(r: ResultadoRodadaVigilancia | null): boolean {
+  return r !== null && r.consultas > 0 && r.itinerarios === 0 && r.erros >= r.consultas;
 }

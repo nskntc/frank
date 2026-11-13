@@ -1,7 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { lerDia } from '@frank/dominio';
 import { describe, expect, it } from 'vitest';
-import { FonteIndisponivelError, RespostaInvalidaError, type ConsultaVoo } from '../fonte.js';
+import {
+  FonteIndisponivelError,
+  RespostaInvalidaError,
+  semResposta,
+  type ConsultaVoo,
+} from '../fonte.js';
 import { KiwiMcp, lerResposta, montarArgumentos } from './kiwi-mcp.js';
 
 const gravada = readFileSync(new URL('./fixtures/busca-sao-rec.sse.txt', import.meta.url), 'utf8');
@@ -101,7 +106,11 @@ describe('lerResposta com erro', () => {
   });
 
   it('erro JSON-RPC vira fonte indisponivel', () => {
-    const corpo = respostaSse({ jsonrpc: '2.0', id: 1, error: { code: -32000, message: 'limite' } });
+    const corpo = respostaSse({
+      jsonrpc: '2.0',
+      id: 1,
+      error: { code: -32000, message: 'limite' },
+    });
     expect(() => lerResposta(corpo)).toThrow(FonteIndisponivelError);
   });
 
@@ -124,7 +133,10 @@ describe('lerResposta com erro', () => {
   });
 
   it('link de compra de outro dominio vira resposta invalida', () => {
-    const adulterada = gravada.replace('https://www.kiwi.com/u/exemplo1', 'https://kiwi.com.exemplo-falso.example/x');
+    const adulterada = gravada.replace(
+      'https://www.kiwi.com/u/exemplo1',
+      'https://kiwi.com.exemplo-falso.example/x',
+    );
     expect(() => lerResposta(adulterada)).toThrow(RespostaInvalidaError);
   });
 
@@ -152,6 +164,31 @@ describe('KiwiMcp.buscar', () => {
       },
     });
     await expect(fonte.buscar(consulta)).rejects.toBeInstanceOf(FonteIndisponivelError);
+  });
+
+  it('diz se foi falta de conexao ou tempo limite (issue #23)', async () => {
+    const semRede = new KiwiMcp({
+      fetch: async () => {
+        throw new TypeError('fetch failed', { cause: { code: 'ENOTFOUND' } });
+      },
+    });
+    await expect(semRede.buscar(consulta)).rejects.toThrow('kiwi: sem conexão (ENOTFOUND)');
+    const lenta = new KiwiMcp({
+      tempoLimiteMs: 30_000,
+      fetch: async () => {
+        throw new DOMException('signal timed out', 'TimeoutError');
+      },
+    });
+    await expect(lenta.buscar(consulta)).rejects.toThrow(
+      'kiwi: sem resposta em 30 s (tempo limite)',
+    );
+  });
+});
+
+describe('semResposta', () => {
+  it('codigo estranho nao entra na mensagem', () => {
+    expect(semResposta({ cause: { code: 'https://x?api_key=segredo' } }, 1000)).toBe('sem conexão');
+    expect(semResposta(new Error('x'), 1000)).toBe('sem conexão');
   });
 });
 

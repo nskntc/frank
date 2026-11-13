@@ -3,10 +3,16 @@ import {
   listarVigilancias,
   marcarRodada,
   obterRodizio,
+  rodadaVencida,
   registrarPrecosVistos,
   vigilanciasDevidas,
 } from '@frank/banco';
-import type { Itinerario, ResultadoRodadaVigilancia, Vigilancia } from '@frank/contratos';
+import {
+  falhouInteira,
+  type Itinerario,
+  type ResultadoRodadaVigilancia,
+  type Vigilancia,
+} from '@frank/contratos';
 import { planejarConsultas, type PlanoVigilancia } from '@frank/dominio';
 import type { ConsultaVoo, FontePreco } from '@frank/fontes';
 import {
@@ -77,6 +83,8 @@ export async function executarRodada(
     if (plano && !venceuNoPlano(vigilancia, plano, agora)) continue;
     resumo.vigilancias++;
     const resultado = novoResultado();
+    // Depois de uma rodada que falhou inteira, esta e a tentativa extra (issue #23).
+    if (falhouInteira(vigilancia.ultimaRodadaResultado)) resultado.repeticao = true;
     try {
       // Sem plano (nao deveria acontecer: so ativas sao devidas), consulta tudo como antes.
       const { rodada, inicio } = cicloDaRodada(deps, vigilancia, plano, agora);
@@ -135,9 +143,7 @@ export function planosDoVigia(deps: DependenciasRodada): Map<string, PlanoVigila
 
 /** Com intervalo aumentado pelo plano, a vigilancia so roda quando esse intervalo venceu. */
 function venceuNoPlano(v: Vigilancia, plano: PlanoVigilancia, agora: Date): boolean {
-  if (v.ultimaRodadaEm === null) return true;
-  const ultima = Date.parse(v.ultimaRodadaEm);
-  return Number.isNaN(ultima) || ultima + plano.intervaloMinutos * 60_000 <= agora.getTime();
+  return rodadaVencida(v, agora, plano.intervaloMinutos);
 }
 
 /**

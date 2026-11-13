@@ -1,7 +1,7 @@
 import type { Itinerario, Perna } from '@frank/contratos';
 import { type Centavos, reaisParaCentavos } from '@frank/dominio';
 import { z } from 'zod';
-import { type ConsultaVoo, FonteIndisponivelError, RespostaInvalidaError } from '../fonte.js';
+import { type ConsultaVoo, FonteIndisponivelError, RespostaInvalidaError, semResposta } from '../fonte.js';
 import { buscaGoogle, type OpcaoGoogle, reservaGoogle } from './formato.js';
 import { vendedorEstrangeiro } from './vendedores.js';
 
@@ -91,7 +91,9 @@ export class SerpApiGoogleFlights {
       });
     } catch (erro) {
       // Mensagem sem a URL: ela carrega a chave.
-      throw new FonteIndisponivelError(NOME, 'sem resposta (rede ou tempo limite)', { cause: erro });
+      throw new FonteIndisponivelError(NOME, semResposta(erro, this.opcoes.tempoLimiteMs ?? TEMPO_LIMITE_MS), {
+        cause: erro,
+      });
     }
     if (resposta.status === 401 || resposta.status === 403) {
       throw new FonteIndisponivelError(NOME, 'chave recusada (confira SERPAPI_API_KEY)');

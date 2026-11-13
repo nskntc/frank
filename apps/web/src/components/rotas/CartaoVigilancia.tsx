@@ -25,7 +25,11 @@ function estado(s: Situacao): { texto: string; alerta: boolean } | null {
         alerta: false,
       };
     case 'falhou':
-      return { texto: `Última checagem ${s.quando}: falhou. ${s.erro ?? ''}`.trim(), alerta: true };
+      return {
+        texto:
+          `Última checagem ${s.quando}: falhou. ${s.erro ?? ''}${s.tentaLogo ? ' Nova tentativa em até 10 min.' : ''}`.trim(),
+        alerta: true,
+      };
     case 'sem_voos':
       return null; // AvisoSemVoos
     case 'ok': {

@@ -156,3 +156,42 @@ describe('rodizio de pares', () => {
     expect(obterRodizio(db, id)).toBeNull();
   });
 });
+
+describe('tentativa extra depois de falha inteira (issue #23)', () => {
+  const falha = {
+    consultas: 2,
+    itinerarios: 0,
+    erros: 2,
+    puladasPorTeto: 0,
+    ultimoErro: 'kiwi: sem conexão',
+  };
+  const devidas = (iso: string) => vigilanciasDevidas(db, instante(iso)).length;
+
+  it('rodada que falhou inteira volta em 10 min; a repeticao que falha espera o intervalo', () => {
+    const v = criarVigilancia(db, vigilanciaExemplo); // 60 min
+    marcarRodada(db, v.id, instante('2026-11-11T12:00:00Z'), falha);
+    expect(devidas('2026-11-11T12:09:00Z')).toBe(0);
+    expect(devidas('2026-11-11T12:10:00Z')).toBe(1);
+    marcarRodada(db, v.id, instante('2026-11-11T12:10:00Z'), { ...falha, repeticao: true });
+    expect(obterVigilancia(db, v.id)?.ultimaRodadaResultado?.repeticao).toBe(true);
+    expect(devidas('2026-11-11T12:20:00Z')).toBe(0);
+    expect(devidas('2026-11-11T13:10:00Z')).toBe(1);
+  });
+
+  it('falha parcial ou so teto nao antecipa', () => {
+    const v = criarVigilancia(db, vigilanciaExemplo);
+    marcarRodada(db, v.id, instante('2026-11-11T12:00:00Z'), {
+      ...falha,
+      itinerarios: 5,
+      erros: 1,
+    });
+    expect(devidas('2026-11-11T12:10:00Z')).toBe(0);
+    marcarRodada(db, v.id, instante('2026-11-11T12:00:00Z'), {
+      ...falha,
+      consultas: 0,
+      erros: 0,
+      puladasPorTeto: 2,
+    });
+    expect(devidas('2026-11-11T12:10:00Z')).toBe(0);
+  });
+});
