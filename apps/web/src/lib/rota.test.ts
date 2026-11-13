@@ -147,3 +147,51 @@ describe('mais barato agora', () => {
     expect(d?.dias).toEqual([{ dia: '2027-01-20', frank: 100_000, google: null, link: null }]);
   });
 });
+
+describe('preferencia na frente (issue #21)', () => {
+  it('o mais barato que atende vai primeiro; os outros seguem pelo preco, com o motivo', () => {
+    const v = criarVigilancia(db, {
+      ...(EXEMPLOS[0] as (typeof EXEMPLOS)[number]).vig,
+      filtros: {
+        duracaoMaximaHoras: null,
+        idaPartidaApos: null,
+        idaChegadaAte: '17:00',
+        voltaPartidaApos: null,
+        voltaChegadaAte: null,
+      },
+    });
+    const base = it0();
+    const comChegada = (id: string, preco: number, chegada: string) => ({
+      ...base,
+      idNaFonte: id,
+      precoCentavos: preco,
+      linkCompra: `https://www.kiwi.com/u/${id}`,
+      ida: { ...base.ida, chegada: `${base.ida.chegada.slice(0, 11)}${chegada}:00` },
+    });
+    registrarPrecosVistos(
+      db,
+      v.id,
+      'r1',
+      [
+        comChegada('barato-tarde', 80_000, '22:10'),
+        comChegada('medio-tarde', 85_000, '21:00'),
+        comChegada('caro-cedo', 95_000, '16:40'),
+        comChegada('mais-caro', 99_000, '23:00'),
+      ],
+      new Date('2027-01-20T14:00:00Z'),
+    );
+    const agora = detalheDaRota(db, v.id, AGORA)?.agora ?? [];
+    expect(agora.map((x) => x.itinerario.idNaFonte)).toEqual([
+      'caro-cedo',
+      'barato-tarde',
+      'medio-tarde',
+    ]);
+    expect(agora[0]?.foraDaPreferencia).toEqual([]);
+    expect(agora[1]?.foraDaPreferencia).toEqual(['ida chega 22:10 (você prefere até 17:00)']);
+  });
+
+  it('sem preferencia, nada muda: so os mais baratos', () => {
+    registrarPrecosVistos(db, id, 'r1', [it0()], new Date('2027-01-20T14:00:00Z'));
+    expect(detalheDaRota(db, id, AGORA)?.agora[0]?.foraDaPreferencia).toBeNull();
+  });
+});

@@ -9,6 +9,8 @@ import type { VooNaTela } from '@/lib/rota';
  */
 export function MaisBaratoAgora({ voos }: { voos: VooNaTela[] }) {
   const quando = voos[0]?.vistoEm;
+  const comPreferencia = voos.some((v) => v.foraDaPreferencia !== null);
+  const algumNoJeito = voos.some((v) => v.foraDaPreferencia?.length === 0);
   return (
     <section className="mt-8" aria-labelledby="mais-barato-agora">
       <h2 id="mais-barato-agora" className="text-lg font-semibold">
@@ -24,6 +26,10 @@ export function MaisBaratoAgora({ voos }: { voos: VooNaTela[] }) {
           <p className="mt-1 max-w-prose text-sm text-[var(--color-texto-suave)]">
             Os voos mais baratos da última checagem ({quando ? haQuanto(quando) : ''}). Não são
             ofertas, só o melhor preço do momento: confira o valor final no site antes de pagar.
+            {comPreferencia &&
+              (algumNoJeito
+                ? ' O primeiro é o mais barato no horário que você prefere.'
+                : ' Nenhum desta checagem bate com o horário que você prefere: estes são os mais baratos.')}
           </p>
           <ol className="mt-3 space-y-3">
             {voos.map((v) => (
@@ -32,12 +38,22 @@ export function MaisBaratoAgora({ voos }: { voos: VooNaTela[] }) {
                 className="rounded-xl border border-[var(--color-borda)] p-4 md:flex md:items-start md:gap-6"
               >
                 <div className="min-w-0 flex-1 space-y-2">
+                  {v.foraDaPreferencia?.length === 0 && (
+                    <p className="inline-flex rounded-md bg-[var(--color-destaque)]/10 px-2 py-1 text-xs font-medium text-[var(--color-destaque)]">
+                      Do jeito que você prefere
+                    </p>
+                  )}
                   <Trecho nome="Ida" p={v.itinerario.ida} />
                   {v.itinerario.volta && <Trecho nome="Volta" p={v.itinerario.volta} />}
                   <p className="text-xs text-[var(--color-texto-suave)]">
                     Mala despachada:{' '}
                     {v.itinerario.malas.despachada > 0 ? 'incluída' : 'não incluída'}
                   </p>
+                  {v.foraDaPreferencia && v.foraDaPreferencia.length > 0 && (
+                    <p className="text-xs text-[var(--color-texto-suave)]">
+                      Fora da sua preferência: {v.foraDaPreferencia.join('; ')}.
+                    </p>
+                  )}
                   {v.pegadinhas.length > 0 && (
                     <ul className="flex flex-wrap gap-2" aria-label="Cuidados">
                       {v.pegadinhas.map((p) => (

@@ -8,7 +8,6 @@ import {
   vigilanciasDevidas,
 } from '@frank/banco';
 import {
-  cabeNosFiltros,
   falhouInteira,
   type Itinerario,
   type ResultadoRodadaVigilancia,
@@ -268,15 +267,9 @@ async function consultarEGravar(
   registrarConsultaSemLancar(deps, fonte.nome, { sucesso: true }, agora);
 
   // 2. A gravacao: erro aqui e do vigia (banco, vigilancia apagada no meio), nao da fonte.
-  // 3. Filtros de horario e duracao (issue #21): so o que serve para a pessoa vira preco visto
-  // (normal, grafico, detector e "mais barato agora" falam dos mesmos voos). A resposta crua volta
-  // para a busca adaptativa, que decide pelas companhias que a fonte mostrou.
-  const servem = itinerarios.filter((it) => cabeNosFiltros(it, vigilancia.filtros));
-  const fora = itinerarios.length - servem.length;
-  if (fora > 0) resultado.foraDosFiltros = (resultado.foraDosFiltros ?? 0) + fora;
   try {
-    if (servem.length > 0) registrarPrecosVistos(deps.db, vigilancia.id, rodada, servem, agora);
-    resultado.itinerarios += servem.length;
+    registrarPrecosVistos(deps.db, vigilancia.id, rodada, itinerarios, agora);
+    resultado.itinerarios += itinerarios.length;
     return itinerarios;
   } catch (erro) {
     resultado.erros++;

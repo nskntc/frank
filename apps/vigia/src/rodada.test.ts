@@ -251,8 +251,8 @@ describe('rodizio de pares (issue #19)', () => {
   });
 });
 
-describe('filtros de horario e duracao (issue #21)', () => {
-  it('so grava o voo que cabe; conta os que ficaram de fora', async () => {
+describe('preferencias de horario e duracao (issue #21)', () => {
+  it('sao preferencia, nao corte: o voo fora da preferencia tambem e gravado', async () => {
     const v = criarVigilancia(db, {
       ...vigilanciaExemplo,
       origens: ['GRU'],
@@ -265,17 +265,9 @@ describe('filtros de horario e duracao (issue #21)', () => {
       },
     });
     const tarde = itinerario('tarde', 50_000);
-    const cedo = itinerario('cedo', 90_000);
     tarde.ida = { ...tarde.ida, chegada: '2026-12-01T22:10:00' };
-    cedo.ida = { ...cedo.ida, chegada: '2026-12-01T16:40:00' };
-    const fonte = new FonteFalsa('falsa', async () => [tarde, cedo]);
+    const fonte = new FonteFalsa('falsa', async () => [tarde, itinerario('cedo', 90_000)]);
     await executarRodada(deps([fonte]), agora);
-
-    expect(ultimaRodada(db, v.id).map((p) => p.idNaFonte)).toEqual(['cedo']);
-    expect(obterVigilancia(db, v.id)?.ultimaRodadaResultado).toMatchObject({
-      itinerarios: 1,
-      foraDosFiltros: 1,
-      erros: 0,
-    });
+    expect(ultimaRodada(db, v.id).map((p) => p.idNaFonte)).toEqual(['tarde', 'cedo']);
   });
 });

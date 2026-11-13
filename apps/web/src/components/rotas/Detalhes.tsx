@@ -29,7 +29,7 @@ export function Detalhes({ v }: { v: NovaVigilancia }) {
         ? `até ${formatarReais(v.precoAlvoCentavos)} no total`
         : 'sem alvo: avisa o que fugir do normal',
     ],
-    ['Horário e duração', descreverFiltros(v.filtros) ?? 'qualquer'],
+    ['Preferência de horário e duração', descreverFiltros(v.filtros) ?? 'qualquer'],
     ['Checagem', `a cada ${v.intervaloMinutos} min`],
   ];
   return (

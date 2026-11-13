@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   cabeNosFiltros,
   descreverFiltros,
+  foraDaPreferencia,
   filtrosSchema,
   SEM_FILTROS,
   temFiltros,
@@ -85,6 +86,21 @@ describe('cabeNosFiltros', () => {
     expect(
       cabeNosFiltros(voo(perna('2027-03-10T06:00:00', '2027-03-10T15:00:00', 9), null), F),
     ).toBe(true);
+  });
+});
+
+describe('foraDaPreferencia', () => {
+  it('diz em que o voo foge, trecho por trecho', () => {
+    const v = voo(
+      perna('2027-03-10T08:00:00', '2027-03-10T22:10:00', 15),
+      perna('2027-03-17T09:00:00', '2027-03-17T18:00:00', 9),
+    );
+    expect(foraDaPreferencia(v, F)).toEqual([
+      'ida chega 22:10 (você prefere até 17:00)',
+      'ida leva 15 h (você prefere até 12 h)',
+      'volta sai 09:00 (você prefere depois das 14:00)',
+    ]);
+    expect(foraDaPreferencia(v, undefined)).toEqual([]);
   });
 });
 

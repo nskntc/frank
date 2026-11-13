@@ -6,6 +6,7 @@ const hora = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'hora inva
 
 /**
  * Preferencias de horario e duracao da vigilancia (issue #21). Todos opcionais (null = tanto faz).
+ * Sao preferencia, nao corte: todo voo continua gravado e valendo; os que atendem vem na frente.
  * Horarios sao do relogio local de cada aeroporto, como a fonte informa e como a pessoa le no
  * cartao de embarque. Comparam so a hora do dia: chegar 16:00 no dia seguinte "cabe" no "ate
  * 17h"; quem quer evitar viagem longa usa a duracao maxima.
@@ -41,26 +42,59 @@ function horaDoDia(horarioLocal: string): string {
   return horarioLocal.slice(11, 16);
 }
 
-function pernaCabe(
+function horasDe(segundos: number): string {
+  const h = Math.floor(segundos / 3600);
+  const m = Math.round((segundos % 3600) / 60);
+  return m ? `${h} h ${m} min` : `${h} h`;
+}
+
+function motivosDaPerna(
   p: Perna,
+  nome: 'ida' | 'volta',
   partidaApos: string | null,
   chegadaAte: string | null,
   duracaoMaximaHoras: number | null,
-): boolean {
-  if (partidaApos !== null && horaDoDia(p.partida) < partidaApos) return false;
-  if (chegadaAte !== null && horaDoDia(p.chegada) > chegadaAte) return false;
-  if (duracaoMaximaHoras !== null && p.duracaoSegundos > duracaoMaximaHoras * 3600) return false;
-  return true;
+): string[] {
+  const motivos: string[] = [];
+  const sai = horaDoDia(p.partida);
+  const chega = horaDoDia(p.chegada);
+  if (partidaApos !== null && sai < partidaApos) {
+    motivos.push(`${nome} sai ${sai} (você prefere depois das ${partidaApos})`);
+  }
+  if (chegadaAte !== null && chega > chegadaAte) {
+    motivos.push(`${nome} chega ${chega} (você prefere até ${chegadaAte})`);
+  }
+  if (duracaoMaximaHoras !== null && p.duracaoSegundos > duracaoMaximaHoras * 3600) {
+    motivos.push(
+      `${nome} leva ${horasDe(p.duracaoSegundos)} (você prefere até ${duracaoMaximaHoras} h)`,
+    );
+  }
+  return motivos;
 }
 
-/** O voo atende as preferencias? Sem filtros, sempre. */
+/**
+ * Em que o voo foge das preferencias, em frases curtas para o painel. Vazio = atende tudo.
+ * Preferencia nao e corte (issue #21): o voo continua valendo, so vai para depois dos que atendem.
+ */
+export function foraDaPreferencia(it: Itinerario, f: Filtros | null | undefined): string[] {
+  if (!temFiltros(f)) return [];
+  return [
+    ...motivosDaPerna(it.ida, 'ida', f.idaPartidaApos, f.idaChegadaAte, f.duracaoMaximaHoras),
+    ...(it.volta
+      ? motivosDaPerna(
+          it.volta,
+          'volta',
+          f.voltaPartidaApos,
+          f.voltaChegadaAte,
+          f.duracaoMaximaHoras,
+        )
+      : []),
+  ];
+}
+
+/** O voo atende as preferencias? Sem preferencias, sempre. */
 export function cabeNosFiltros(it: Itinerario, f: Filtros | null | undefined): boolean {
-  if (!temFiltros(f)) return true;
-  if (!pernaCabe(it.ida, f.idaPartidaApos, f.idaChegadaAte, f.duracaoMaximaHoras)) return false;
-  return (
-    it.volta === null ||
-    pernaCabe(it.volta, f.voltaPartidaApos, f.voltaChegadaAte, f.duracaoMaximaHoras)
-  );
+  return foraDaPreferencia(it, f).length === 0;
 }
 
 /** Texto curto para o painel: "trechos de até 12 h · ida chegando até 17:00 · volta saindo depois das 14:00". */

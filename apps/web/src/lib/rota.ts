@@ -9,7 +9,7 @@ import {
   serieDaVigilancia,
   ultimaRodada,
 } from '@frank/banco';
-import type { Itinerario, Vigilancia } from '@frank/contratos';
+import { foraDaPreferencia, type Itinerario, temFiltros, type Vigilancia } from '@frank/contratos';
 import { type Centavos, DETECTOR_PADRAO, diaNoFuso, mediana, precoNormal } from '@frank/dominio';
 import { FONTES, linkSeguro } from './ofertas';
 import { type Situacao, situacaoDaRota } from './situacao';
@@ -40,6 +40,11 @@ export interface VooNaTela {
   link: string | null;
   vistoEm: string;
   pegadinhas: string[];
+  /**
+   * Preferencias de horario e duracao (issue #21): null = a rota nao tem; [] = atende tudo;
+   * senao, em que o voo foge ("ida chega 22:10 (voce prefere ate 17:00)").
+   */
+  foraDaPreferencia: string[] | null;
 }
 
 /** Quantos voos o "Mais barato agora" mostra. */
@@ -128,10 +133,21 @@ function voosAgora(db: Banco, v: Vigilancia): VooNaTela[] {
         vendedorEstrangeiro: false, // aparece ao lado do vendedor
         percentualAbaixo: null,
       }).map((x) => x.descricao),
+      foraDaPreferencia: temFiltros(v.filtros) ? foraDaPreferencia(it, v.filtros) : null,
     });
-    if (voos.length === VOOS_AGORA) break;
   }
-  return voos;
+  return naFrente(voos).slice(0, VOOS_AGORA);
+}
+
+/**
+ * Preferencia nao e corte (issue #21): o voo mais barato que atende as preferencias vai na
+ * frente; depois, os mais baratos de todos, atendendo ou nao. `voos` ja vem do mais barato.
+ */
+export function naFrente(voos: VooNaTela[]): VooNaTela[] {
+  const preferido = voos.find(
+    (v) => v.foraDaPreferencia !== null && v.foraDaPreferencia.length === 0,
+  );
+  return preferido ? [preferido, ...voos.filter((v) => v !== preferido)] : voos;
 }
 
 /** Tudo que a tela de detalhe da rota mostra (RF-18). Null se a vigilancia nao existe. */

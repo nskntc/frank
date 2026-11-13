@@ -118,31 +118,3 @@ describe('sugestoesSemVoos', () => {
     );
   });
 });
-
-describe('nenhum voo por causa dos filtros (issue #21)', () => {
-  it('diz quantos a fonte trouxe e sugere afrouxar os filtros primeiro', () => {
-    const comFiltros = {
-      ...V,
-      filtros: {
-        duracaoMaximaHoras: 12,
-        idaPartidaApos: null,
-        idaChegadaAte: '17:00',
-        voltaPartidaApos: '14:00',
-        voltaChegadaAte: null,
-      },
-      ultimaRodadaResultado: {
-        consultas: 1,
-        itinerarios: 0,
-        erros: 0,
-        puladasPorTeto: 0,
-        ultimoErro: null,
-        foraDosFiltros: 15,
-      },
-    };
-    const s = situacaoDaRota(comFiltros, false);
-    expect(s).toMatchObject({ tipo: 'sem_voos', foraDosFiltros: 15 });
-    if (s.tipo !== 'sem_voos') throw new Error('tipo');
-    expect(s.sugestoes[0]?.noPedido).toBe('com qualquer horário e duração');
-    expect(s.sugestoes[0]?.texto).toContain('ida chegando até 17:00');
-  });
-});

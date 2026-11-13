@@ -49,7 +49,6 @@ function lerResultado(json: string | null): ResultadoRodadaVigilancia | null {
       puladasPorTeto: r.puladasPorTeto ?? 0,
       ultimoErro: r.ultimoErro ?? null,
       ...(r.repeticao ? { repeticao: true } : {}),
-      ...(typeof r.foraDosFiltros === 'number' ? { foraDosFiltros: r.foraDosFiltros } : {}),
     };
   } catch {
     return null;
@@ -136,8 +135,6 @@ function mudouAViagem(antes: NovaVigilancia, depois: NovaVigilancia): boolean {
       v.companhias,
       v.aceitarPassagensSeparadas,
       v.moeda,
-      // Filtros mudam quais voos contam: o preco normal de antes nao vale mais.
-      temFiltros(v.filtros) ? v.filtros : null,
     ]);
   return viagem(antes) !== viagem(depois);
 }

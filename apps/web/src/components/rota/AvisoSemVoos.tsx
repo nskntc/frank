@@ -7,19 +7,12 @@ type SemVoos = Extract<Situacao, { tipo: 'sem_voos' }>;
  * letras e sugere o que mudar no pedido; sem isso, o painel parece travado.
  */
 export function AvisoSemVoos({ s, compacto = false }: { s: SemVoos; compacto?: boolean }) {
-  const filtrou = s.foraDosFiltros > 0;
-  const voos = s.foraDosFiltros === 1 ? '1 voo' : `${s.foraDosFiltros} voos`;
-  const titulo = filtrou
-    ? `A fonte achou ${voos}, mas nenhum cabe nos seus filtros`
-    : s.nuncaAchou
-      ? 'A fonte não achou nenhum voo para essa viagem'
-      : 'A última checagem não achou voo';
-  const explicacao = filtrou
-    ? `Última checagem ${s.quando}. Os filtros de horário e duração tiraram todos os voos que a fonte mostrou. O Frank segue checando.`
-    : s.nuncaAchou
-      ? `Última checagem ${s.quando}. A consulta funcionou, mas a Kiwi não vende esse trajeto nessas condições. O Frank segue checando.`
-      : `Checagem ${s.quando}. Antes havia voos: os lugares podem ter acabado ou a fonte oscilou. O Frank segue checando.`;
-  const sugerir = s.nuncaAchou || filtrou;
+  const titulo = s.nuncaAchou
+    ? 'A fonte não achou nenhum voo para essa viagem'
+    : 'A última checagem não achou voo';
+  const explicacao = s.nuncaAchou
+    ? `Última checagem ${s.quando}. A consulta funcionou, mas a Kiwi não vende esse trajeto nessas condições. O Frank segue checando.`
+    : `Checagem ${s.quando}. Antes havia voos: os lugares podem ter acabado ou a fonte oscilou. O Frank segue checando.`;
 
   const lista =
     s.sugestoes.length > 0 ? (
@@ -45,7 +38,7 @@ export function AvisoSemVoos({ s, compacto = false }: { s: SemVoos; compacto?: b
         <p className="text-sm text-[var(--color-aviso)]">
           {titulo} (checagem {s.quando}).
         </p>
-        {sugerir && (
+        {s.nuncaAchou && (
           <details className="mt-1">
             <summary className="min-h-11 cursor-pointer py-2 text-sm">
               O que mudar no pedido
@@ -64,7 +57,7 @@ export function AvisoSemVoos({ s, compacto = false }: { s: SemVoos; compacto?: b
     >
       <p className="text-base font-medium">{titulo}</p>
       <p className="mt-1 text-sm text-[var(--color-texto-suave)]">{explicacao}</p>
-      {sugerir && (
+      {s.nuncaAchou && (
         <>
           <p className="mt-3 text-sm font-medium">Para aumentar as chances:</p>
           {lista}

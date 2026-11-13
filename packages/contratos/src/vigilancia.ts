@@ -89,8 +89,6 @@ export interface ResultadoRodadaVigilancia {
    * falhar de novo, a proxima espera o intervalo normal: uma tentativa extra por falha.
    */
   repeticao?: boolean;
-  /** Voos que a fonte trouxe mas nao cabem nos filtros de horario e duracao (issue #21). */
-  foraDosFiltros?: number;
 }
 
 /**

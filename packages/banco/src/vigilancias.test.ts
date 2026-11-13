@@ -217,7 +217,7 @@ describe('filtros de horario e duracao (issue #21)', () => {
     expect(obterVigilancia(db, com.id)).not.toHaveProperty('filtros');
   });
 
-  it('mudar os filtros recomeca o historico de preco', () => {
+  it('mudar as preferencias nao recomeca o historico (todo voo continua valendo)', () => {
     const v = criarVigilancia(db, vigilanciaExemplo, instante('2026-11-11T12:00:00.000Z'));
     const depois = atualizarVigilancia(
       db,
@@ -225,6 +225,7 @@ describe('filtros de horario e duracao (issue #21)', () => {
       { ...vigilanciaExemplo, filtros: F },
       instante('2026-11-12T12:00:00.000Z'),
     );
-    expect(depois?.historicoDesde).toBe('2026-11-12T12:00:00.000Z');
+    expect(depois?.historicoDesde).toBe('2026-11-11T12:00:00.000Z');
+    expect(depois?.filtros).toEqual(F);
   });
 });

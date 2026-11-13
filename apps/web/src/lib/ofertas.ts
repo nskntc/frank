@@ -7,7 +7,12 @@ import {
   ondeComprarDaOferta,
   type Oferta,
 } from '@frank/banco';
-import type { Itinerario, TipoPegadinha } from '@frank/contratos';
+import {
+  foraDaPreferencia,
+  type Itinerario,
+  temFiltros,
+  type TipoPegadinha,
+} from '@frank/contratos';
 import type { Centavos, EtiquetaCompra } from '@frank/dominio';
 
 /** Uma linha do "Onde comprar" pronta para a tela: link so https, ou nenhum. */
@@ -32,6 +37,8 @@ export interface OfertaNaTela {
   valeAPena: boolean | null;
   resumo: string | null;
   pegadinhas: { tipo: TipoPegadinha; descricao: string }[];
+  /** Preferencias de horario e duracao (issue #21): null = a rota nao tem; [] = atende tudo. */
+  foraDaPreferencia: string[] | null;
   compras: CompraNaTela[];
   destacado: number;
   companhiaNaTolerancia: boolean;
@@ -106,6 +113,9 @@ function paraTela(db: Banco, oferta: Oferta, hoje: Date): OfertaNaTela | null {
     valeAPena: oferta.avaliacao?.valeAPena ?? null,
     resumo: oferta.avaliacao?.resumo ?? null,
     pegadinhas,
+    foraDaPreferencia: temFiltros(vigilancia.filtros)
+      ? foraDaPreferencia(it, vigilancia.filtros)
+      : null,
     compras,
     destacado,
     companhiaNaTolerancia: onde?.motivo === 'companhia_na_tolerancia',

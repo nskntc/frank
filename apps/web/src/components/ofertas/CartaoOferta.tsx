@@ -69,6 +69,16 @@ export function CartaoOferta({ o }: { o: OfertaNaTela }) {
       </div>
 
       <div className="mt-4 space-y-2">
+        {o.foraDaPreferencia?.length === 0 && (
+          <p className="inline-flex rounded-md bg-[var(--color-destaque)]/10 px-2 py-1 text-xs font-medium text-[var(--color-destaque)]">
+            Do jeito que você prefere
+          </p>
+        )}
+        {o.foraDaPreferencia && o.foraDaPreferencia.length > 0 && (
+          <p className="text-xs text-[var(--color-texto-suave)]">
+            Fora da sua preferência: {o.foraDaPreferencia.join('; ')}.
+          </p>
+        )}
         <Avaliacao o={o} />
         {o.pegadinhas.length > 0 && (
           <ul className="flex flex-wrap gap-2" aria-label="Cuidados">
