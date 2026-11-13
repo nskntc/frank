@@ -1,5 +1,6 @@
 import { lerDia } from '@frank/dominio';
 import { z } from 'zod';
+import { filtrosSchema } from './filtros.js';
 
 /** Dia AAAA-MM-DD que existe no calendario (2027-02-30 e recusado). */
 const dia = z.string().refine(
@@ -41,6 +42,8 @@ export const novaVigilanciaSchema = z
     moeda: z.string().regex(/^[A-Z]{3}$/),
     /** SPEC-01 RF-04: padrao 60, minimo 30. */
     intervaloMinutos: z.number().int().min(30).max(1440),
+    /** Horario e duracao (issue #21). Ausente = qualquer horario, qualquer duracao. */
+    filtros: filtrosSchema.optional(),
   })
   .strict()
   .refine((v) => v.idaAte >= v.idaDe, { message: 'idaAte antes de idaDe', path: ['idaAte'] })
@@ -86,6 +89,8 @@ export interface ResultadoRodadaVigilancia {
    * falhar de novo, a proxima espera o intervalo normal: uma tentativa extra por falha.
    */
   repeticao?: boolean;
+  /** Voos que a fonte trouxe mas nao cabem nos filtros de horario e duracao (issue #21). */
+  foraDosFiltros?: number;
 }
 
 /**

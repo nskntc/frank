@@ -1,4 +1,4 @@
-import { type NovaVigilancia, novaVigilanciaSchema } from '@frank/contratos';
+import { type NovaVigilancia, novaVigilanciaSchema, temFiltros } from '@frank/contratos';
 import type { ProvedorLLM } from '@frank/ia';
 import { z } from 'zod';
 import { montarSistema } from './skills.js';
@@ -19,6 +19,12 @@ export const planoSchema = z
     companhias: z.array(z.string()),
     aceitarPassagensSeparadas: z.boolean(),
     precoAlvoCentavos: z.number().int().nullable(),
+    // Filtros de horario e duracao (issue #21). Formato conferido no contrato (filtrosSchema).
+    duracaoMaximaHoras: z.number().int().nullable(),
+    idaPartidaApos: z.string().nullable(),
+    idaChegadaAte: z.string().nullable(),
+    voltaPartidaApos: z.string().nullable(),
+    voltaChegadaAte: z.string().nullable(),
     // Limites cabem no JSON Schema: o proprio Claude ja respeita, e o Zod confere.
     // Vao para o painel como texto puro (nunca HTML, nunca link).
     duvidas: z.array(z.string().max(200)).max(10),
@@ -94,6 +100,14 @@ export async function planejarVigilancia(
     precoAlvoCentavos: dados.precoAlvoCentavos,
     moeda: 'BRL',
     intervaloMinutos: INTERVALO_PADRAO_MINUTOS,
+    filtros: {
+      duracaoMaximaHoras: dados.duracaoMaximaHoras,
+      idaPartidaApos: dados.idaPartidaApos,
+      idaChegadaAte: dados.idaChegadaAte,
+      // So ida: filtro de volta nao tem o que filtrar.
+      voltaPartidaApos: dados.voltaDe === null ? null : dados.voltaPartidaApos,
+      voltaChegadaAte: dados.voltaDe === null ? null : dados.voltaChegadaAte,
+    },
   };
 
   // As mensagens citam so o nome do campo e a regra, nunca o valor que veio do modelo.
@@ -105,5 +119,11 @@ export async function planejarVigilancia(
   }
   if (validada.data.idaDe < hoje) throw new PlanoInvalidoError(['a data de ida já passou']);
 
-  return { vigilancia: validada.data, duvidas: dados.duvidas, resumo: dados.resumo };
+  // Filtros todos null equivalem a nenhum: a vigilancia sai sem o campo.
+  const { filtros, ...resto } = validada.data;
+  return {
+    vigilancia: temFiltros(filtros) ? { ...resto, filtros } : resto,
+    duvidas: dados.duvidas,
+    resumo: dados.resumo,
+  };
 }

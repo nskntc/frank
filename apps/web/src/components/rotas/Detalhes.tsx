@@ -1,4 +1,4 @@
-import type { NovaVigilancia } from '@frank/contratos';
+import { descreverFiltros, type NovaVigilancia } from '@frank/contratos';
 import { formatarReais } from '@frank/dominio';
 import { janela, plural } from '@/lib/formatar';
 
@@ -29,6 +29,7 @@ export function Detalhes({ v }: { v: NovaVigilancia }) {
         ? `até ${formatarReais(v.precoAlvoCentavos)} no total`
         : 'sem alvo: avisa o que fugir do normal',
     ],
+    ['Horário e duração', descreverFiltros(v.filtros) ?? 'qualquer'],
     ['Checagem', `a cada ${v.intervaloMinutos} min`],
   ];
   return (

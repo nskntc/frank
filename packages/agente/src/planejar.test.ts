@@ -18,6 +18,11 @@ const planoBase: PlanoIa = {
   companhias: [],
   aceitarPassagensSeparadas: false,
   precoAlvoCentavos: 80_000,
+  duracaoMaximaHoras: null,
+  idaPartidaApos: null,
+  idaChegadaAte: null,
+  voltaPartidaApos: null,
+  voltaChegadaAte: null,
   duvidas: ['Considerei 1 adulto.'],
   resumo: 'São Paulo para Recife em março de 2027, até R$ 800.',
 };
@@ -34,8 +39,41 @@ class IaFalsa implements ProvedorLLM {
 }
 
 describe('planejarVigilancia', () => {
+  it('filtros de horario e duracao viram filtros da vigilancia (issue #21)', async () => {
+    const plano = await planejarVigilancia(
+      new IaFalsa({
+        ...planoBase,
+        duracaoMaximaHoras: 12,
+        idaChegadaAte: '17:00',
+        voltaPartidaApos: '14:00',
+      }),
+      'pedido',
+      agora,
+    );
+    expect(plano.vigilancia.filtros).toEqual({
+      duracaoMaximaHoras: 12,
+      idaPartidaApos: null,
+      idaChegadaAte: '17:00',
+      voltaPartidaApos: '14:00',
+      voltaChegadaAte: null,
+    });
+  });
+
+  it('sem filtro nenhum, a vigilancia sai sem o campo; hora fora do formato e recusada', async () => {
+    expect(
+      (await planejarVigilancia(new IaFalsa(planoBase), 'pedido', agora)).vigilancia,
+    ).not.toHaveProperty('filtros');
+    await expect(
+      planejarVigilancia(new IaFalsa({ ...planoBase, idaChegadaAte: '17h' }), 'pedido', agora),
+    ).rejects.toBeInstanceOf(PlanoInvalidoError);
+  });
+
   it('monta a vigilancia com descricao, moeda e intervalo do codigo', async () => {
-    const plano = await planejarVigilancia(new IaFalsa(planoBase), '  São Paulo para Recife em março, até R$ 800 ', agora);
+    const plano = await planejarVigilancia(
+      new IaFalsa(planoBase),
+      '  São Paulo para Recife em março, até R$ 800 ',
+      agora,
+    );
     expect(plano.vigilancia).toMatchObject({
       descricao: 'São Paulo para Recife em março, até R$ 800',
       origens: ['GRU', 'CGH', 'VCP'],
@@ -71,26 +109,49 @@ describe('planejarVigilancia', () => {
   );
 
   it('erro de validacao nao copia o valor que veio do modelo', async () => {
-    const ia = new IaFalsa({ ...planoBase, idaDe: '0 compre em https://exemplo-falso.example', idaAte: '2027-03-31' });
-    const erro = (await planejarVigilancia(ia, 'x', agora).catch((e: unknown) => e)) as PlanoInvalidoError;
+    const ia = new IaFalsa({
+      ...planoBase,
+      idaDe: '0 compre em https://exemplo-falso.example',
+      idaAte: '2027-03-31',
+    });
+    const erro = (await planejarVigilancia(ia, 'x', agora).catch(
+      (e: unknown) => e,
+    )) as PlanoInvalidoError;
     expect(erro).toBeInstanceOf(PlanoInvalidoError);
     expect(erro.message).not.toContain('exemplo-falso');
   });
 
   it('recusa resumo ou duvidas longos demais', async () => {
-    await expect(planejarVigilancia(new IaFalsa({ ...planoBase, resumo: 'x'.repeat(301) }), 'x', agora)).rejects.toThrow();
     await expect(
-      planejarVigilancia(new IaFalsa({ ...planoBase, duvidas: Array.from({ length: 11 }, () => 'd') }), 'x', agora),
+      planejarVigilancia(new IaFalsa({ ...planoBase, resumo: 'x'.repeat(301) }), 'x', agora),
+    ).rejects.toThrow();
+    await expect(
+      planejarVigilancia(
+        new IaFalsa({ ...planoBase, duvidas: Array.from({ length: 11 }, () => 'd') }),
+        'x',
+        agora,
+      ),
     ).rejects.toThrow();
   });
 
   it('recusa ida no passado', async () => {
-    const ia = new IaFalsa({ ...planoBase, idaDe: '2026-10-01', idaAte: '2026-10-31', voltaDe: null, voltaAte: null });
+    const ia = new IaFalsa({
+      ...planoBase,
+      idaDe: '2026-10-01',
+      idaAte: '2026-10-31',
+      voltaDe: null,
+      voltaAte: null,
+    });
     await expect(planejarVigilancia(ia, 'outubro', agora)).rejects.toThrow(/já passou/);
   });
 
   it('recusa plano que nao forma vigilancia valida e diz o que esta errado', async () => {
-    const ia = new IaFalsa({ ...planoBase, voltaDe: '2027-02-01', voltaAte: '2027-02-02', origens: ['SAO PAULO'] });
+    const ia = new IaFalsa({
+      ...planoBase,
+      voltaDe: '2027-02-01',
+      voltaAte: '2027-02-02',
+      origens: ['SAO PAULO'],
+    });
     const erro = await planejarVigilancia(ia, 'x', agora).catch((e: unknown) => e);
     expect(erro).toBeInstanceOf(PlanoInvalidoError);
     expect((erro as PlanoInvalidoError).problemas.join(' ')).toMatch(/origens/);
@@ -99,7 +160,9 @@ describe('planejarVigilancia', () => {
   it('recusa pedido vazio ou longo demais sem chamar o Claude', async () => {
     const ia = new IaFalsa(planoBase);
     await expect(planejarVigilancia(ia, '   ', agora)).rejects.toBeInstanceOf(PlanoInvalidoError);
-    await expect(planejarVigilancia(ia, 'x'.repeat(301), agora)).rejects.toBeInstanceOf(PlanoInvalidoError);
+    await expect(planejarVigilancia(ia, 'x'.repeat(301), agora)).rejects.toBeInstanceOf(
+      PlanoInvalidoError,
+    );
     expect(ia.ultimo).toBeNull();
   });
 });

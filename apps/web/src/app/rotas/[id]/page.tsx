@@ -1,3 +1,4 @@
+import { descreverFiltros } from '@frank/contratos';
 import { formatarReais } from '@frank/dominio';
 import { headers } from 'next/headers';
 import Link from 'next/link';
@@ -56,6 +57,7 @@ export default async function DetalheDaRota({ params }: { params: Promise<{ id: 
       <p className="mt-1 text-sm text-[var(--color-texto-suave)]">
         {v.origens.join(', ')} → {v.destinos.join(', ')} · ida {janela(v.idaDe, v.idaAte)}
         {v.voltaDe && v.voltaAte ? ` · volta ${janela(v.voltaDe, v.voltaAte)}` : ' · só ida'}
+        {v.filtros && descreverFiltros(v.filtros) ? ` · ${descreverFiltros(v.filtros)}` : ''}
         {v.ativa ? '' : ' · pausada'}
       </p>
 

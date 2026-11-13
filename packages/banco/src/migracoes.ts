@@ -180,4 +180,9 @@ export const MIGRACOES: readonly string[] = [
   ALTER TABLE vigilancias ADD COLUMN ciclo TEXT;
   ALTER TABLE vigilancias ADD COLUMN proximo_par INTEGER NOT NULL DEFAULT 0;
   `,
+
+  // 7 — filtros de horario e duracao da vigilancia (issue #21), em JSON. Null = sem filtros.
+  `
+  ALTER TABLE vigilancias ADD COLUMN filtros TEXT;
+  `,
 ];

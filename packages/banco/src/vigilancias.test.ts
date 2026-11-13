@@ -195,3 +195,36 @@ describe('tentativa extra depois de falha inteira (issue #23)', () => {
     expect(devidas('2026-11-11T12:10:00Z')).toBe(0);
   });
 });
+
+describe('filtros de horario e duracao (issue #21)', () => {
+  const F = {
+    duracaoMaximaHoras: 12,
+    idaPartidaApos: null,
+    idaChegadaAte: '17:00',
+    voltaPartidaApos: '14:00',
+    voltaChegadaAte: null,
+  };
+
+  it('grava e le; filtros todos null somem; JSON estragado vira sem filtros', () => {
+    const com = criarVigilancia(db, { ...vigilanciaExemplo, filtros: F });
+    expect(obterVigilancia(db, com.id)?.filtros).toEqual(F);
+    const vazio = criarVigilancia(db, {
+      ...vigilanciaExemplo,
+      filtros: { ...F, duracaoMaximaHoras: null, idaChegadaAte: null, voltaPartidaApos: null },
+    });
+    expect(obterVigilancia(db, vazio.id)).not.toHaveProperty('filtros');
+    db.prepare(`UPDATE vigilancias SET filtros = '{"x":' WHERE id = ?`).run(com.id);
+    expect(obterVigilancia(db, com.id)).not.toHaveProperty('filtros');
+  });
+
+  it('mudar os filtros recomeca o historico de preco', () => {
+    const v = criarVigilancia(db, vigilanciaExemplo, instante('2026-11-11T12:00:00.000Z'));
+    const depois = atualizarVigilancia(
+      db,
+      v.id,
+      { ...vigilanciaExemplo, filtros: F },
+      instante('2026-11-12T12:00:00.000Z'),
+    );
+    expect(depois?.historicoDesde).toBe('2026-11-12T12:00:00.000Z');
+  });
+});

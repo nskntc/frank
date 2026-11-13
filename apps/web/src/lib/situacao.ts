@@ -1,4 +1,4 @@
-import { falhouInteira, type Vigilancia } from '@frank/contratos';
+import { descreverFiltros, falhouInteira, type Vigilancia } from '@frank/contratos';
 import { haQuanto } from './formatar';
 
 /**
@@ -9,7 +9,14 @@ export type Situacao =
   | { tipo: 'pausada' }
   | { tipo: 'nunca_rodou' }
   | { tipo: 'falhou'; quando: string; erro: string | null; tentaLogo: boolean }
-  | { tipo: 'sem_voos'; quando: string; nuncaAchou: boolean; sugestoes: Sugestao[] }
+  | {
+      tipo: 'sem_voos';
+      quando: string;
+      nuncaAchou: boolean;
+      /** Voos que a fonte trouxe e os filtros de horario e duracao tiraram (issue #21). */
+      foraDosFiltros: number;
+      sugestoes: Sugestao[];
+    }
   | { tipo: 'ok'; quando: string; voos: number; erros: number; erro: string | null };
 
 export interface Sugestao {
@@ -85,8 +92,15 @@ const REGIAO: Record<string, keyof typeof HUB_POR_REGIAO> = {
  * O que a pessoa pode mudar para a fonte achar voo, a partir da propria vigilancia. Na ordem do
  * que mais costuma resolver.
  */
-export function sugestoesSemVoos(v: Vigilancia): Sugestao[] {
+export function sugestoesSemVoos(v: Vigilancia, foraDosFiltros = 0): Sugestao[] {
   const s: Sugestao[] = [];
+  const filtros = descreverFiltros(v.filtros);
+  if (foraDosFiltros > 0 && filtros) {
+    s.push({
+      texto: `Afrouxar os filtros de horário e duração (hoje: ${filtros}). É o que está tirando os voos.`,
+      noPedido: 'com qualquer horário e duração',
+    });
+  }
   if (!v.aceitarPassagensSeparadas) {
     s.push({
       texto:
@@ -142,7 +156,14 @@ export function situacaoDaRota(v: Vigilancia, jaAchouVoo: boolean): Situacao {
     };
   }
   if (r.itinerarios === 0 && r.consultas > 0) {
-    return { tipo: 'sem_voos', quando, nuncaAchou: !jaAchouVoo, sugestoes: sugestoesSemVoos(v) };
+    const fora = r.foraDosFiltros ?? 0;
+    return {
+      tipo: 'sem_voos',
+      quando,
+      nuncaAchou: !jaAchouVoo,
+      foraDosFiltros: fora,
+      sugestoes: sugestoesSemVoos(v, fora),
+    };
   }
   return { tipo: 'ok', quando, voos: r.itinerarios, erros: r.erros, erro: r.ultimoErro };
 }

@@ -1,9 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import {
   falhouInteira,
+  type Filtros,
+  filtrosSchema,
   type NovaVigilancia,
   novaVigilanciaSchema,
   type ResultadoRodadaVigilancia,
+  temFiltros,
   type Vigilancia,
 } from '@frank/contratos';
 import { type Banco, emTransacao } from './abrir.js';
@@ -31,6 +34,7 @@ interface LinhaVigilancia {
   historico_desde: string;
   ultima_rodada_em: string | null;
   ultima_rodada_resultado: string | null;
+  filtros: string | null;
 }
 
 function lerResultado(json: string | null): ResultadoRodadaVigilancia | null {
@@ -45,13 +49,26 @@ function lerResultado(json: string | null): ResultadoRodadaVigilancia | null {
       puladasPorTeto: r.puladasPorTeto ?? 0,
       ultimoErro: r.ultimoErro ?? null,
       ...(r.repeticao ? { repeticao: true } : {}),
+      ...(typeof r.foraDosFiltros === 'number' ? { foraDosFiltros: r.foraDosFiltros } : {}),
     };
   } catch {
     return null;
   }
 }
 
+/** Leitura tolerante: JSON fora do formato vira "sem filtros", nunca derruba a tela. */
+function lerFiltros(json: string | null): Filtros | null {
+  if (!json) return null;
+  try {
+    const r = filtrosSchema.safeParse(JSON.parse(json));
+    return r.success && temFiltros(r.data) ? r.data : null;
+  } catch {
+    return null;
+  }
+}
+
 function paraVigilancia(l: LinhaVigilancia): Vigilancia {
+  const filtros = lerFiltros(l.filtros);
   return {
     id: l.id,
     descricao: l.descricao,
@@ -75,6 +92,7 @@ function paraVigilancia(l: LinhaVigilancia): Vigilancia {
     historicoDesde: l.historico_desde,
     ultimaRodadaEm: l.ultima_rodada_em,
     ultimaRodadaResultado: lerResultado(l.ultima_rodada_resultado),
+    ...(filtros ? { filtros } : {}),
   };
 }
 
@@ -95,6 +113,7 @@ function parametros(v: NovaVigilancia): (string | number | null)[] {
     v.precoAlvoCentavos,
     v.moeda,
     v.intervaloMinutos,
+    temFiltros(v.filtros) ? JSON.stringify(v.filtros) : null,
   ];
 }
 
@@ -117,6 +136,8 @@ function mudouAViagem(antes: NovaVigilancia, depois: NovaVigilancia): boolean {
       v.companhias,
       v.aceitarPassagensSeparadas,
       v.moeda,
+      // Filtros mudam quais voos contam: o preco normal de antes nao vale mais.
+      temFiltros(v.filtros) ? v.filtros : null,
     ]);
   return viagem(antes) !== viagem(depois);
 }
@@ -133,20 +154,12 @@ export function criarVigilancia(
   db.prepare(
     `INSERT INTO vigilancias (descricao, origens, destinos, ida_de, ida_ate, volta_de, volta_ate,
        adultos, malas_despachadas, max_escalas, companhias, aceitar_passagens_separadas,
-       preco_alvo_centavos, moeda, intervalo_minutos, id, ativa, criada_em, atualizada_em,
-       historico_desde)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
+       preco_alvo_centavos, moeda, intervalo_minutos, filtros, id, ativa, criada_em,
+       atualizada_em, historico_desde)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
   ).run(...parametros(valida), id, instante, instante, instante);
-  return {
-    ...valida,
-    id,
-    ativa: true,
-    criadaEm: instante,
-    atualizadaEm: instante,
-    historicoDesde: instante,
-    ultimaRodadaEm: null,
-    ultimaRodadaResultado: null,
-  };
+  // Le de volta: o que volta e exatamente o que fica gravado (ex.: filtros todos null somem).
+  return obterVigilancia(db, id) as Vigilancia;
 }
 
 export function obterVigilancia(db: Banco, id: string): Vigilancia | null {
@@ -185,7 +198,7 @@ export function atualizarVigilancia(
       `UPDATE vigilancias SET descricao = ?, origens = ?, destinos = ?, ida_de = ?, ida_ate = ?,
          volta_de = ?, volta_ate = ?, adultos = ?, malas_despachadas = ?, max_escalas = ?,
          companhias = ?, aceitar_passagens_separadas = ?, preco_alvo_centavos = ?, moeda = ?,
-         intervalo_minutos = ?, atualizada_em = ?, historico_desde = ?
+         intervalo_minutos = ?, filtros = ?, atualizada_em = ?, historico_desde = ?
        WHERE id = ?`,
     ).run(...parametros(valida), instante, historicoDesde, id);
     return obterVigilancia(db, id);
