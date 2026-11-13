@@ -1,5 +1,6 @@
 import { lerDia } from '@frank/dominio';
 import { z } from 'zod';
+import { estadiaSchema } from './estadia.js';
 import { filtrosSchema } from './filtros.js';
 
 /** Dia AAAA-MM-DD que existe no calendario (2027-02-30 e recusado). */
@@ -44,6 +45,8 @@ export const novaVigilanciaSchema = z
     intervaloMinutos: z.number().int().min(30).max(1440),
     /** Horario e duracao (issue #21). Ausente = qualquer horario, qualquer duracao. */
     filtros: filtrosSchema.optional(),
+    /** Noites no destino (issue #24). Ausente = qualquer combinacao das janelas. So com volta. */
+    estadia: estadiaSchema.optional(),
   })
   .strict()
   .refine((v) => v.idaAte >= v.idaDe, { message: 'idaAte antes de idaDe', path: ['idaAte'] })
@@ -54,6 +57,10 @@ export const novaVigilanciaSchema = z
   .refine((v) => v.voltaDe === null || v.voltaAte === null || v.voltaAte >= v.voltaDe, {
     message: 'voltaAte antes de voltaDe',
     path: ['voltaAte'],
+  })
+  .refine((v) => !v.estadia || v.voltaDe !== null, {
+    message: 'estadia so vale com volta',
+    path: ['estadia'],
   })
   .refine((v) => v.voltaDe === null || v.voltaDe >= v.idaDe, {
     message: 'volta antes da ida',

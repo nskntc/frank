@@ -12,7 +12,7 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 
 | Id | Requisito | Aceite |
 |---|---|---|
-| RF-01 | Criar vigilância a partir de texto livre ("São Paulo → Recife, março, até R$ 800") | o Claude devolve JSON validado (origens, destinos, datas ou janela, passageiros, malas, preço-alvo, filtros); o painel mostra o entendido e só salva depois da confirmação |
+| RF-01 | Criar vigilância a partir de texto livre ("São Paulo → Recife, março, até R$ 800") | o Claude devolve JSON validado (origens, destinos, datas ou janela, noites no destino, passageiros, malas, preço-alvo, filtros); o painel mostra o entendido e só salva depois da confirmação |
 | RF-02 | Editar, pausar e apagar vigilância | ações no painel, refletidas no próximo ciclo |
 | RF-03 | Filtros: aeroportos aceitos, escalas máximas, horários (partida depois de, chegada até, por trecho), duração máxima por trecho, aceitar passagens separadas, companhias | escalas, companhias e passagens separadas chegam na busca da fonte; horário e duração são preferência (#21): nenhum voo é descartado, o que atende vai na frente e os outros dizem em que fogem; preferência sem campo vira dúvida na confirmação |
 

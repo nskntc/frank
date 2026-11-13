@@ -271,3 +271,39 @@ describe('preferencias de horario e duracao (issue #21)', () => {
     expect(ultimaRodada(db, v.id).map((p) => p.idNaFonte)).toEqual(['tarde', 'cedo']);
   });
 });
+
+describe('estadia (issue #24)', () => {
+  it('manda as noites para a fonte e nunca grava combinacao fora da estadia', async () => {
+    const v = criarVigilancia(db, {
+      ...vigilanciaExemplo,
+      origens: ['GRU'],
+      idaDe: '2026-12-01',
+      idaAte: '2026-12-31',
+      voltaDe: '2026-12-11',
+      voltaAte: '2027-01-14',
+      estadia: { minNoites: 10, maxNoites: 14 },
+    });
+    const comVolta = (id: string, volta: string) => {
+      const it = itinerario(id, 100_000);
+      const ida = { ...it.ida, partida: '2026-12-11T15:05:00', chegada: '2026-12-11T16:45:00' };
+      return {
+        ...it,
+        ida,
+        volta: {
+          ...ida,
+          de: ida.para,
+          para: ida.de,
+          partida: `${volta}T08:30:00`,
+          chegada: `${volta}T10:10:00`,
+        },
+      };
+    };
+    const fonte = new FonteFalsa('falsa', async () => [
+      comVolta('33-noites', '2027-01-13'),
+      comVolta('12-noites', '2026-12-23'),
+    ]);
+    await executarRodada(deps([fonte]), agora);
+    expect(fonte.consultas[0]).toMatchObject({ noitesMin: 10, noitesMax: 14 });
+    expect(ultimaRodada(db, v.id).map((p) => p.idNaFonte)).toEqual(['12-noites']);
+  });
+});

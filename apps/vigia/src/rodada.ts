@@ -8,6 +8,7 @@ import {
   vigilanciasDevidas,
 } from '@frank/banco';
 import {
+  cabeNaEstadia,
   falhouInteira,
   type Itinerario,
   type ResultadoRodadaVigilancia,
@@ -267,9 +268,17 @@ async function consultarEGravar(
   registrarConsultaSemLancar(deps, fonte.nome, { sucesso: true }, agora);
 
   // 2. A gravacao: erro aqui e do vigia (banco, vigilancia apagada no meio), nao da fonte.
+  // 3. Estadia (issue #24) e requisito: a fonte ja recebe as noites, e o vigia confere de novo.
+  // Combinacao fora (ex.: 33 noites quando a pessoa quer 10 a 14) nunca vira preco visto.
+  const servem = itinerarios.filter((it) => cabeNaEstadia(it, vigilancia.estadia));
+  if (servem.length < itinerarios.length) {
+    deps.log.aviso(
+      `${rotulo}: ${itinerarios.length - servem.length} voo(s) fora da estadia pedida, ignorados`,
+    );
+  }
   try {
-    registrarPrecosVistos(deps.db, vigilancia.id, rodada, itinerarios, agora);
-    resultado.itinerarios += itinerarios.length;
+    if (servem.length > 0) registrarPrecosVistos(deps.db, vigilancia.id, rodada, servem, agora);
+    resultado.itinerarios += servem.length;
     return itinerarios;
   } catch (erro) {
     resultado.erros++;

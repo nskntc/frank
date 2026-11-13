@@ -229,3 +229,18 @@ describe('filtros de horario e duracao (issue #21)', () => {
     expect(depois?.filtros).toEqual(F);
   });
 });
+
+describe('estadia (issue #24)', () => {
+  it('grava, le e mudar a estadia recomeca o historico (e outra viagem)', () => {
+    const v = criarVigilancia(db, vigilanciaExemplo, instante('2026-11-11T12:00:00.000Z'));
+    const depois = atualizarVigilancia(
+      db,
+      v.id,
+      { ...vigilanciaExemplo, estadia: { minNoites: 10, maxNoites: 14 } },
+      instante('2026-11-12T12:00:00.000Z'),
+    );
+    expect(depois?.estadia).toEqual({ minNoites: 10, maxNoites: 14 });
+    expect(depois?.historicoDesde).toBe('2026-11-12T12:00:00.000Z');
+    expect(obterVigilancia(db, v.id)?.estadia).toEqual({ minNoites: 10, maxNoites: 14 });
+  });
+});

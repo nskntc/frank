@@ -25,6 +25,16 @@ function respostaSse(objeto: unknown): string {
 }
 
 describe('montarArgumentos', () => {
+  it('estadia vira noites no destino (issue #24); so ida ignora', () => {
+    expect(montarArgumentos({ ...consulta, noitesMin: 10, noitesMax: 14 })).toMatchObject({
+      nights_in_dst_from: 10,
+      nights_in_dst_to: 14,
+    });
+    expect(montarArgumentos({ ...consulta, volta: undefined, noitesMin: 10, noitesMax: 14 })).not.toHaveProperty(
+      'nights_in_dst_from',
+    );
+  });
+
   it('converte datas e campos para o formato da Kiwi', () => {
     expect(montarArgumentos(consulta)).toMatchObject({
       flyFrom: 'Sao Paulo',

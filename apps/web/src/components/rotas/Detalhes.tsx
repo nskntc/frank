@@ -1,4 +1,4 @@
-import { descreverFiltros, type NovaVigilancia } from '@frank/contratos';
+import { descreverEstadia, descreverFiltros, type NovaVigilancia } from '@frank/contratos';
 import { formatarReais } from '@frank/dominio';
 import { janela, plural } from '@/lib/formatar';
 
@@ -9,6 +9,11 @@ export function Detalhes({ v }: { v: NovaVigilancia }) {
     ['Indo para', v.destinos.join(', ')],
     ['Ida', janela(v.idaDe, v.idaAte)],
     ['Volta', v.voltaDe && v.voltaAte ? janela(v.voltaDe, v.voltaAte) : 'só ida'],
+    ...(v.voltaDe
+      ? ([
+          ['Estadia no destino', descreverEstadia(v.estadia) ?? 'qualquer combinação das datas'],
+        ] as [string, string][])
+      : []),
     ['Passageiros', plural(v.adultos, 'adulto', 'adultos')],
     [
       'Mala despachada',

@@ -13,6 +13,9 @@ export interface ConsultaVoo {
   volta?: Dia;
   /** Ultimo dia aceito para a volta (janela volta..voltaAte). */
   voltaAte?: Dia;
+  /** Noites no destino, minimo e maximo (issue #24). So com volta. */
+  noitesMin?: number;
+  noitesMax?: number;
   adultos: number;
   /** Malas despachadas por adulto (0 a 2). */
   malasDespachadas?: number;

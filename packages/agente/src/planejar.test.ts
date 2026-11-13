@@ -18,6 +18,8 @@ const planoBase: PlanoIa = {
   companhias: [],
   aceitarPassagensSeparadas: false,
   precoAlvoCentavos: 80_000,
+  minNoites: null,
+  maxNoites: null,
   duracaoMaximaHoras: null,
   idaPartidaApos: null,
   idaChegadaAte: null,
@@ -39,6 +41,21 @@ class IaFalsa implements ProvedorLLM {
 }
 
 describe('planejarVigilancia', () => {
+  it('noites no destino viram a estadia; so ida nao tem estadia (issue #24)', async () => {
+    const plano = await planejarVigilancia(
+      new IaFalsa({ ...planoBase, minNoites: 10, maxNoites: 14 }),
+      'pedido',
+      agora,
+    );
+    expect(plano.vigilancia.estadia).toEqual({ minNoites: 10, maxNoites: 14 });
+    const soIda = await planejarVigilancia(
+      new IaFalsa({ ...planoBase, voltaDe: null, voltaAte: null, minNoites: 10, maxNoites: 14 }),
+      'pedido',
+      agora,
+    );
+    expect(soIda.vigilancia).not.toHaveProperty('estadia');
+  });
+
   it('filtros de horario e duracao viram filtros da vigilancia (issue #21)', async () => {
     const plano = await planejarVigilancia(
       new IaFalsa({

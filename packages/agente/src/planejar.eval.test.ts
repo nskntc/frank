@@ -1,7 +1,7 @@
 /**
  * Eval do planejador contra o Claude de verdade (issue #8). Roda so com FRANK_EVAL=1:
  *   FRANK_EVAL=1 pnpm --filter @frank/agente test
- * Gasta 12 chamadas do plano de quem roda. Pedidos ficticios. Data de hoje fixa: 2026-11-11.
+ * Gasta 13 chamadas do plano de quem roda. Pedidos ficticios. Data de hoje fixa: 2026-11-11.
  * Confere o JSON (campos), nunca o texto. Caiu um caso: ajustar a skill, nao o teste.
  */
 import { ClaudeCli } from '@frank/ia';
@@ -83,6 +83,7 @@ const CASOS: Caso[] = [
       expect([v.origens, v.destinos, v.companhias]).toEqual([['CWB'], ['IGU'], ['LA']]);
       expect([v.idaDe, v.idaAte]).toEqual(['2027-07-01', '2027-07-31']);
       expect(v.voltaDe! >= '2027-07-08').toBe(true);
+      expect(v.estadia).toEqual({ minNoites: 7, maxNoites: 7 });
     },
   },
   {
@@ -118,6 +119,15 @@ const CASOS: Caso[] = [
       expect([v.origens, v.destinos]).toEqual([['FOR'], ['NAT']]);
       expect(v.precoAlvoCentavos).toBeNull();
       expect(v.idaDe).toBe('2027-03-03');
+    },
+  },
+  {
+    // Aceite da issue #24: sem estadia, o Frank combinava ida e volta com 33 noites.
+    pedido: 'Quero ir de Goiânia para o Rio de Janeiro em dezembro, ficar de 10 a 14 dias',
+    conferir: ({ vigilancia: v, duvidas }) => {
+      expect([v.origens, v.idaDe, v.idaAte]).toEqual([['GYN'], '2026-12-01', '2026-12-31']);
+      expect(v.estadia).toEqual({ minNoites: 10, maxNoites: 14 });
+      expect(duvidas.some((d) => /não garante/i.test(d))).toBe(false);
     },
   },
   {

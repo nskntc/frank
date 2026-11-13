@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import {
   falhouInteira,
+  type Estadia,
+  estadiaSchema,
   type Filtros,
   filtrosSchema,
   type NovaVigilancia,
@@ -35,6 +37,7 @@ interface LinhaVigilancia {
   ultima_rodada_em: string | null;
   ultima_rodada_resultado: string | null;
   filtros: string | null;
+  estadia: string | null;
 }
 
 function lerResultado(json: string | null): ResultadoRodadaVigilancia | null {
@@ -66,8 +69,19 @@ function lerFiltros(json: string | null): Filtros | null {
   }
 }
 
+function lerEstadia(json: string | null): Estadia | null {
+  if (!json) return null;
+  try {
+    const r = estadiaSchema.safeParse(JSON.parse(json));
+    return r.success ? r.data : null;
+  } catch {
+    return null;
+  }
+}
+
 function paraVigilancia(l: LinhaVigilancia): Vigilancia {
   const filtros = lerFiltros(l.filtros);
+  const estadia = l.volta_de ? lerEstadia(l.estadia) : null;
   return {
     id: l.id,
     descricao: l.descricao,
@@ -92,6 +106,7 @@ function paraVigilancia(l: LinhaVigilancia): Vigilancia {
     ultimaRodadaEm: l.ultima_rodada_em,
     ultimaRodadaResultado: lerResultado(l.ultima_rodada_resultado),
     ...(filtros ? { filtros } : {}),
+    ...(estadia ? { estadia } : {}),
   };
 }
 
@@ -113,6 +128,7 @@ function parametros(v: NovaVigilancia): (string | number | null)[] {
     v.moeda,
     v.intervaloMinutos,
     temFiltros(v.filtros) ? JSON.stringify(v.filtros) : null,
+    v.estadia ? JSON.stringify(v.estadia) : null,
   ];
 }
 
@@ -135,6 +151,7 @@ function mudouAViagem(antes: NovaVigilancia, depois: NovaVigilancia): boolean {
       v.companhias,
       v.aceitarPassagensSeparadas,
       v.moeda,
+      v.estadia ?? null,
     ]);
   return viagem(antes) !== viagem(depois);
 }
@@ -151,9 +168,9 @@ export function criarVigilancia(
   db.prepare(
     `INSERT INTO vigilancias (descricao, origens, destinos, ida_de, ida_ate, volta_de, volta_ate,
        adultos, malas_despachadas, max_escalas, companhias, aceitar_passagens_separadas,
-       preco_alvo_centavos, moeda, intervalo_minutos, filtros, id, ativa, criada_em,
+       preco_alvo_centavos, moeda, intervalo_minutos, filtros, estadia, id, ativa, criada_em,
        atualizada_em, historico_desde)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
   ).run(...parametros(valida), id, instante, instante, instante);
   // Le de volta: o que volta e exatamente o que fica gravado (ex.: filtros todos null somem).
   return obterVigilancia(db, id) as Vigilancia;
@@ -195,7 +212,7 @@ export function atualizarVigilancia(
       `UPDATE vigilancias SET descricao = ?, origens = ?, destinos = ?, ida_de = ?, ida_ate = ?,
          volta_de = ?, volta_ate = ?, adultos = ?, malas_despachadas = ?, max_escalas = ?,
          companhias = ?, aceitar_passagens_separadas = ?, preco_alvo_centavos = ?, moeda = ?,
-         intervalo_minutos = ?, filtros = ?, atualizada_em = ?, historico_desde = ?
+         intervalo_minutos = ?, filtros = ?, estadia = ?, atualizada_em = ?, historico_desde = ?
        WHERE id = ?`,
     ).run(...parametros(valida), instante, historicoDesde, id);
     return obterVigilancia(db, id);

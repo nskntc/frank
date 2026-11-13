@@ -185,4 +185,9 @@ export const MIGRACOES: readonly string[] = [
   `
   ALTER TABLE vigilancias ADD COLUMN filtros TEXT;
   `,
+
+  // 8 — noites no destino (issue #24), em JSON. Null = qualquer combinacao das janelas.
+  `
+  ALTER TABLE vigilancias ADD COLUMN estadia TEXT;
+  `,
 ];

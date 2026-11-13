@@ -44,6 +44,10 @@ export function montarArgumentos(consulta: ConsultaVoo): Record<string, unknown>
   if (consulta.volta && consulta.voltaAte && consulta.voltaAte !== consulta.volta) {
     args.returnDateTo = dataKiwi(consulta.voltaAte);
   }
+  if (consulta.volta && consulta.noitesMin !== undefined && consulta.noitesMax !== undefined) {
+    args.nights_in_dst_from = consulta.noitesMin;
+    args.nights_in_dst_to = consulta.noitesMax;
+  }
   if (consulta.maxEscalas !== undefined) args.max_sector_stopovers = consulta.maxEscalas;
   // A Kiwi nao aceita os dois juntos; `companhias` (escolha da pessoa) tem prioridade.
   if (consulta.companhias?.length) args.select_airlines = consulta.companhias.join(',');

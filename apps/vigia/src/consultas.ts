@@ -17,7 +17,12 @@ export function consultasDaVigilancia(v: Vigilancia): ConsultaVoo[] {
         ida: lerDia(v.idaDe),
         ...(v.idaAte !== v.idaDe ? { idaAte: lerDia(v.idaAte) } : {}),
         ...(v.voltaDe ? { volta: lerDia(v.voltaDe) } : {}),
-        ...(v.voltaDe && v.voltaAte && v.voltaAte !== v.voltaDe ? { voltaAte: lerDia(v.voltaAte) } : {}),
+        ...(v.voltaDe && v.voltaAte && v.voltaAte !== v.voltaDe
+          ? { voltaAte: lerDia(v.voltaAte) }
+          : {}),
+        ...(v.voltaDe && v.estadia
+          ? { noitesMin: v.estadia.minNoites, noitesMax: v.estadia.maxNoites }
+          : {}),
         adultos: v.adultos,
         malasDespachadas: v.malasDespachadas,
         ...(v.maxEscalas !== null ? { maxEscalas: v.maxEscalas } : {}),

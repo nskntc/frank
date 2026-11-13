@@ -19,6 +19,9 @@ export const planoSchema = z
     companhias: z.array(z.string()),
     aceitarPassagensSeparadas: z.boolean(),
     precoAlvoCentavos: z.number().int().nullable(),
+    // Noites no destino (issue #24): "ficar de 10 a 14 dias" = 10 e 14.
+    minNoites: z.number().int().nullable(),
+    maxNoites: z.number().int().nullable(),
     // Filtros de horario e duracao (issue #21). Formato conferido no contrato (filtrosSchema).
     duracaoMaximaHoras: z.number().int().nullable(),
     idaPartidaApos: z.string().nullable(),
@@ -100,6 +103,9 @@ export async function planejarVigilancia(
     precoAlvoCentavos: dados.precoAlvoCentavos,
     moeda: 'BRL',
     intervaloMinutos: INTERVALO_PADRAO_MINUTOS,
+    ...(dados.voltaDe !== null && (dados.minNoites !== null || dados.maxNoites !== null)
+      ? { estadia: { minNoites: dados.minNoites ?? 0, maxNoites: dados.maxNoites ?? 90 } }
+      : {}),
     filtros: {
       duracaoMaximaHoras: dados.duracaoMaximaHoras,
       idaPartidaApos: dados.idaPartidaApos,
