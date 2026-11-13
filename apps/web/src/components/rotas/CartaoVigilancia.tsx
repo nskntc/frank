@@ -1,7 +1,9 @@
 import { formatarReais } from '@frank/dominio';
 import Link from 'next/link';
 import { descreverRodizio, emHoras } from '@/lib/estimativa';
-import { haQuanto, janela } from '@/lib/formatar';
+import { AvisoSemVoos } from '@/components/rota/AvisoSemVoos';
+import { janela } from '@/lib/formatar';
+import { situacaoDaRota, type Situacao } from '@/lib/situacao';
 import type { VigilanciaNaTela } from './tipos';
 
 interface Props {
@@ -13,24 +15,32 @@ interface Props {
 }
 
 /** Estado da ultima rodada em uma linha: o painel nunca diz "tudo certo" sem saber. */
-function estado(v: VigilanciaNaTela): { texto: string; alerta: boolean } {
-  if (!v.ativa) return { texto: 'Pausada', alerta: false };
-  if (!v.ultimaRodadaEm)
-    return { texto: 'Esperando a primeira checagem (o vigia precisa estar ligado)', alerta: false };
-  const r = v.ultimaRodadaResultado;
-  const quando = `Última checagem ${haQuanto(v.ultimaRodadaEm)}`;
-  if (!r) return { texto: quando, alerta: false };
-  if (r.itinerarios === 0 && (r.erros > 0 || r.puladasPorTeto > 0)) {
-    return { texto: `${quando}: nada encontrado. ${r.ultimoErro ?? ''}`.trim(), alerta: true };
+function estado(s: Situacao): { texto: string; alerta: boolean } | null {
+  switch (s.tipo) {
+    case 'pausada':
+      return { texto: 'Pausada', alerta: false };
+    case 'nunca_rodou':
+      return {
+        texto: 'Esperando a primeira checagem (o vigia precisa estar ligado)',
+        alerta: false,
+      };
+    case 'falhou':
+      return { texto: `Última checagem ${s.quando}: falhou. ${s.erro ?? ''}`.trim(), alerta: true };
+    case 'sem_voos':
+      return null; // AvisoSemVoos
+    case 'ok': {
+      const quando = `Última checagem ${s.quando}`;
+      const voos = `${s.voos} ${s.voos === 1 ? 'voo visto' : 'voos vistos'}`;
+      return s.erros > 0
+        ? { texto: `${quando} · ${voos} · ${s.erros} erro(s): ${s.erro ?? ''}`, alerta: true }
+        : { texto: `${quando} · ${voos}`, alerta: false };
+    }
   }
-  const voos = `${r.itinerarios} ${r.itinerarios === 1 ? 'voo visto' : 'voos vistos'}`;
-  return r.erros > 0
-    ? { texto: `${quando} · ${voos} · ${r.erros} erro(s): ${r.ultimoErro ?? ''}`, alerta: true }
-    : { texto: `${quando} · ${voos}`, alerta: false };
 }
 
 export function CartaoVigilancia({ v, ocupado, aoPausar, aoEditar, aoApagar }: Props) {
-  const e = estado(v);
+  const s = situacaoDaRota(v, v.jaAchouVoo);
+  const e = estado(s);
   return (
     <li className="rounded-xl border border-[var(--color-borda)] p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -50,11 +60,14 @@ export function CartaoVigilancia({ v, ocupado, aoPausar, aoEditar, aoApagar }: P
         {v.voltaDe && v.voltaAte ? ` · volta ${janela(v.voltaDe, v.voltaAte)}` : ' · só ida'}
         {v.precoAlvoCentavos !== null ? ` · até ${formatarReais(v.precoAlvoCentavos)}` : ''}
       </p>
-      <p
-        className={`mt-2 text-sm ${e.alerta ? 'text-[var(--color-aviso)]' : 'text-[var(--color-texto-suave)]'}`}
-      >
-        {e.texto}
-      </p>
+      {e && (
+        <p
+          className={`mt-2 text-sm ${e.alerta ? 'text-[var(--color-aviso)]' : 'text-[var(--color-texto-suave)]'}`}
+        >
+          {e.texto}
+        </p>
+      )}
+      {s.tipo === 'sem_voos' && <AvisoSemVoos s={s} compacto />}
       {v.estimativa.ajustado && (
         <p className="mt-1 text-sm text-[var(--color-texto-suave)]">
           Rota ampla: o Frank reveza, {descreverRodizio(v.estimativa)}

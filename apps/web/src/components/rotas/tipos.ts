@@ -8,4 +8,5 @@ export interface Plano {
   estimativa: Estimativa;
 }
 
-export type VigilanciaNaTela = Vigilancia & { estimativa: Estimativa };
+/** `jaAchouVoo`: a fonte ja trouxe algum voo desde a ultima mudanca da viagem (issue #22). */
+export type VigilanciaNaTela = Vigilancia & { estimativa: Estimativa; jaAchouVoo: boolean };

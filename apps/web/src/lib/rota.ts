@@ -1,6 +1,7 @@
 import { detectarPegadinhas } from '@frank/agente';
 import {
   type Banco,
+  jaViuVoo,
   listarReferencias,
   maisBaratoPorDia,
   menoresPorRodada,
@@ -11,6 +12,7 @@ import {
 import type { Itinerario, Vigilancia } from '@frank/contratos';
 import { type Centavos, DETECTOR_PADRAO, diaNoFuso, mediana, precoNormal } from '@frank/dominio';
 import { FONTES, linkSeguro } from './ofertas';
+import { type Situacao, situacaoDaRota } from './situacao';
 
 const DIA_MS = 86_400_000;
 
@@ -55,6 +57,8 @@ export interface DetalheRota {
   dias: LinhaDoDia[];
   /** Os mais baratos da ultima checagem (sempre ha onde clicar, mesmo sem oferta). */
   agora: VooNaTela[];
+  /** Nunca rodou, falhou, nao achou voo ou ok (issue #22). */
+  situacao: Situacao;
 }
 
 function meioDiaEmBrasilia(dia: string): number {
@@ -160,5 +164,6 @@ export function detalheDaRota(db: Banco, id: string, agora: Date = new Date()): 
       ),
     ),
     agora: voosAgora(db, vigilancia),
+    situacao: situacaoDaRota(vigilancia, jaViuVoo(db, id)),
   };
 }

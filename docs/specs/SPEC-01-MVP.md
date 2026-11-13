@@ -54,7 +54,7 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 
 | Id | Requisito | Aceite |
 |---|---|---|
-| RF-18 | Telas | Ofertas, Rotas vigiadas, Detalhe da rota (gráfico, os 3 mais baratos da última checagem e botão de compra em cada dia da tabela, mesmo sem oferta), Placar, Configurações |
+| RF-18 | Telas | Ofertas, Rotas vigiadas, Detalhe da rota (gráfico, os 3 mais baratos da última checagem e botão de compra em cada dia da tabela, mesmo sem oferta; "a fonte não achou nenhum voo" com o que mudar no pedido, #22), Placar, Configurações |
 | RF-19 | Barra de status | vigia ligado ou parado há quanto tempo, última checagem, erro de fonte, teto de consultas, Claude disponível, falha de aviso, e-mail e Telegram configurados (só se existem; segredos ficam no `.env`) |
 | RF-20 | Placar | registrar à mão o preço e a hora do alerta do Google por rota e comparar com os avisos que o Frank entregou: cada alerta do Google é uma disputa (Frank avisou preço igual ou até 2% maior antes? ponto do Frank); novo menor preço do Frank que o Google ainda não tinha avisado também é ponto do Frank |
 

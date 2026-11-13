@@ -1,4 +1,4 @@
-import { criarVigilancia, listarVigilancias } from '@frank/banco';
+import { criarVigilancia, jaViuVoo, listarVigilancias } from '@frank/banco';
 import { novaVigilanciaSchema } from '@frank/contratos';
 import { estimarConsultas, limitesDoAmbiente } from '@/lib/estimativa';
 import { pedidoDoPainel } from '@/lib/servidor/origem';
@@ -14,7 +14,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: Request) {
   if (!pedidoDoPainel(request.headers)) return recusado();
-  const todas = listarVigilancias(banco());
+  const db = banco();
+  const todas = listarVigilancias(db);
   const ativas = todas.filter((v) => v.ativa);
   const limites = limitesDoAmbiente();
   const vigilancias = todas.map((v) => ({
@@ -24,6 +25,7 @@ export async function GET(request: Request) {
       ativas.filter((o) => o.id !== v.id),
       limites,
     ),
+    jaAchouVoo: jaViuVoo(db, v.id),
   }));
   return ok(vigilancias);
 }

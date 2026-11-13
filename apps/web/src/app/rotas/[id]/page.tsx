@@ -2,6 +2,7 @@ import { formatarReais } from '@frank/dominio';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AvisoSemVoos } from '@/components/rota/AvisoSemVoos';
 import { GraficoPreco } from '@/components/rota/GraficoPreco';
 import { MaisBaratoAgora } from '@/components/rota/MaisBaratoAgora';
 import { diaComSemana, janela, plural } from '@/lib/formatar';
@@ -80,7 +81,19 @@ export default async function DetalheDaRota({ params }: { params: Promise<{ id: 
         />
       </dl>
 
-      <MaisBaratoAgora voos={d.agora} />
+      {d.situacao.tipo === 'sem_voos' && d.situacao.nuncaAchou ? (
+        <section className="mt-8" aria-labelledby="mais-barato-agora">
+          <h2 id="mais-barato-agora" className="text-lg font-semibold">
+            Mais barato agora
+          </h2>
+          <AvisoSemVoos s={d.situacao} />
+        </section>
+      ) : (
+        <>
+          {d.situacao.tipo === 'sem_voos' && <AvisoSemVoos s={d.situacao} />}
+          <MaisBaratoAgora voos={d.agora} />
+        </>
+      )}
 
       <section className="mt-8" aria-label="Preço ao longo do tempo">
         <h2 className="text-lg font-semibold">Preço ao longo do tempo</h2>

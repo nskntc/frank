@@ -8,6 +8,7 @@ Status: **pauta** (ideia anotada) · **rascunho** · **publicado** (com link).
 
 | Data | Momento | Prova | O que ensina | Status |
 |---|---|---|---|---|
+| 2026-11-13 | "Ele não achou nenhum preço, é porque não tem voo direto?" Não: a fonte não vende o trajeto em passagem única. O painel passou a dizer isso e sugerir o que mudar | pergunta de quem usa e o cartão com "O que mudar no pedido" (#22) | Agente autônomo precisa explicar o próprio silêncio: "nada aconteceu" e "não achei nada" são coisas diferentes | pauta |
 | 2026-11-12 | O pedido "qualquer praia do Nordeste saindo de BH" vira 10 pares e 720 consultas por dia, mais que o dobro do limite. O Frank passou a revezar os pares e a dividir o limite entre as rotas | cartão de confirmação com "todos os 10 pares a cada 4 h" (#19) | Agente que roda sozinho precisa de orçamento: dividir de forma justa e dizer à pessoa, antes de salvar, quanto vai custar | pauta |
 | 2026-11-12 | "Aonde eu clico para comprar?": o agente só mostrava o botão quando achava oferta, e quem usa queria comprar mesmo sem ela | print do pedido e da tela com Mais barato agora (#20) | O agente decide quando avisar; quem decide quando comprar é a pessoa: a interface precisa servir aos dois | pauta |
 | 2026-11-12 | Do git clone ao primeiro pedido entendido em 5 passos, sem Docker e sem chave de API: o Frank usa o Claude Code já logado de quem instala | README (#17) e o teste na pasta limpa | Agente local que reaproveita a assinatura de quem usa: custo zero de infraestrutura | pauta |

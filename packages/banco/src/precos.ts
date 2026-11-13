@@ -92,8 +92,7 @@ export function registrarPrecosVistos(
 
 export function obterPrecoVisto(db: Banco, id: number): PrecoVisto | null {
   const linha = db.prepare('SELECT * FROM precos_vistos WHERE id = ?').get(id) as
-    | LinhaPrecoVisto
-    | undefined;
+    LinhaPrecoVisto | undefined;
   return linha ? paraPrecoVisto(linha) : null;
 }
 
@@ -179,13 +178,17 @@ export function salvarReferencias(
   );
   const instante = buscadoEm.toISOString();
   emTransacao(db, () => {
-    for (const p of pontos) gravar.run(vigilanciaId, fonte, p.dia, p.precoCentavos, moeda, instante);
+    for (const p of pontos)
+      gravar.run(vigilanciaId, fonte, p.dia, p.precoCentavos, moeda, instante);
   });
 }
 
 /** Apaga a referencia de uma fonte (a rota mudou: os pontos antigos sao de outra viagem). */
 export function apagarReferencias(db: Banco, vigilanciaId: string, fonte: string): void {
-  db.prepare('DELETE FROM referencias_preco WHERE vigilancia_id = ? AND fonte = ?').run(vigilanciaId, fonte);
+  db.prepare('DELETE FROM referencias_preco WHERE vigilancia_id = ? AND fonte = ?').run(
+    vigilanciaId,
+    fonte,
+  );
 }
 
 export function listarReferencias(
@@ -198,7 +201,11 @@ export function listarReferencias(
       `SELECT fonte, dia, preco_centavos FROM referencias_preco
        WHERE vigilancia_id = ? AND moeda = ? ORDER BY dia`,
     )
-    .all(vigilanciaId, moeda) as unknown as { fonte: string; dia: string; preco_centavos: number }[];
+    .all(vigilanciaId, moeda) as unknown as {
+    fonte: string;
+    dia: string;
+    preco_centavos: number;
+  }[];
   return linhas.map((l) => ({ fonte: l.fonte, dia: l.dia, precoCentavos: l.preco_centavos }));
 }
 
@@ -251,4 +258,19 @@ export function maisBaratoPorDia(
     )
     .all(vigilanciaId, moeda) as unknown as (LinhaPrecoVisto & { dia: string })[];
   return linhas.map((l) => ({ ...paraPrecoVisto(l), dia: l.dia }));
+}
+
+/**
+ * A vigilancia ja viu algum voo desde a ultima mudanca da viagem? Separa "a fonte nunca achou
+ * voo para essa viagem" de "a ultima checagem veio vazia" (issue #22).
+ */
+export function jaViuVoo(db: Banco, vigilanciaId: string): boolean {
+  return (
+    db
+      .prepare(
+        `SELECT 1 FROM precos_vistos p JOIN vigilancias v ON v.id = p.vigilancia_id
+         WHERE p.vigilancia_id = ? AND p.visto_em >= v.historico_desde LIMIT 1`,
+      )
+      .get(vigilanciaId) !== undefined
+  );
 }
