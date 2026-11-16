@@ -16,9 +16,16 @@ export const CHAVES_ESTADO = {
   erroAviso: (canal: string) => `erro_aviso:${canal}`,
   /** Ultimo aviso que o Frank desistiu de mandar depois de todas as tentativas. */
   avisoDesistido: 'aviso_desistido',
+  /** Sem internet (issue #25): o valor e o instante em que caiu. Some quando a rede volta. */
+  semRede: 'sem_rede',
 } as const;
 
-export function gravarEstado(db: Banco, chave: string, valor: string, agora: Date = new Date()): void {
+export function gravarEstado(
+  db: Banco,
+  chave: string,
+  valor: string,
+  agora: Date = new Date(),
+): void {
   db.prepare(
     `INSERT INTO estado_vigia (chave, valor, atualizado_em) VALUES (?, ?, ?)
      ON CONFLICT (chave) DO UPDATE SET valor = excluded.valor, atualizado_em = excluded.atualizado_em`,
@@ -45,7 +52,9 @@ export function lerEstado(db: Banco, chave: string): ItemEstado | null {
 export function listarEstado(db: Banco, prefixo: string): (ItemEstado & { chave: string })[] {
   // Sem LIKE: '_' e '%' no prefixo seriam curingas.
   const linhas = db
-    .prepare('SELECT chave, valor, atualizado_em FROM estado_vigia WHERE substr(chave, 1, ?) = ? ORDER BY chave')
+    .prepare(
+      'SELECT chave, valor, atualizado_em FROM estado_vigia WHERE substr(chave, 1, ?) = ? ORDER BY chave',
+    )
     .all(prefixo.length, prefixo) as { chave: string; valor: string; atualizado_em: string }[];
   return linhas.map((l) => ({ chave: l.chave, valor: l.valor, atualizadoEm: l.atualizado_em }));
 }

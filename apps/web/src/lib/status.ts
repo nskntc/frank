@@ -83,8 +83,20 @@ export function montarStatus(
     });
   }
 
+  const semRede = lerEstado(db, CHAVES_ESTADO.semRede);
+  if (semRede) {
+    problemas.push({
+      id: 'sem-rede',
+      texto:
+        'Sem internet: o vigia espera a rede voltar para checar. Se o computador estava suspenso, é normal por alguns minutos.',
+      desde: semRede.valor,
+    });
+  }
+
   for (const v of ativas) {
     const r = v.ultimaRodadaResultado;
+    // Sem internet, o erro "sem conexão" de cada rota so repete o aviso acima.
+    if (semRede && r?.ultimoErro?.includes('sem conexão')) continue;
     if (r && r.erros > 0 && v.ultimaRodadaEm) {
       problemas.push({
         id: `fonte:${v.id}`,

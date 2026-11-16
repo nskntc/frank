@@ -40,6 +40,11 @@ export interface DependenciasRodada extends ContextoFonte {
    * filtro e as seguintes excluindo as companhias ja vistas. Padrao 3.
    */
   maxBuscasPorPar?: number;
+  /**
+   * Ha internet? (issue #25) Conferido so quando ha vigilancia devida. Sem rede, a rodada nao
+   * acontece: nada e consultado nem marcado, e a tentativa extra de falha (#23) nao e gasta.
+   */
+  temRede?: () => Promise<boolean>;
 }
 
 export const MAX_BUSCAS_POR_PAR_PADRAO = 3;
@@ -53,6 +58,8 @@ export interface ResumoRodada {
   puladasPorTeto: number;
   /** Ofertas novas, ja reconferidas na fonte. */
   ofertas: number;
+  /** A rodada nao aconteceu: havia vigilancia devida, mas sem internet. */
+  semRede?: boolean;
 }
 
 function novoResultado(): ResultadoRodadaVigilancia {
@@ -78,10 +85,16 @@ export async function executarRodada(
     ofertas: 0,
   };
   const planos = planosDoVigia(deps);
+  const devidas = vigilanciasDevidas(deps.db, agora).filter((v) => {
+    const plano = planos.get(v.id);
+    return !plano || venceuNoPlano(v, plano, agora);
+  });
+  if (devidas.length > 0 && deps.temRede && !(await deps.temRede())) {
+    return { ...resumo, semRede: true };
+  }
 
-  for (const vigilancia of vigilanciasDevidas(deps.db, agora)) {
+  for (const vigilancia of devidas) {
     const plano = planos.get(vigilancia.id);
-    if (plano && !venceuNoPlano(vigilancia, plano, agora)) continue;
     resumo.vigilancias++;
     const resultado = novoResultado();
     // Depois de uma rodada que falhou inteira, esta e a tentativa extra (issue #23).

@@ -1,6 +1,19 @@
 import { type CanalAlerta, enviarAlertasPendentes } from '@frank/alertas';
-import { apagarEstado, CHAVES_ESTADO, gravarEstado } from '@frank/banco';
-import { type DependenciasRodada, executarRodada, resumirErro, type ResumoRodada } from './rodada.js';
+import { apagarEstado, type Banco, CHAVES_ESTADO, gravarEstado, lerEstado } from '@frank/banco';
+import {
+  type DependenciasRodada,
+  executarRodada,
+  resumirErro,
+  type ResumoRodada,
+} from './rodada.js';
+
+function lerEstadoSemLancar(db: Banco): boolean {
+  try {
+    return lerEstado(db, CHAVES_ESTADO.semRede) !== null;
+  } catch {
+    return false;
+  }
+}
 
 /** De quanto em quanto tempo o vigia acorda para ver se alguma vigilancia venceu. */
 export const TIQUE_PADRAO_MS = 60_000;
@@ -27,7 +40,10 @@ export class Vigia {
   private async avisar(agora: Date): Promise<void> {
     if (!this.deps.canais?.length) return;
     try {
-      const r = await enviarAlertasPendentes({ db: this.deps.db, canais: this.deps.canais, log: this.deps.log }, agora);
+      const r = await enviarAlertasPendentes(
+        { db: this.deps.db, canais: this.deps.canais, log: this.deps.log },
+        agora,
+      );
       // So registra quando muda: no horario silencioso o vigia passa por aqui a cada minuto.
       if (r.adiadas !== this.adiadasAntes && r.adiadas > 0) {
         this.deps.log.info(`${r.adiadas} aviso(s) guardado(s) até o fim do horário silencioso`);
@@ -51,10 +67,14 @@ export class Vigia {
 
   private async rodar(): Promise<ResumoRodada | null> {
     const agora = this.relogio();
-    this.gravarSemLancar(() => gravarEstado(this.deps.db, CHAVES_ESTADO.vigiaVistoEm, agora.toISOString(), agora));
+    this.gravarSemLancar(() =>
+      gravarEstado(this.deps.db, CHAVES_ESTADO.vigiaVistoEm, agora.toISOString(), agora),
+    );
     try {
       const resumo = await executarRodada(this.deps, agora);
       this.gravarSemLancar(() => apagarEstado(this.deps.db, CHAVES_ESTADO.ultimoErroCiclo));
+      this.anotarRede(resumo, agora);
+      if (resumo.semRede) return resumo; // sem internet, aviso tambem nao sai: fica para depois
       await this.avisar(agora);
       if (resumo.vigilancias > 0) {
         this.deps.log.info(
@@ -68,8 +88,24 @@ export class Vigia {
       // O ciclo inteiro falhou (ex.: banco): fica gravado para o painel, alem do log.
       const mensagem = resumirErro(erro);
       this.deps.log.erro(`rodada falhou: ${mensagem}`);
-      this.gravarSemLancar(() => gravarEstado(this.deps.db, CHAVES_ESTADO.ultimoErroCiclo, mensagem, agora));
+      this.gravarSemLancar(() =>
+        gravarEstado(this.deps.db, CHAVES_ESTADO.ultimoErroCiclo, mensagem, agora),
+      );
       return null;
+    }
+  }
+
+  /** Grava quando a internet cai e apaga quando volta; o log so registra a mudanca (#25). */
+  private anotarRede(resumo: ResumoRodada, agora: Date): void {
+    const caiu = lerEstadoSemLancar(this.deps.db);
+    if (resumo.semRede && !caiu) {
+      this.deps.log.aviso('sem internet: o vigia espera a rede voltar para checar');
+      this.gravarSemLancar(() =>
+        gravarEstado(this.deps.db, CHAVES_ESTADO.semRede, agora.toISOString(), agora),
+      );
+    } else if (!resumo.semRede && caiu && resumo.vigilancias > 0) {
+      this.deps.log.info('internet voltou');
+      this.gravarSemLancar(() => apagarEstado(this.deps.db, CHAVES_ESTADO.semRede));
     }
   }
 

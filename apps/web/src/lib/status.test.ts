@@ -109,3 +109,21 @@ describe('montarStatus', () => {
     expect(JSON.stringify(s)).not.toContain('segredo');
   });
 });
+
+describe('sem internet (issue #25)', () => {
+  it('um aviso so, com desde quando; o "sem conexão" de cada rota some', () => {
+    const v = criarVigilancia(db, (EXEMPLOS[0] as (typeof EXEMPLOS)[number]).vig);
+    marcarRodada(db, v.id, antes(30), {
+      consultas: 1,
+      itinerarios: 0,
+      erros: 1,
+      puladasPorTeto: 0,
+      ultimoErro: 'kiwi GRU→REC: FonteIndisponivelError: kiwi: sem conexão (ENOTFOUND)',
+    });
+    gravarEstado(db, CHAVES_ESTADO.semRede, antes(20).toISOString(), antes(20));
+    const s = montarStatus(db, ENV_COM_EMAIL, AGORA);
+    expect(ids(s)).toContain('sem-rede');
+    expect(ids(s)).not.toContain(`fonte:${v.id}`);
+    expect(s.problemas.find((p) => p.id === 'sem-rede')?.desde).toBe(antes(20).toISOString());
+  });
+});

@@ -5,6 +5,7 @@ import { KiwiMcp, SerpApiGoogleFlights } from '@frank/fontes';
 import { ClaudeCli, ComOrcamento } from '@frank/ia';
 import { lerConfig } from './config.js';
 import { log } from './log.js';
+import { conferidorDeRede } from './rede.js';
 import { resumirErro } from './rodada.js';
 import { Vigia } from './vigia.js';
 
@@ -34,9 +35,13 @@ const vigia = new Vigia(
       limiteDiario: config.limiteDiarioIa,
     }),
     ...(config.chaveSerpApi
-      ? { serpapi: new SerpApiGoogleFlights({ chave: config.chaveSerpApi }), tetoMensalSerpApi: config.tetoMensalSerpApi }
+      ? {
+          serpapi: new SerpApiGoogleFlights({ chave: config.chaveSerpApi }),
+          tetoMensalSerpApi: config.tetoMensalSerpApi,
+        }
       : {}),
     canais,
+    temRede: conferidorDeRede(),
     log,
   },
   config.tiqueMs,
@@ -58,7 +63,9 @@ async function desligar(): Promise<void> {
   parando = true;
   log.info('Frank: desligando o vigia (Ctrl+C de novo para sair na hora)...');
   try {
-    const prazo = new Promise<'prazo'>((ok) => setTimeout(() => ok('prazo'), PRAZO_PARA_PARAR_MS).unref());
+    const prazo = new Promise<'prazo'>((ok) =>
+      setTimeout(() => ok('prazo'), PRAZO_PARA_PARAR_MS).unref(),
+    );
     if ((await Promise.race([vigia.parar(), prazo])) === 'prazo') {
       log.aviso('Frank: a rodada em andamento demorou demais; saindo assim mesmo.');
     }
