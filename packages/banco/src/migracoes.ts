@@ -190,4 +190,10 @@ export const MIGRACOES: readonly string[] = [
   `
   ALTER TABLE vigilancias ADD COLUMN estadia TEXT;
   `,
+
+  // 9 — botao "Checar agora" (issue #26): quando a pessoa pediu. Pedido mais novo que a ultima
+  // rodada = a rota vence no proximo tique do vigia.
+  `
+  ALTER TABLE vigilancias ADD COLUMN checagem_pedida_em TEXT;
+  `,
 ];

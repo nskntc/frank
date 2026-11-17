@@ -1,15 +1,17 @@
-import { descreverEstadia, descreverFiltros } from '@frank/contratos';
+import { checagemPendente, descreverEstadia, descreverFiltros } from '@frank/contratos';
 import { formatarReais } from '@frank/dominio';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AvisoSemVoos } from '@/components/rota/AvisoSemVoos';
+import { ChecarAgora } from '@/components/rota/ChecarAgora';
 import { GraficoPreco } from '@/components/rota/GraficoPreco';
 import { MaisBaratoAgora } from '@/components/rota/MaisBaratoAgora';
-import { diaComSemana, janela, plural } from '@/lib/formatar';
+import { diaComSemana, haQuanto, janela, plural } from '@/lib/formatar';
 import { detalheDaRota } from '@/lib/rota';
 import { hostLocal } from '@/lib/servidor/origem';
 import { banco } from '@/lib/servidor/recursos';
+import { montarStatus } from '@/lib/status';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -61,6 +63,13 @@ export default async function DetalheDaRota({ params }: { params: Promise<{ id: 
         {v.filtros && descreverFiltros(v.filtros) ? ` · ${descreverFiltros(v.filtros)}` : ''}
         {v.ativa ? '' : ' · pausada'}
       </p>
+      <ChecarAgora
+        id={v.id}
+        ativa={v.ativa}
+        pendente={checagemPendente(v)}
+        vigiaLigado={montarStatus(banco()).vigia.estado === 'ligado'}
+        ultimaChecagem={v.ultimaRodadaEm ? haQuanto(v.ultimaRodadaEm) : null}
+      />
 
       <dl className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Numero

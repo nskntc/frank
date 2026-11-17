@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
+  checagemPendente,
   falhouInteira,
   type Estadia,
   estadiaSchema,
@@ -38,6 +39,7 @@ interface LinhaVigilancia {
   ultima_rodada_resultado: string | null;
   filtros: string | null;
   estadia: string | null;
+  checagem_pedida_em: string | null;
 }
 
 function lerResultado(json: string | null): ResultadoRodadaVigilancia | null {
@@ -107,6 +109,7 @@ function paraVigilancia(l: LinhaVigilancia): Vigilancia {
     ultimaRodadaResultado: lerResultado(l.ultima_rodada_resultado),
     ...(filtros ? { filtros } : {}),
     ...(estadia ? { estadia } : {}),
+    ...(l.checagem_pedida_em ? { checagemPedidaEm: l.checagem_pedida_em } : {}),
   };
 }
 
@@ -208,6 +211,9 @@ export function atualizarVigilancia(
     const historicoDesde = mudou ? instante : antes.historicoDesde;
     // Viagem nova (outros pares): o rodizio recomeca do primeiro par, num ciclo novo.
     if (mudou) gravarRodizio(db, id, null);
+    // Viagem nova tambem checa ja no proximo tique (issue #26): ninguem espera 1 h para ver se a
+    // edicao achou voo.
+    if (mudou) pedirChecagem(db, id, agora);
     db.prepare(
       `UPDATE vigilancias SET descricao = ?, origens = ?, destinos = ?, ida_de = ?, ida_ate = ?,
          volta_de = ?, volta_ate = ?, adultos = ?, malas_despachadas = ?, max_escalas = ?,
@@ -289,7 +295,7 @@ export function rodadaVencida(
   agora: Date,
   intervaloMinutos = v.intervaloMinutos,
 ): boolean {
-  if (v.ultimaRodadaEm === null) return true;
+  if (v.ultimaRodadaEm === null || checagemPendente(v)) return true;
   const ultima = Date.parse(v.ultimaRodadaEm);
   // Data ilegivel conta como vencida: a vigilancia nunca pode ficar parada para sempre.
   return (
@@ -307,6 +313,19 @@ export function vigilanciasDevidas(db: Banco, agora: Date = new Date()): Vigilan
   return listarVigilancias(db, { soAtivas: true })
     .filter((v) => rodadaVencida(v, agora))
     .sort((a, b) => (a.ultimaRodadaEm ?? '').localeCompare(b.ultimaRodadaEm ?? ''));
+}
+
+/**
+ * "Checar agora" (issue #26): a vigilancia vence no proximo tique do vigia. So vale para rota
+ * ativa; o teto diario de consultas continua valendo. Devolve false se a rota nao existe ou esta
+ * pausada.
+ */
+export function pedirChecagem(db: Banco, id: string, agora: Date = new Date()): boolean {
+  return (
+    db
+      .prepare('UPDATE vigilancias SET checagem_pedida_em = ? WHERE id = ? AND ativa = 1')
+      .run(agora.toISOString(), id).changes > 0
+  );
 }
 
 /** Apaga a vigilancia e tudo dela (precos, ofertas, alertas, placar). E pedido da pessoa. */

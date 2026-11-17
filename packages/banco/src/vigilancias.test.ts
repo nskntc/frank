@@ -11,6 +11,7 @@ import {
   marcarRodada,
   obterRodizio,
   obterVigilancia,
+  pedirChecagem,
   vigilanciasDevidas,
 } from './vigilancias.js';
 
@@ -242,5 +243,47 @@ describe('estadia (issue #24)', () => {
     expect(depois?.estadia).toEqual({ minNoites: 10, maxNoites: 14 });
     expect(depois?.historicoDesde).toBe('2026-11-12T12:00:00.000Z');
     expect(obterVigilancia(db, v.id)?.estadia).toEqual({ minNoites: 10, maxNoites: 14 });
+  });
+});
+
+describe('checar agora (issue #26)', () => {
+  const devidas = (iso: string) => vigilanciasDevidas(db, instante(iso)).length;
+  const ok = { consultas: 1, itinerarios: 3, erros: 0, puladasPorTeto: 0, ultimoErro: null };
+
+  it('o pedido vence a rota no proximo tique; a rodada seguinte atende o pedido', () => {
+    const v = criarVigilancia(db, vigilanciaExemplo); // 60 min
+    marcarRodada(db, v.id, instante('2026-11-11T12:00:00Z'), ok);
+    expect(devidas('2026-11-11T12:05:00Z')).toBe(0);
+    expect(pedirChecagem(db, v.id, instante('2026-11-11T12:05:00Z'))).toBe(true);
+    expect(devidas('2026-11-11T12:05:30Z')).toBe(1);
+    marcarRodada(db, v.id, instante('2026-11-11T12:06:00Z'), ok);
+    expect(devidas('2026-11-11T12:07:00Z')).toBe(0);
+    expect(devidas('2026-11-11T13:06:00Z')).toBe(1);
+  });
+
+  it('rota pausada ou inexistente nao aceita o pedido', () => {
+    const v = criarVigilancia(db, vigilanciaExemplo);
+    definirAtiva(db, v.id, false);
+    expect(pedirChecagem(db, v.id)).toBe(false);
+    expect(pedirChecagem(db, 'nao-existe')).toBe(false);
+  });
+
+  it('editar a viagem pede checagem; editar so a descricao nao', () => {
+    const v = criarVigilancia(db, vigilanciaExemplo);
+    marcarRodada(db, v.id, instante('2026-11-11T12:00:00Z'), ok);
+    atualizarVigilancia(
+      db,
+      v.id,
+      { ...vigilanciaExemplo, descricao: 'outro nome' },
+      instante('2026-11-11T12:10:00Z'),
+    );
+    expect(devidas('2026-11-11T12:11:00Z')).toBe(0);
+    atualizarVigilancia(
+      db,
+      v.id,
+      { ...vigilanciaExemplo, destinos: ['GRU'] },
+      instante('2026-11-11T12:20:00Z'),
+    );
+    expect(devidas('2026-11-11T12:21:00Z')).toBe(1);
   });
 });

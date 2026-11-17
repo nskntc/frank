@@ -81,6 +81,15 @@ export interface Vigilancia extends NovaVigilancia {
   ultimaRodadaEm: string | null;
   /** Como foi a ultima rodada. Null = nunca rodou (ou formato antigo ilegivel). */
   ultimaRodadaResultado: ResultadoRodadaVigilancia | null;
+  /** A pessoa apertou "Checar agora" neste instante (issue #26). Ausente/null = nunca pediu. */
+  checagemPedidaEm?: string | null;
+}
+
+/** Ha um "Checar agora" esperando: pedido depois da ultima rodada (ou rota que nunca rodou). */
+export function checagemPendente(v: Vigilancia): boolean {
+  const pedida = v.checagemPedidaEm;
+  if (!pedida) return false;
+  return v.ultimaRodadaEm === null || pedida > v.ultimaRodadaEm;
 }
 
 /** Resultado da ultima rodada de uma vigilancia, para o painel mostrar "ultima checagem falhou". */
