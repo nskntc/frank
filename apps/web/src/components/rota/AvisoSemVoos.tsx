@@ -11,7 +11,7 @@ export function AvisoSemVoos({ s, compacto = false }: { s: SemVoos; compacto?: b
     ? 'A fonte não achou nenhum voo para essa viagem'
     : 'A última checagem não achou voo';
   const explicacao = s.nuncaAchou
-    ? `Última checagem ${s.quando}. A consulta funcionou, mas a Kiwi não vende esse trajeto nessas condições. O Frank segue checando.`
+    ? `Última checagem ${s.quando}. A consulta funcionou, mas nenhuma fonte vende esse trajeto nessas condições. O Frank segue checando.`
     : `Checagem ${s.quando}. Antes havia voos: os lugares podem ter acabado ou a fonte oscilou. O Frank segue checando.`;
 
   const lista =

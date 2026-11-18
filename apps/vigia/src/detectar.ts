@@ -18,6 +18,7 @@ import {
   DETECTOR_PADRAO,
   detectarOferta,
   formatarReais,
+  lerDia,
   precoNormal,
   type ResultadoDetector,
 } from '@frank/dominio';
@@ -36,6 +37,8 @@ export const JANELA_NORMAL_DIAS = DETECTOR_PADRAO.janelaNormalDias;
 
 export interface ContextoDeteccao extends ContextoGoogle {
   fontes: readonly FontePreco[];
+  /** Google Flights como fonte de voos (issue #27): fora do laco por par, mas reconfere oferta. */
+  google?: FontePreco;
   /** O Claude, ja com orcamento. Sem ele, toda oferta fica "sem avaliacao" (RF-11). */
   ia?: ProvedorLLM;
 }
@@ -109,7 +112,9 @@ export async function detectarNaRodada(
   );
   const itinerario = candidato?.itinerario;
   if (!candidato || !itinerario) return null;
-  const fonte = ctx.fontes.find((f) => f.nome === candidato.fonte);
+  const fonte = [...ctx.fontes, ...(ctx.google ? [ctx.google] : [])].find(
+    (f) => f.nome === candidato.fonte,
+  );
   if (!fonte) return null;
 
   const bases = consultasDaVigilancia(vigilancia);
@@ -191,6 +196,21 @@ export async function detectarNaRodada(
   return obterOferta(ctx.db, oferta.id) ?? oferta;
 }
 
+/**
+ * Fonte que busca um dia por vez (Google): a reconferencia vai nos dias do proprio voo, sem a
+ * janela de datas nem as noites da busca-base.
+ */
+function noDiaDoVoo(base: ConsultaVoo, it: Itinerario): ConsultaVoo {
+  const c: ConsultaVoo = { ...base, ida: lerDia(it.ida.partida.slice(0, 10)) };
+  delete c.idaAte;
+  delete c.volta;
+  delete c.voltaAte;
+  delete c.noitesMin;
+  delete c.noitesMax;
+  if (it.volta) c.volta = lerDia(it.volta.partida.slice(0, 10));
+  return c;
+}
+
 /** Busca de novo o mesmo voo. Devolve o itinerario reconferido, ou null (sumiu, erro, teto). */
 async function reconferir(
   ctx: ContextoDeteccao,
@@ -208,7 +228,11 @@ async function reconferir(
     return null;
   }
   // So as companhias daquele voo: ele cabe nos 15 resultados da fonte.
-  const consulta = { ...base, companhias: companhiasDoResultado([itinerario]), excluirCompanhias: undefined };
+  const consulta = {
+    ...(fonte.umDiaPorBusca ? noDiaDoVoo(base, itinerario) : base),
+    companhias: companhiasDoResultado([itinerario]),
+    excluirCompanhias: undefined,
+  };
 
   resultado.consultas++;
   let itinerarios: Itinerario[];

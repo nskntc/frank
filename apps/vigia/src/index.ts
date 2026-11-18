@@ -1,9 +1,10 @@
 import { join } from 'node:path';
 import { canaisDoAmbiente } from '@frank/alertas';
 import { abrirBanco, caminhoDoBanco, raizDoRepositorio } from '@frank/banco';
-import { KiwiMcp, SerpApiGoogleFlights } from '@frank/fontes';
+import { FonteGoogle, KiwiMcp, SerpApiGoogleFlights } from '@frank/fontes';
 import { ClaudeCli, ComOrcamento } from '@frank/ia';
 import { lerConfig } from './config.js';
+import { cotaDaBuscaGoogle } from './google.js';
 import { log } from './log.js';
 import { conferidorDeRede } from './rede.js';
 import { resumirErro } from './rodada.js';
@@ -25,6 +26,7 @@ const config = lerConfig();
 const canais = canaisDoAmbiente();
 const caminho = caminhoDoBanco();
 const db = abrirBanco(caminho);
+const serpapi = config.chaveSerpApi ? new SerpApiGoogleFlights({ chave: config.chaveSerpApi }) : null;
 const vigia = new Vigia(
   {
     db,
@@ -34,10 +36,19 @@ const vigia = new Vigia(
     ia: new ComOrcamento(new ClaudeCli(config.modeloIa ? { modelo: config.modeloIa } : {}), db, {
       limiteDiario: config.limiteDiarioIa,
     }),
-    ...(config.chaveSerpApi
+    ...(serpapi
       ? {
-          serpapi: new SerpApiGoogleFlights({ chave: config.chaveSerpApi }),
+          serpapi,
           tetoMensalSerpApi: config.tetoMensalSerpApi,
+          // Segunda fonte de voos (issue #27), racionada pela cota da SerpApi.
+          google: new FonteGoogle(
+            serpapi,
+            cotaDaBuscaGoogle(
+              { db, log, tetoDiarioPorFonte: config.tetoDiarioPorFonte, tetoMensalSerpApi: config.tetoMensalSerpApi },
+              config.buscasGooglePorDia,
+            ),
+          ),
+          buscasGooglePorDia: config.buscasGooglePorDia,
         }
       : {}),
     canais,

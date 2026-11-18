@@ -39,6 +39,13 @@ function conexoes(perna: Perna, nome: string): Pegadinha[] {
     const chegada = perna.trechos.at(i);
     const saida = perna.trechos.at(i + 1);
     if (!chegada || !saida) continue;
+    // Conexao em outro aeroporto da cidade (ex.: chega em GRU, sai de CGH): o deslocamento e seu.
+    if (chegada.para !== saida.de) {
+      achadas.push({
+        tipo: 'outro_aeroporto',
+        descricao: `Na ${nome}, você chega em ${chegada.para} e o próximo voo sai de ${saida.de}: precisa trocar de aeroporto.`,
+      });
+    }
     const espera = minutosEntre(chegada.chegada, saida.partida);
     if (Number.isNaN(espera)) continue;
     if (espera >= ESCALA_LONGA_MIN) {

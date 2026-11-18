@@ -23,6 +23,7 @@ import {
   registrarConsultaSemLancar,
   resumirErro,
 } from './apoio-fonte.js';
+import { buscarNoGoogle } from './busca-google.js';
 import { consultasDaVigilancia, proximaExclusao } from './consultas.js';
 import { type ContextoDeteccao, detectarNaRodada } from './detectar.js';
 
@@ -35,6 +36,13 @@ export interface DependenciasRodada extends ContextoFonte {
   /** Google Flights via SerpApi: referencia de preco e "onde comprar". Opcional. */
   serpapi?: ContextoDeteccao['serpapi'];
   tetoMensalSerpApi?: number;
+  /**
+   * Google Flights como segunda fonte de voos (issue #27), racionada pela cota da SerpApi. Fica
+   * fora de `fontes`: busca todos os pares de uma vez, um dia por vez. Opcional.
+   */
+  google?: FontePreco;
+  /** Consultas da SerpApi em 24 h para a busca de voos no Google. */
+  buscasGooglePorDia?: number;
   /**
    * Maximo de buscas por par origem x destino e fonte numa rodada (RF-05): a primeira sem
    * filtro e as seguintes excluindo as companhias ja vistas. Padrao 3.
@@ -106,6 +114,7 @@ export async function executarRodada(
       const fatia = bases.slice(inicio, inicio + (plano?.paresPorRodada ?? bases.length));
       const cobertos = await rodarVigilancia(deps, vigilancia, fatia, rodada, agora, resultado);
       avancarRodizio(deps, vigilancia, rodada, inicio, cobertos, bases.length);
+      await buscarNoGoogle(deps, vigilancia, rodada, agora, resultado);
       if (resultado.itinerarios > 0) {
         try {
           if (await detectarNaRodada(deps, vigilancia, rodada, agora, resultado)) resumo.ofertas++;

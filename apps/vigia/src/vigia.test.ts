@@ -109,6 +109,7 @@ describe('lerConfig', () => {
       modeloIa: '',
       chaveSerpApi: '',
       tetoMensalSerpApi: 240,
+      buscasGooglePorDia: 6,
     });
     expect(lerConfig({ FRANK_TETO_DIARIO_FONTE: '50' }).tetoDiarioPorFonte).toBe(50);
   });

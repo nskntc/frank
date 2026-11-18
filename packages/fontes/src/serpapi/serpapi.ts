@@ -4,6 +4,14 @@ import { z } from 'zod';
 import { type ConsultaVoo, FonteIndisponivelError, RespostaInvalidaError, semResposta } from '../fonte.js';
 import { buscaGoogle, type OpcaoGoogle, reservaGoogle } from './formato.js';
 import { vendedorEstrangeiro } from './vendedores.js';
+import {
+  filtrosDaBusca,
+  itinerarioDoGoogle,
+  linkDaBusca,
+  opcoesDe,
+  pernaDe,
+  semResultado,
+} from './voos.js';
 
 const NOME = 'serpapi';
 const NOME_VENDEDOR = /^[^\p{Cc}]{1,60}$/u;
@@ -109,6 +117,43 @@ export class SerpApiGoogleFlights {
     const r = schema.safeParse(json);
     if (!r.success) throw new RespostaInvalidaError(NOME, `formato mudou: ${z.prettifyError(r.error).slice(0, 200)}`);
     return r.data;
+  }
+
+  /**
+   * Voos do Google Flights para um dia de ida (e um de volta), no formato do Frank (issue #27).
+   * `consulta.origem` e `consulta.destino` podem ser listas ("GIG,SDU"). So ida: 1 consulta. Ida e
+   * volta: 2 (a segunda traz as voltas da ida mais barata, cada uma com o preco total). `gasto`
+   * conta cada chamada tentada, inclusive se a segunda falhar.
+   */
+  async voos(
+    consulta: ConsultaVoo,
+    gasto: { consultas: number } = { consultas: 0 },
+  ): Promise<Itinerario[]> {
+    const base = {
+      ...this.parametrosBase(consulta, consulta.origem, consulta.destino),
+      ...filtrosDaBusca(consulta),
+    };
+    gasto.consultas++;
+    const ida = await this.chamar(base, buscaGoogle);
+    if (ida.error) return semResultado(ida.error);
+    const linkIda = ida.search_metadata?.google_flights_url;
+    if (!consulta.volta) {
+      const link = linkDaBusca(linkIda);
+      return opcoesDe(ida).flatMap((o) => itinerarioDoGoogle(o, null, consulta.moeda, link));
+    }
+    // Ida e volta: o preco so fecha com a volta. Segue a ida mais barata que da para montar.
+    const escolhida = opcoesDe(ida)
+      .filter((o) => o.departure_token && o.price !== undefined && pernaDe(o))
+      .sort((a, b) => (a.price ?? 0) - (b.price ?? 0))[0];
+    if (!escolhida?.departure_token) return [];
+    gasto.consultas++;
+    const volta = await this.chamar(
+      { ...base, departure_token: escolhida.departure_token },
+      buscaGoogle,
+    );
+    if (volta.error) return semResultado(volta.error);
+    const link = linkDaBusca(volta.search_metadata?.google_flights_url ?? linkIda);
+    return opcoesDe(volta).flatMap((o) => itinerarioDoGoogle(escolhida, o, consulta.moeda, link));
   }
 
   /** Historico da rota (1 consulta). `origens` e `destinos`: codigos IATA. */

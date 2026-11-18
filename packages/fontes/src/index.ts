@@ -9,3 +9,5 @@ export {
   SerpApiGoogleFlights,
 } from './serpapi/serpapi.js';
 export { vendedorEstrangeiro } from './serpapi/vendedores.js';
+export { type CotaSerpApi, FonteGoogle } from './serpapi/fonte-google.js';
+export { NOME_FONTE_GOOGLE } from './serpapi/voos.js';

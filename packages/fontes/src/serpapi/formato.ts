@@ -8,11 +8,16 @@ export const vooGoogle = z.object({
   arrival_airport: aeroporto,
   airline: z.string().optional(),
   flight_number: z.string(),
+  /** Minutos no ar deste voo. */
+  duration: z.number().optional(),
 });
 
 export const opcaoGoogle = z.object({
   flights: z.array(vooGoogle).min(1),
   price: z.number().optional(),
+  /** Minutos do trecho inteiro, com as conexoes. */
+  total_duration: z.number().optional(),
+  layovers: z.array(z.object({ duration: z.number().optional() })).optional(),
   departure_token: z.string().optional(),
   booking_token: z.string().optional(),
 });

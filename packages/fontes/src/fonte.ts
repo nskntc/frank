@@ -39,6 +39,11 @@ export interface FontePreco {
   readonly vendedorEstrangeiro?: boolean;
   /** Nome do vendedor como aparece em "Onde comprar" (Kiwi: "Kiwi.com"). Padrao: `nome`. */
   readonly vendedor?: string;
+  /**
+   * A fonte busca um dia de ida (e um de volta) por vez, sem janela (Google Flights). A
+   * reconferencia de uma oferta usa as datas do proprio voo.
+   */
+  readonly umDiaPorBusca?: boolean;
   /** Lanca FonteIndisponivelError ou RespostaInvalidaError; nunca devolve [] para esconder erro. */
   buscar(consulta: ConsultaVoo): Promise<Itinerario[]>;
 }

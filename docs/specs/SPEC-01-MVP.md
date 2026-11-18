@@ -22,6 +22,7 @@ Valores marcados com *(calibrar)* são premissas iniciais, ajustadas com os dado
 |---|---|---|
 | RF-04 | Vigia consulta a fonte no intervalo da vigilância | padrão 60 min, mínimo 30 *(calibrar)*; teto diário de consultas por fonte; rota ampla reveza os pares (e, se preciso, espaça as checagens) para caber em 80% do teto, dividido entre as rotas ativas; o painel mostra o custo antes de salvar (#19) |
 | RF-05 | Busca dividida por companhia e aeroporto | uma vigilância São Paulo → Recife traz Azul, LATAM e Gol, não só a primeira |
+| RF-05b | Google Flights como segunda fonte (#27) | com chave da SerpApi, o vigia busca também no Google: todos os aeroportos numa consulta, um dia de ida (e um de volta) por vez, girando pela janela; até 6 consultas por dia (FRANK_BUSCAS_GOOGLE_POR_DIA) sem passar do teto mensal; rota em que a Kiwi não acha nada busca com o dobro da frequência; rota com mala despachada fica só na Kiwi; oferta vinda do Google é reconferida no Google, nos dias do voo; conexão em outro aeroporto vira pegadinha |
 | RF-06 | Todo preço visto vai para o histórico | hora, fonte, voo, companhia, escalas, malas, preço em centavos |
 
 ### Detecção e avaliação

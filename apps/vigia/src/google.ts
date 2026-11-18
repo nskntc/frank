@@ -58,6 +58,32 @@ function registrar(ctx: ContextoGoogle, n: number, agora: Date, erro?: string): 
   }
 }
 
+/** Consultas do mes que a busca de voos no Google nunca usa: ficam para referencia e "onde comprar". */
+export const RESERVA_MENSAL_SERPAPI = 20;
+/** Consultas da SerpApi em 24 h que a busca de voos no Google pode usar (issue #27, calibrar). */
+export const BUSCAS_GOOGLE_POR_DIA_PADRAO = 6;
+
+/**
+ * A cota da busca de voos no Google (issue #27): no maximo `porDia` consultas da SerpApi em 24 h
+ * (contando tudo que usa a SerpApi) e sempre sobrando a reserva do mes.
+ */
+export function cotaDaBuscaGoogle(
+  ctx: ContextoGoogle,
+  porDia: number,
+  relogio: () => Date = () => new Date(),
+): { cabe(n: number): boolean; gastou(n: number, erro?: string): void } {
+  return {
+    cabe(n) {
+      const agora = relogio();
+      const hoje = contarConsultas(ctx.db, 'serpapi', new Date(agora.getTime() - DIA_MS));
+      return hoje + n <= porDia && cabe(ctx, n + RESERVA_MENSAL_SERPAPI, agora);
+    },
+    gastou(n, erro) {
+      registrar(ctx, n, relogio(), erro);
+    },
+  };
+}
+
 /**
  * Preco normal pela referencia do Google: mediana do historico dos ultimos 60 dias, se houver
  * pelo menos 10 dias. Busca (1 consulta) quando nao ha referencia valida para a viagem atual.

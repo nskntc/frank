@@ -61,6 +61,8 @@ export function linkSeguro(link: string | null | undefined): string | null {
 /** Nome de vitrine das fontes e se vendem como empresa estrangeira (IOF ja no preco da oferta). */
 export const FONTES: Record<string, { nome: string; estrangeira: boolean }> = {
   kiwi: { nome: 'Kiwi.com', estrangeira: true },
+  // O link abre o Google Flights; quem vende costuma ser a propria companhia (issue #27).
+  google: { nome: 'Google Flights', estrangeira: false },
 };
 
 function paraTela(db: Banco, oferta: Oferta, hoje: Date): OfertaNaTela | null {

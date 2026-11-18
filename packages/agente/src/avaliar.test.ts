@@ -29,6 +29,22 @@ describe('detectarPegadinhas', () => {
     expect(tipos(it)).toEqual(['outro_aeroporto']);
   });
 
+  it('conexao em outro aeroporto da cidade (issue #27)', () => {
+    const ida = perna(
+      ['VCP', 'GRU', '2027-03-12T08:00:00', '2027-03-12T09:00:00'],
+      ['CGH', 'REC', '2027-03-12T12:00:00', '2027-03-12T15:00:00'],
+    );
+    const achadas = detectarPegadinhas({
+      itinerario: itinerario(ida, vooLimpo.volta, 1),
+      vigilancia: vigilanciaTeste,
+      vendedorEstrangeiro: false,
+      percentualAbaixo: 20,
+    });
+    expect(achadas.map((p) => p.descricao)).toContain(
+      'Na ida, você chega em GRU e o próximo voo sai de CGH: precisa trocar de aeroporto.',
+    );
+  });
+
   it('madrugada, escala longa e conexao curta', () => {
     const ida = perna(
       ['GRU', 'BSB', '2027-03-12T04:30:00', '2027-03-12T06:10:00'],

@@ -43,7 +43,7 @@ achar a passagem mais barata.
 | [Claude Code](https://claude.com/claude-code)      | entender o pedido e avaliar as ofertas       | o seu plano do Claude        |
 | Uma conta de e-mail com SMTP (Gmail serve)         | receber os avisos                            | grátis                       |
 | Telegram (opcional)                                | receber os avisos também no celular          | grátis                       |
-| Chave da [SerpApi](https://serpapi.com) (opcional) | preço em cada vendedor e histórico do Google | grátis até 250 consultas/mês |
+| Chave da [SerpApi](https://serpapi.com) (opcional) | voos do Google Flights além da Kiwi, preço em cada vendedor e histórico do Google | grátis até 250 consultas/mês |
 
 Funciona em Windows, macOS e Linux. O Frank só usa a internet para consultar preços e mandar os
 avisos; o painel abre só no seu computador (`127.0.0.1`), ninguém de fora acessa.

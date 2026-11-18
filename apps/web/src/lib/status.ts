@@ -15,6 +15,7 @@ const HORA_MS = 60 * MIN_MS;
 /** Nome das fontes e canais para a tela. Nome desconhecido aparece como veio. */
 const NOMES: Record<string, string> = {
   kiwi: 'Kiwi.com',
+  google: 'Google Flights (busca de voos)',
   serpapi: 'Google Flights (SerpApi)',
   email: 'e-mail',
   telegram: 'Telegram',
